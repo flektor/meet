@@ -18,3 +18,7 @@ export const addActivityValidator = z.object({
 });
 
 export type AddActivityValidator = z.infer<typeof addActivityValidator>;
+
+export type addToFavoritesOutput = RouterOutput["favorites"]["addToFavorites"];
+export type removeFromFavoritesOutput =
+  RouterOutput["favorites"]["removeFromFavorites"];
