@@ -11,6 +11,13 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Activity {
+    id          String   @id @default(cuid())
+    title       String   @unique
+    description String
+    createdAt   DateTime @default(now())
+}
+
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
