@@ -1,8 +1,12 @@
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { addActivityValidator } from "~/types";
 
 export const activitiesRouter = createTRPCRouter({
-  getActivities: protectedProcedure
+  getActivities: publicProcedure
     .query(({ ctx }) => ctx.prisma.activity.findMany({})),
 
   addActivity: protectedProcedure

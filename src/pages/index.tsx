@@ -1,11 +1,27 @@
 import { type NextPage } from "next";
-import { type Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import { api } from "~/utils/api";
+import { useStore } from "~/utils/store";
 import { CreateActivity } from "~/components/CreateActivity";
+import { Activities } from "~/components/Activities";
+import { useEffect } from "react";
+import Spinner from "~/components/Spinner";
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
+
+  const store = useStore();
+
+  const { data, isLoading } = api.activities.getActivities
+    .useQuery();
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    store.setActivities(data);
+  }, [data]);
 
   return (
     <>
@@ -23,6 +39,8 @@ const Home: NextPage = () => {
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>
+
+          {isLoading ? <Spinner /> : <Activities />}
 
           {session && <CreateActivity />}
         </div>
