@@ -1,16 +1,22 @@
-import React, { FunctionComponent } from "react";
+import React, { type FunctionComponent, type MouseEventHandler } from "react";
 
 const Svg: FunctionComponent<
-  { children: any; className: string; viewBox?: string }
+  {
+    children: any;
+    className: string;
+    viewBox?: string;
+    onClick?: MouseEventHandler<SVGSVGElement>;
+  }
 > = (
-  { children, className, viewBox = "0 0 32 32" },
+  { children, className, onClick, viewBox = "0 0 24 24" },
 ) => {
   return (
     <svg
-      className={`w-10 h-10 transition ${className}`}
+      className={`w-8 h-8 transition ${className}`}
       viewBox={viewBox}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
     >
       {children}
     </svg>

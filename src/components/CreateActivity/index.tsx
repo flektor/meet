@@ -7,6 +7,7 @@ import Spinner from "../Spinner/";
 import Link from "next/link";
 import EnterIcon from "../icons/Enter";
 import AlarmIcon from "../icons/Alarm";
+import { useStore } from "~/utils/store";
 
 function capitalizeFirstCharacter(text: string) {
   if (!text) return "";
@@ -15,6 +16,7 @@ function capitalizeFirstCharacter(text: string) {
 }
 
 export const CreateActivity: NextPage = () => {
+  const store = useStore();
   const [isWaitingForServer, setIsWaitingForServer] = useState(false);
   const [isActivityAlreadyExist, setIsActivityAlreadyExist] = useState(false);
   const [title, setTitle] = useState("");
@@ -22,10 +24,6 @@ export const CreateActivity: NextPage = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   const { mutate } = api.activities.addActivity.useMutation({
-    // onMutate: async (newActivity) => {
-    //   await trpc.example.
-    // },
-
     onError: (error) => {
       const ActivityExistsError =
         "Unique constraint failed on the fields: (`title`)";
@@ -41,7 +39,7 @@ export const CreateActivity: NextPage = () => {
         setTitle("");
         formRef.current.reset();
       }
-      console.log(activity);
+      store.addActivity(activity);
     },
 
     onSettled: () => setIsWaitingForServer(false),
@@ -68,13 +66,11 @@ export const CreateActivity: NextPage = () => {
     if (isActivityAlreadyExist) {
       setIsActivityAlreadyExist(false);
     }
-
     setTitle(trim(event.target.value));
   }
 
   return (
     <form
-      ref={formRef}
       onSubmit={onSubmit}
       className="flex max-w-md flex-col gap-4 rounded-xl bg-white/10 p-4 text-white"
     >

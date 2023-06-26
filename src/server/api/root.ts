@@ -1,4 +1,5 @@
 import { activitiesRouter } from "~/server/api/routers/activities";
+import { favoritesRouter } from "~/server/api/routers/favorites";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   activities: activitiesRouter,
+  favorites: favoritesRouter,
 });
 
 // export type definition of API
