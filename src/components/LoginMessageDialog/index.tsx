@@ -10,10 +10,10 @@ export default function LoginMessageDialog(
       className="fixed left-0 top-0 h-full w-full overflow-y-auto overflow-x-hidden outline-none flex justify-center items-center bg-black/40"
     >
       <div className="flex-col justfy-center m-5 p-10 rounded-lg bg-gradient-to-br from-[#2b1747] to-[#232338] text-white border-2 border-[#cc66ff]">
-        <header className="text-center text-2xl">Authantication Message</header>
+        <header className="text-center text-2xl">Authentication Message</header>
         <hr className="h-px mt-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
         <p className="h-20 flex justify-center items-center">
-          You need to sign in order to proceed with this action
+          You need to sign in order to continue
         </p>
         <footer className="flex justify-around">
           <button
