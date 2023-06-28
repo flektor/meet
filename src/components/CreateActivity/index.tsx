@@ -29,6 +29,7 @@ export const CreateActivity: NextPage = () => {
         "Unique constraint failed on the fields: (`title`)";
       if (error.message.includes(ActivityExistsError)) {
         setIsActivityAlreadyExist(true);
+        setTitle((title) => title.trim());
         return;
       }
       console.log(error.data?.zodError);

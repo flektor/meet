@@ -8,7 +8,7 @@ export type getActivitiesOutput = RouterOutput["activities"]["getActivities"];
 export type addActivityOutput = RouterOutput["activities"]["addActivity"];
 
 export const createActivityInput = z.object({
-  title: z.string(),
+  title: z.string().trim(),
   description: z.string(),
 });
 
