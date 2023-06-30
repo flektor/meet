@@ -45,20 +45,20 @@ const Activities: FunctionComponent = () => {
                     {title}
                   </Link>
 
-                  <div className="flex items-center text-[#cc66ff]">
+                  <div className="flex items-center">
                     <FavoriteButton
                       activityId={id}
                       className="mt-1"
                     />
                     <RegisterButton
                       activityId={id}
-                      className="mt-1 group-hover:fill-white"
+                      className="mt-1"
                     />
                   </div>
 
-                  <footer className="absolute bottom-2.5 right-4 pr-0.5">
+                  <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
                     {isRegistered && (
-                      <DotsLoader className="fill-[#33BBFF] h-3" />
+                      <DotsLoader className="fill-[#33BBFF] max-h-3" />
                     )}
                   </footer>
                 </div>

@@ -25,7 +25,7 @@ const Button = (
   return (
     <>
       <span
-        className={`transition text-base pt-2.5 ml-${
+        className={`transition text-base pt-1.5 text-[#33BBFF] ml-${
           registrationsCount > 0 ? 3 : 2
         } mr-2`}
       >
@@ -99,7 +99,7 @@ const RegisterButton = (
       {showText
         ? (
           <button
-            className={`flex items-center text-2xl bg-white/20 hover:bg-white/30 rounded-3xl py-1 px-5 pb-3 transition [&>span]:text-[#33BBFF] ${className} ${
+            className={`flex items-center text-2xl bg-white/20 hover:bg-white/30 rounded-3xl py-1 px-5 pb-3 transition [&>span]:text-[#33BBFF] [&>span]:pt-2 ${className} ${
               isRegistered
                 ? "[&>svg]:hover:fill-white [&>svg]:hover:stroke-2 [&>svg]:hover:fill-white"
                 : "[&>svg]:hover:stroke-white [&>svg]:hover:fill-white/10 [&>span]:hover:text-white"
@@ -109,7 +109,7 @@ const RegisterButton = (
               ? (
                 <div className="flex items-center justify-center">
                   <span className="text-[#33BBFF] pt-1 mr-3">Searching</span>
-                  <DotsLoader className="fill-[#33BBFF] pt-1.5" />
+                  <DotsLoader className="fill-[#33BBFF]" />
                 </div>
               )
               : <span className="text-white pt-1 mr-3 ">Quick Search</span>}
