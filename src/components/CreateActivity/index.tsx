@@ -2,12 +2,13 @@ import { type NextPage } from "next";
 import React, { ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
-import { createActivityInput } from "../../types";
+import { addActivityInput } from "../../types";
 import Spinner from "../Spinner/";
 import Link from "next/link";
 import EnterIcon from "../icons/Enter";
 import AlarmIcon from "../icons/Alarm";
 import { useStore } from "~/utils/store";
+import { createSlug } from "~/utils";
 
 function capitalizeFirstCharacter(text: string) {
   if (!text) return "";
@@ -40,7 +41,13 @@ export const CreateActivity: NextPage = () => {
         setTitle("");
         formRef.current.reset();
       }
-      store.addActivity(activity);
+      store.addActivity({
+        ...activity,
+        isFavorite: false,
+        isRegistered: false,
+        favoritesCount: 0,
+        registrationsCount: 0,
+      });
     },
 
     onSettled: () => setIsWaitingForServer(false),
@@ -52,8 +59,7 @@ export const CreateActivity: NextPage = () => {
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
     try {
-      const activity = createActivityInput.parse(data);
-      activity.title = capitalizeFirstCharacter(activity.title);
+      const activity = addActivityInput.parse(data);
       activity.description = capitalizeFirstCharacter(activity.description);
       mutate(activity);
     } catch (error) {
@@ -64,10 +70,26 @@ export const CreateActivity: NextPage = () => {
   }
 
   function onTitleChange(event: ChangeEvent<HTMLInputElement>) {
+    const text = event.target.value;
+
+    if (text.length < title.length) {
+      return setTitle(formatTitle(text));
+    }
+
+    const character = text.charAt(text.length - 1).toLowerCase();
+
+    if (!character.match(/^[A-Za-z ]+$/)) {
+      return;
+    }
+
     if (isActivityAlreadyExist) {
       setIsActivityAlreadyExist(false);
     }
-    setTitle(trim(event.target.value));
+    setTitle(formatTitle(title + character));
+  }
+
+  function formatTitle(title: string): string {
+    return capitalizeFirstCharacter(trim(title));
   }
 
   return (
@@ -92,7 +114,9 @@ export const CreateActivity: NextPage = () => {
         onChange={onTitleChange}
       />
 
-      {isActivityAlreadyExist && <ActivityAlreadyExist />}
+      {isActivityAlreadyExist && (
+        <ActivityAlreadyExist slug={createSlug(title)} />
+      )}
 
       <label htmlFor="description" className="text-2xl">Description</label>
 
@@ -118,7 +142,7 @@ export const CreateActivity: NextPage = () => {
   );
 };
 
-function ActivityAlreadyExist() {
+function ActivityAlreadyExist({ slug }: { slug: string }) {
   return (
     <>
       <i className="flex items-center font-medium mt-2 text-sm text-orange-300">
@@ -131,7 +155,7 @@ function ActivityAlreadyExist() {
       <i className="flex font-medium ml-7 mb-4 text-sm text-[#e8c5fa]">
         Click
         <Link
-          href=""
+          href={`/activities/${slug}`}
           className="flex justify-center ml-1 font-medium text-[#cc66ff] transition underline hover:text-white [&>svg]:hover:fill-white"
         >
           here
@@ -147,6 +171,9 @@ function ActivityAlreadyExist() {
 }
 
 function trim(title: string) {
+  if (title === " ") {
+    return "";
+  }
   if (title.charAt(title.length - 1) === " ") {
     return title.trim() + " ";
   }
