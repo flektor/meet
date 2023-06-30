@@ -1,9 +1,11 @@
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { addActivityValidator } from "~/types";
+import { addActivityInput } from "~/types";
+import { createSlug } from "~/utils";
 
 export const activitiesRouter = createTRPCRouter({
   getActivities: publicProcedure
@@ -11,22 +13,59 @@ export const activitiesRouter = createTRPCRouter({
       const activities = await ctx.prisma.activity.findMany({
         include: {
           Favorites: true,
-          // Favorites: { where: { userId: ctx.session?.user.id } },
+          Registrations: true,
         },
       });
 
-      return activities.map(({ Favorites, ...rest }) => ({
+      return activities.map(({ Favorites, Registrations, ...rest }) => ({
         ...rest,
         isFavorite: ctx.session?.user.id
           ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
         favoritesCount: Favorites.length,
+        isRegistered: ctx.session?.user.id
+          ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
+        registrationsCount: Registrations.length,
       }));
     }),
 
+  getActivity: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const activity = await ctx.prisma.activity
+        .findUnique({
+          where: { slug: input.slug },
+          include: {
+            Favorites: true,
+            Registrations: true,
+          },
+        });
+
+      if (!activity) {
+        return;
+      }
+
+      const { Favorites, Registrations, ...rest } = activity;
+
+      return {
+        ...rest,
+        isFavorite: ctx.session?.user.id
+          ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
+        favoritesCount: Favorites.length,
+        isRegistered: ctx.session?.user.id
+          ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
+        registrationsCount: Registrations.length,
+      };
+    }),
+
   addActivity: protectedProcedure
-    .input(addActivityValidator)
+    .input(addActivityInput)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.prisma.activity.create({ data: input });
+      return await ctx.prisma.activity.create({
+        data: { ...input, slug: createSlug(input.title) },
+      });
     }),
 });
