@@ -1,15 +1,18 @@
 import { create } from "zustand";
-import type { getActivitiesOutput } from "~/types";
-import type { Activity } from "@prisma/client";
+import type { getActivitiesOutput, getActivityOutput } from "~/types";
 
 type Store = {
   activities: getActivitiesOutput;
   setActivities: (activities: getActivitiesOutput) => void;
-  addActivity: (activity: Activity) => void;
+  addActivity: (activity: getActivityOutput) => void;
   removeActivity: (activityId: string) => void;
+  updateActivity: (activity: getActivityOutput) => void;
 
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
+
+  addToRegistrations: (activityId: string) => void;
+  removeFromRegistrations: (activityId: string) => void;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -18,15 +21,25 @@ export const useStore = create<Store>((set) => ({
   setActivities: (activities: getActivitiesOutput) =>
     set((state) => ({ ...state, activities })),
 
-  addActivity: (activity: Activity) =>
-    set((state) => ({
+  addActivity: (activity: getActivityOutput) =>
+    activity && set((state) => ({
       ...state,
-      activities: [...state.activities, {
-        ...activity,
-        isFavorite: false,
-        favoritesCount: 0,
-      }],
+      activities: [...state.activities, activity],
     })),
+
+  updateActivity: (activity: getActivityOutput) => {
+    activity && set((state) => {
+      return {
+        ...state,
+        activities: state.activities.map((prevActivity) => {
+          if (prevActivity.id === activity.id) {
+            return activity;
+          }
+          return prevActivity;
+        }),
+      };
+    });
+  },
 
   removeActivity: (activityId: string) =>
     set((state) => ({
@@ -42,7 +55,7 @@ export const useStore = create<Store>((set) => ({
           return {
             ...activity,
             isFavorite: true,
-            favoritesCount: activity.favoritesCount + 1,
+            favoritesCount: ++activity.favoritesCount,
           };
         }
         return activity;
@@ -57,7 +70,37 @@ export const useStore = create<Store>((set) => ({
           return {
             ...activity,
             isFavorite: false,
-            favoritesCount: activity.favoritesCount - 1,
+            favoritesCount: --activity.favoritesCount,
+          };
+        }
+        return activity;
+      }),
+    })),
+
+  addToRegistrations: (activityId: string) =>
+    set((state) => ({
+      ...state,
+      activities: state.activities.map((activity) => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            isRegistered: true,
+            registrationsCount: ++activity.registrationsCount,
+          };
+        }
+        return activity;
+      }),
+    })),
+
+  removeFromRegistrations: (activityId: string) =>
+    set((state) => ({
+      ...state,
+      activities: state.activities.map((activity) => {
+        if (activity.id === activityId) {
+          return {
+            ...activity,
+            isRegistered: false,
+            registrationsCount: --activity.registrationsCount,
           };
         }
         return activity;

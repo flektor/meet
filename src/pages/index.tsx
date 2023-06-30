@@ -1,27 +1,12 @@
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import { api } from "~/utils/api";
-import { useStore } from "~/utils/store";
 import { CreateActivity } from "~/components/CreateActivity";
-import { Activities } from "~/components/Activities";
-import { useEffect } from "react";
+import Activities from "~/components/Activities";
 import Spinner from "~/components/Spinner";
 
-const Home: NextPage = () => {
+const Home: NextPage<{ isLoading: boolean }> = ({ isLoading }) => {
   const { data: session } = useSession();
-
-  const store = useStore();
-
-  const { data, isLoading } = api.activities.getActivities
-    .useQuery();
-
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-    store.setActivities(data);
-  }, [data]);
 
   return (
     <>
@@ -31,7 +16,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+        <div className="mt-10 container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             {"Let's"} <span className="text-[#cc66ff]">meet</span> outside
           </h1>
