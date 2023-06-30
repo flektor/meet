@@ -1,13 +1,10 @@
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import { CreateActivity } from "~/components/CreateActivity";
 import Activities from "~/components/Activities";
-import Spinner from "~/components/Spinner";
+import Nav from "~/components/Nav";
 
-const Home: NextPage<{ isLoading: boolean }> = ({ isLoading }) => {
-  const { data: session } = useSession();
-
+const Home: NextPage = () => {
   return (
     <>
       <Head>
@@ -17,6 +14,7 @@ const Home: NextPage<{ isLoading: boolean }> = ({ isLoading }) => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="mt-10 container flex flex-col items-center justify-center gap-12 px-4 py-16">
+          <Nav />
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             {"Let's"} <span className="text-[#cc66ff]">meet</span> outside
           </h1>
@@ -25,9 +23,7 @@ const Home: NextPage<{ isLoading: boolean }> = ({ isLoading }) => {
             <AuthShowcase />
           </div>
 
-          {isLoading ? <Spinner /> : <Activities />}
-
-          {session && <CreateActivity />}
+          {<Activities />}
         </div>
       </main>
     </>
