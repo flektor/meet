@@ -11,17 +11,40 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Channel {
+    id          String    @id @default(cuid())
+    title       String?
+    description String?
+    createdAt   DateTime  @default(now())
+    Users       User[]
+    Message     Message[]
+    activity    Activity?
+}
+
 model Activity {
-    id            String          @id @default(cuid())
-    slug          String          @unique
-    title         String          @unique
-    description   String
-    createdAt     DateTime        @default(now())
-    Favorites     Favorites[]
-    Registrations Registrations[]
+    id             String           @id @default(cuid())
+    slug           String           @unique
+    title          String           @unique
+    description    String
+    createdAt      DateTime         @default(now())
+    Favorites      Favorites[]
+    Registrations  Registrations[]
+    channelId      String           @unique
+    channel        Channel          @relation(fields: [channelId], references: [id])
+    ActivityViewer ActivityViewer[]
 }
 
 model Favorites {
+    userId     String
+    activityId String
+    activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, activityId])
+}
+
+model ActivityViewer {
+    id         String   @id @default(cuid())
     userId     String
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
@@ -37,6 +60,18 @@ model Registrations {
     user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, activityId])
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    content   String
+    sentAt    DateTime @default(now())
+    sentBy    String
+    channelId String
+    User      User     @relation(fields: [sentBy], references: [id], onDelete: Cascade)
+    Channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+    @@unique([id, channelId, sentBy])
 }
 
 // Necessary for Next auth
@@ -67,15 +102,19 @@ model Session {
 }
 
 model User {
-    id            String          @id @default(cuid())
-    name          String?
-    email         String?         @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    Favorites     Favorites[]
-    Registrations Registrations[]
+    id             String           @id @default(cuid())
+    name           String?
+    email          String?          @unique
+    emailVerified  DateTime?
+    image          String?
+    accounts       Account[]
+    sessions       Session[]
+    Favorites      Favorites[]
+    Registrations  Registrations[]
+    channelId      String?
+    Message        Message[]
+    Channel        Channel?         @relation(fields: [channelId], references: [id])
+    ActivityViewer ActivityViewer[]
 }
 
 model VerificationToken {
