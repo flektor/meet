@@ -17,12 +17,15 @@ export const activitiesRouter = createTRPCRouter({
         },
       });
 
-      return activities.map(({ Favorites, Registrations, ...rest }) => ({
+      return activities.map((
+        { Favorites, Registrations, ...rest },
+      ) => ({
         ...rest,
         isFavorite: ctx.session?.user.id
           ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
         favoritesCount: Favorites.length,
+
         isRegistered: ctx.session?.user.id
           ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
@@ -39,6 +42,11 @@ export const activitiesRouter = createTRPCRouter({
           include: {
             Favorites: true,
             Registrations: true,
+            channel: {
+              include: {
+                Message: true,
+              },
+            },
           },
         });
 
@@ -46,7 +54,20 @@ export const activitiesRouter = createTRPCRouter({
         return;
       }
 
-      const { Favorites, Registrations, ...rest } = activity;
+      const views = await ctx.prisma.activityViewer
+        .findMany({
+          where: { activityId: activity.id },
+          include: { user: true },
+        });
+
+      const channelUsers = views.map(({ user }) => ({
+        userId: user.id,
+        image: user.image,
+        name: user.name,
+        slug: `user-${user.id}`,
+      }));
+
+      const { Favorites, Registrations, channel, ...rest } = activity;
 
       return {
         ...rest,
@@ -54,18 +75,38 @@ export const activitiesRouter = createTRPCRouter({
           ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
         favoritesCount: Favorites.length,
+
         isRegistered: ctx.session?.user.id
           ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
         registrationsCount: Registrations.length,
+
+        channel: {
+          users: channelUsers,
+          messages: channel.Message,
+          id: channel.id,
+          title: channel.title,
+          description: channel.description,
+          createdAt: channel.createdAt,
+        },
       };
     }),
 
   addActivity: protectedProcedure
     .input(addActivityInput)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.prisma.activity.create({
-        data: { ...input, slug: createSlug(input.title) },
+      const channel = await ctx.prisma.channel.create({
+        data: {
+          title: input.title,
+        },
+      });
+      console.log(channel);
+      return ctx.prisma.activity.create({
+        data: {
+          ...input,
+          slug: createSlug(input.title),
+          channelId: channel.id,
+        },
       });
     }),
 });

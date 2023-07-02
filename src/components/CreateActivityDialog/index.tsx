@@ -47,9 +47,7 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
 
   const { mutate } = api.activities.addActivity.useMutation({
     onError: (error) => {
-      const ActivityExistsError =
-        "Unique constraint failed on the fields: (`title`)";
-      if (error.message.includes(ActivityExistsError)) {
+      if (error.message.includes("Unique constraint failed on the fields:")) {
         setIsActivityAlreadyExist(true);
         setTitle((title) => title.trim());
         return;
