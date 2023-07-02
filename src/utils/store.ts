@@ -13,18 +13,23 @@ type Store = {
 
   addToRegistrations: (activityId: string) => void;
   removeFromRegistrations: (activityId: string) => void;
+  // channels: getChannelFromActivity[];
+  // setChannel: (channel: getChannelFromActivity) => void;
+  // addMessage: (message: Message) => void;
 };
 
 export const useStore = create<Store>((set) => ({
   activities: [],
+  channels: [],
 
-  setActivities: (activities: getActivitiesOutput) =>
-    set((state) => ({ ...state, activities })),
+  setActivities: (activities: getActivitiesOutput) => set({ activities }),
 
   addActivity: (activity: getActivityOutput) =>
     activity && set((state) => ({
       ...state,
-      activities: [...state.activities, activity],
+      activities: [...state.activities, {
+        ...activity,
+      }],
     })),
 
   updateActivity: (activity: getActivityOutput) => {
@@ -33,7 +38,9 @@ export const useStore = create<Store>((set) => ({
         ...state,
         activities: state.activities.map((prevActivity) => {
           if (prevActivity.id === activity.id) {
-            return activity;
+            return {
+              ...activity,
+            };
           }
           return prevActivity;
         }),
@@ -46,6 +53,34 @@ export const useStore = create<Store>((set) => ({
       ...state,
       activities: state.activities.filter(({ id }) => id !== activityId),
     })),
+
+  // setChannel: (channel: getChannelOutput) =>
+  //   channel && set((state) => ({
+  //     ...state,
+  //     channels: [
+  //       ...state.channels,
+  //       channel,
+  //     ],
+  //   })),
+
+  // addMessage: (message: Message) =>
+  //   message && set((state) => {
+  //     const updatedChannels = state.channels.map((channel) => {
+  //       if (channel?.id !== message.channelId) {
+  //         return channel;
+  //       }
+
+  //       return {
+  //         ...channel,
+  //         Message: [...channel.Message, message],
+  //       };
+  //     });
+
+  //     return {
+  //       ...state,
+  //       channels: updatedChannels,
+  //     };
+  //   }),
 
   addToFavorites: (activityId: string) =>
     set((state) => ({
