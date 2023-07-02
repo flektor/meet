@@ -1,5 +1,5 @@
 import { type NextPage } from "next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
@@ -8,10 +8,58 @@ import FavoriteButton from "~/components/FavoriteButton";
 import useActivity from "~/hooks/useActivity";
 import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
+import { Chat } from "~/components/Chat";
+import { api } from "~/utils/api";
+
 const Activity: NextPage = () => {
   const router = useRouter();
   const slug = router.query.slug as string;
-  const { activity, error, isLoading } = useActivity(slug);
+  const { activity, error, isLoading, refetch } = useActivity(slug);
+
+  const addToViewers = api.activityViewer.add.useMutation();
+
+  const removeFromViewers = api.activityViewer.remove.useMutation();
+
+  const [addedToViewers, setAddedToViewers] = useState(false);
+
+  const { data: viewers, refetch: refetchViewers } = api.activityViewer
+    .getActivityViewers
+    .useQuery({
+      activityId: activity ? activity.id : "",
+    }, {
+      enabled: !!activity,
+    });
+
+  function onUpdateHandler(
+    action: "message" | "viewer",
+  ) {
+    switch (action) {
+      case "message":
+        return refetch();
+      case "viewer":
+    }
+  }
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (activity) {
+        removeFromViewers.mutate({ activityId: activity.id });
+      }
+    };
+
+    if (activity && !addedToViewers) {
+      addToViewers.mutate({ activityId: activity.id });
+      setAddedToViewers(true);
+    }
+
+    router.events.on("beforeHistoryChange", handleRouteChange);
+    window.addEventListener("beforeunload", handleRouteChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleRouteChange);
+      router.events.off("beforeHistoryChange", handleRouteChange);
+    };
+  }, [activity, addedToViewers]);
 
   return (
     <>
@@ -57,6 +105,14 @@ const Activity: NextPage = () => {
                 Description:
                 <p className="text-white text-2xl">{activity.description}</p>
               </div>
+
+              {activity && (
+                <Chat
+                  update={onUpdateHandler}
+                  channel={activity.channel}
+                  isLoading={isLoading}
+                />
+              )}
             </div>
           </div>
         )}
