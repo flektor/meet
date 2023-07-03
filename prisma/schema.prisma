@@ -19,6 +19,7 @@ model Channel {
     Users       User[]
     Message     Message[]
     activity    Activity?
+    Group       Group?
 }
 
 model Activity {
@@ -32,6 +33,7 @@ model Activity {
     channelId      String           @unique
     channel        Channel          @relation(fields: [channelId], references: [id])
     ActivityViewer ActivityViewer[]
+    PendingInvite  PendingInvite[]
 }
 
 model Favorites {
@@ -41,6 +43,37 @@ model Favorites {
     user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, activityId])
+}
+
+model Group {
+    id          String        @id @default(cuid())
+    slug        String        @unique
+    title       String        @unique
+    description String
+    createdAt   DateTime      @default(now())
+    // createdBy   String
+    // user        User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+    members     User[]
+    channelId   String        @unique
+    channel     Channel       @relation(fields: [channelId], references: [id])
+    GroupViewer GroupViewer[]
+}
+
+model PendingInvite {
+    id         String   @id @default(cuid())
+    userId     String
+    activityId String
+    activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt  DateTime @default(now())
+}
+
+model GroupViewer {
+    id      String @id @default(cuid())
+    userId  String
+    groupId String
+    group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ActivityViewer {
@@ -115,6 +148,10 @@ model User {
     Message        Message[]
     Channel        Channel?         @relation(fields: [channelId], references: [id])
     ActivityViewer ActivityViewer[]
+    PendingInvite  PendingInvite[]
+    Group          Group[]
+    groupId        String?
+    GroupViewer    GroupViewer[]
 }
 
 model VerificationToken {
