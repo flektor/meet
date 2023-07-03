@@ -10,7 +10,17 @@ import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
 import { Chat } from "~/components/Chat";
 import { api } from "~/utils/api";
+import { channel } from "diagnostics_channel";
+import { Channel } from "~/types";
 
+const _initChannelData = {
+  createdAt: new Date(),
+  description: "",
+  id: "temp",
+  messages: [],
+  title: "",
+  users: [],
+};
 const Activity: NextPage = () => {
   const router = useRouter();
   const slug = router.query.slug as string;
@@ -30,6 +40,11 @@ const Activity: NextPage = () => {
       enabled: !!activity,
     });
 
+  function getUserNameById(userId: string) {
+    return activity?.channel.users.find((user) => user.userId === userId)
+      ?.name || "user";
+  }
+
   function onUpdateHandler(
     action: "message" | "viewer",
   ) {
@@ -37,8 +52,55 @@ const Activity: NextPage = () => {
       case "message":
         return refetch();
       case "viewer":
+        return refetchViewers();
     }
   }
+
+  const [channel, setChannel] = useState<Channel>(_initChannelData);
+
+  useEffect(() => {
+    if (!activity) return;
+
+    if (viewers) {
+      for (const viewer of viewers) {
+        const index = activity.channel.users.findIndex(({ userId }) =>
+          viewer.userId === userId
+        );
+        if (index > -1) {
+          activity.channel.users[index] = viewer;
+          continue;
+        }
+        activity.channel.users.push(viewer);
+        continue;
+      }
+    }
+    const updatedMessages = activity.channel.messages.map((message) => {
+      return {
+        ...message,
+        sentBy: getUserNameById(message.sentBy),
+      };
+    });
+
+    setChannel((prevChannel) => ({
+      ...prevChannel,
+      messages: updatedMessages,
+    }));
+  }, [viewers, activity]);
+
+  useEffect(() => {
+    if (!activity || !viewers) return;
+
+    for (const viewer of viewers) {
+      const index = activity.channel.users.findIndex(({ userId }) =>
+        viewer.userId === userId
+      );
+      if (index > -1) {
+        activity.channel.users[index] = viewer;
+        return;
+      }
+      activity.channel.users.push(viewer);
+    }
+  }, [activity]);
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -109,7 +171,7 @@ const Activity: NextPage = () => {
               {activity && (
                 <Chat
                   update={onUpdateHandler}
-                  channel={activity.channel}
+                  channel={channel}
                   isLoading={isLoading}
                 />
               )}

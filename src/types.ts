@@ -13,6 +13,8 @@ export type getActivityOutput = RouterOutput["activities"]["getActivity"];
 
 export type Channel = {
   users: {
+    image: string | null;
+    name: string | null;
     userId: string;
     slug: string;
   }[];
@@ -38,7 +40,7 @@ export type addToActivityViewerOutput = RouterOutput["activityViewer"]["add"];
 export type removeFromActivityViewerOutput =
   RouterOutput["activityViewer"]["remove"];
 export type getAllActivityViewersOutput =
-  RouterOutput["activityViewer"]["getAll"];
+  RouterOutput["activityViewer"]["getActivityViewers"];
 
 export type addToRegistrationsOutput = RouterOutput["registrations"]["add"];
 export type removeFromRegistratiosOutput =

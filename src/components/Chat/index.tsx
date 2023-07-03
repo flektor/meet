@@ -22,9 +22,16 @@ export const Chat: FunctionComponent<
 ) => {
   const { data: session } = useSession();
 
+  function getUserNameById(userId: string) {
+    return channel.users.find((user) => user.userId === userId)?.name || "user";
+  }
+
   const { mutate: sendMessage } = api.chat.sendMessage.useMutation({
     onError: (error) => console.log(error),
-    onSuccess: (message) => channel.messages.push(message),
+    onSuccess: (message) => {
+      message.sentBy = getUserNameById(message.sentBy);
+      channel.messages.push(message);
+    },
   });
 
   useSubscribeToEvent(channel.id, (action) => update(action as any));
