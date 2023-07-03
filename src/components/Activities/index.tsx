@@ -1,16 +1,47 @@
-import { type FunctionComponent } from "react";
+import { type FunctionComponent, useState } from "react";
 import FavoriteButton from "../FavoriteButton";
+import Toast from "../InvitationToast";
 import Link from "next/link";
 import useActivities from "~/hooks/useActivities";
 import Spinner from "../Spinner";
 import { env } from "process";
 import RegisterButton from "../RegisterButton";
 import DotsLoader from "../DotsLoader";
+
 const Activities: FunctionComponent = () => {
   const { activities, isLoading, error } = useActivities();
 
   if (error && env.NODE_ENV === "development") {
     console.error(error);
+  }
+
+  // function getUserNameById(userId: string) {
+  //   return activity?.channel.users.find((user) => user.userId === userId)
+  //     ?.name || "user";
+  // }
+
+  const [toasts, setToasts] = useState<
+    { message: string; icon?: string }[]
+  >(
+    [],
+  );
+
+  function onFoundUserForRegisteredActivity(activityId: string) {
+    setToasts((
+      prev,
+    ) => [...prev, { message: `user invites to join ${activityId}` }]);
+  }
+
+  function removeToast(index: number) {
+    setToasts((prev) => [...(prev.filter((t, i) => i !== index))]);
+  }
+
+  function onAcceptInvitation(index: number) {
+    removeToast(index);
+  }
+
+  function onDeclineInvitation(index: number) {
+    removeToast(index);
   }
 
   return (
@@ -23,6 +54,19 @@ const Activities: FunctionComponent = () => {
         {isLoading && <Spinner />}
 
         {error && <div className="text-white 2xl">There was an error.</div>}
+
+        <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
+          {toasts.map(({ message }, index) => (
+            <li key={index}>
+              <Toast
+                message={message}
+                onAccept={() => onAcceptInvitation(index)}
+                onDecline={() => onDeclineInvitation(index)}
+                onDie={() => removeToast(index)}
+              />
+            </li>
+          ))}
+        </ul>
 
         {activities.length === 0 && (
           <div className="text-white 2xl">There are no activities.</div>
@@ -53,6 +97,7 @@ const Activities: FunctionComponent = () => {
                     <RegisterButton
                       activityId={id}
                       className="mt-1"
+                      onPusherMessage={onFoundUserForRegisteredActivity}
                     />
                   </div>
 
