@@ -6,8 +6,10 @@ import { PusherContext } from "~/utils/PusherProvider";
 export default function usePusherStore<T>(
   selector: (state: PusherState) => T,
   equalityFn?: (left: T, right: T) => boolean,
-): T {
+): T | void {
   const store = useContext(PusherContext);
-  if (!store) throw new Error("Missing PusherContext.Provider in the tree");
+  if (!store) {
+    return;
+  }
   return useStore(store, selector, equalityFn);
 }
