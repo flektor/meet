@@ -1,8 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createChannelInput, receiversInput, sendMessageInput } from "~/types";
+import { createChannelInput, sendMessageInput } from "~/types";
 import { TRPCError } from "@trpc/server";
-import { pusherServerClient } from "~/server/pusher";
 import { z } from "zod";
+import { pusherSend } from "~/server/utils";
 
 export const chatRouter = createTRPCRouter({
   createChannel: protectedProcedure
@@ -68,7 +68,11 @@ export const chatRouter = createTRPCRouter({
         input.receivers !== "" &&
         (input.receivers instanceof Array && input.receivers.length > 0)
       ) {
-        pusherServerClient.trigger(input.receivers, input.channelId, "message");
+        pusherSend({
+          receivers: input.receivers,
+          slug: input.channelId,
+          action: "message",
+        });
       }
 
       return await ctx.prisma.message.create({
