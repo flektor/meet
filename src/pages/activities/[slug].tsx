@@ -21,6 +21,7 @@ const _initChannelData = {
   title: "",
   users: [],
 };
+
 const Activity: NextPage = () => {
   const router = useRouter();
   const slug = router.query.slug as string;
@@ -81,10 +82,10 @@ const Activity: NextPage = () => {
       };
     });
 
-    setChannel((prevChannel) => ({
-      ...prevChannel,
+    setChannel({
+      ...activity.channel,
       messages: updatedMessages,
-    }));
+    });
   }, [viewers, activity]);
 
   useEffect(() => {
