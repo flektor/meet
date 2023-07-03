@@ -66,3 +66,11 @@ export const sendMessageInput = z.object({
   channelId: z.string(),
   receivers: receiversInput,
 });
+
+export type PusherMessage = "message" | "quick" | "viewer" | "invite";
+
+export type PusherSendProps = {
+  receivers: string[] | string;
+  slug: string;
+  action: PusherMessage;
+};
