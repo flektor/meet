@@ -33,7 +33,7 @@ model Activity {
     channelId      String           @unique
     channel        Channel          @relation(fields: [channelId], references: [id])
     ActivityViewer ActivityViewer[]
-    PendingInvite  PendingInvite[]
+    groups         Group[]
 }
 
 model Favorites {
@@ -46,38 +46,53 @@ model Favorites {
 }
 
 model Group {
-    id          String        @id @default(cuid())
-    slug        String        @unique
-    title       String        @unique
-    description String
-    createdAt   DateTime      @default(now())
-    // createdBy   String
-    // user        User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-    members     User[]
-    channelId   String        @unique
-    channel     Channel       @relation(fields: [channelId], references: [id])
-    GroupViewer GroupViewer[]
+    id            String          @id @default(cuid())
+    slug          String          @unique
+    title         String          @unique
+    description   String
+    createdAt     DateTime        @default(now())
+    userId        String
+    user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    channelId     String          @unique
+    channel       Channel         @relation(fields: [channelId], references: [id])
+    GroupViewer   GroupViewer[]
+    PendingInvite PendingInvite[]
+    activityId    String
+    activity      Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    Membership    Membership[]
+
+    @@unique([id, userId, activityId])
+}
+
+model Membership {
+    userId  String
+    groupId String
+    user    User   @relation(fields: [userId], references: [id])
+    group   Group  @relation(fields: [groupId], references: [id])
+
+    @@id([userId, groupId])
 }
 
 model PendingInvite {
-    id         String   @id @default(cuid())
-    userId     String
-    activityId String
-    activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    createdAt  DateTime @default(now())
+    userId    String
+    groupId   String
+    group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([userId, groupId])
 }
 
 model GroupViewer {
-    id      String @id @default(cuid())
-    userId  String
+    userId  String @unique
     groupId String
     group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
     user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, groupId])
 }
 
 model ActivityViewer {
-    id         String   @id @default(cuid())
     userId     String
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
@@ -114,12 +129,12 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String?
+    access_token      String?
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String?
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -150,8 +165,8 @@ model User {
     ActivityViewer ActivityViewer[]
     PendingInvite  PendingInvite[]
     Group          Group[]
-    groupId        String?
-    GroupViewer    GroupViewer[]
+    GroupViewer    GroupViewer?
+    Membership     Membership[]
 }
 
 model VerificationToken {
