@@ -100,7 +100,6 @@ export const activitiesRouter = createTRPCRouter({
           title: input.title,
         },
       });
-      console.log(channel);
       return ctx.prisma.activity.create({
         data: {
           ...input,

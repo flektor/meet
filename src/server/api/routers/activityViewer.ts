@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { pusherServerClient } from "~/server/pusher";
+import { pusherSend } from "~/server/utils";
 
 export const activityViewerRouter = createTRPCRouter({
   add: protectedProcedure
@@ -21,11 +22,11 @@ export const activityViewerRouter = createTRPCRouter({
       const receivers = others.map(({ userId }) => `user-${userId}`);
 
       if (receivers.length > 0) {
-        pusherServerClient.trigger(
+        pusherSend({
           receivers,
-          input.activityId,
-          "viewer",
-        );
+          slug: input.activityId,
+          action: "viewer",
+        });
       }
 
       return viewer;
