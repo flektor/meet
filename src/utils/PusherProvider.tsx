@@ -38,11 +38,9 @@ export const PusherProvider = (
     };
   }, [session]);
 
-  if (!store) return null;
-
   return (
     <>
-      {session
+      {session && store
         ? (
           <PusherContext.Provider value={store}>
             {children}
