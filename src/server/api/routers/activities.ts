@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -42,11 +44,8 @@ export const activitiesRouter = createTRPCRouter({
           include: {
             Favorites: true,
             Registrations: true,
-            channel: {
-              include: {
-                Message: true,
-              },
-            },
+            groups: { include: { _count: { select: { GroupViewer: true } } } },
+            channel: { include: { Message: true } },
           },
         });
 
