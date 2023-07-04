@@ -60,12 +60,22 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
         setTitle("");
         formRef.current.reset();
       }
+
       store.addActivity({
         ...activity,
         isFavorite: false,
         isRegistered: false,
         favoritesCount: 0,
         registrationsCount: 0,
+        groups: [],
+        channel: {
+          createdAt: new Date(),
+          description: "",
+          id: "temp",
+          messages: [],
+          title: activity.title,
+          users: [],
+        },
       });
       onNewActivity();
     },
