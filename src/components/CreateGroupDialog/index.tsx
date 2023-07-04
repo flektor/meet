@@ -8,14 +8,14 @@ import React, {
 } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
-import { addActivityInput } from "../../types";
-import Spinner from "../Spinner/";
+import Spinner from "../Spinner";
 import Link from "next/link";
 import EnterIcon from "../icons/Enter";
 import CloseIcon from "../icons/Close";
 import AlarmIcon from "../icons/Alarm";
 import { useStore } from "~/utils/store";
 import { createSlug } from "~/utils";
+import { addGroupInput } from "~/types";
 
 function capitalizeFirstCharacter(text: string) {
   if (!text) return "";
@@ -23,17 +23,19 @@ function capitalizeFirstCharacter(text: string) {
     (text.length > 1 ? text.substring(1) : "");
 }
 
-type CreateActivityDialogProps = {
-  onNewActivity: () => void;
+type CreateGroupDialogProps = {
+  onNewGroup: () => void;
   onClose: () => void;
+  activitySlug: string;
+  activityId: string;
 };
 
-const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
-  { onNewActivity, onClose },
+const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
+  { onNewGroup, onClose, activitySlug, activityId },
 ) => {
   const store = useStore();
   const [isWaitingForServer, setIsWaitingForServer] = useState(false);
-  const [isActivityAlreadyExist, setIsActivityAlreadyExist] = useState(false);
+  const [isGroupAlreadyExist, setisGroupAlreadyExist] = useState(false);
   const [title, setTitle] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -45,39 +47,33 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
     }
   }
 
-  const { mutate } = api.activities.addActivity.useMutation({
+  const { mutate: addGroup } = api.groups.addGroup.useMutation({
     onError: (error) => {
       if (error.message.includes("Unique constraint failed on the fields:")) {
-        setIsActivityAlreadyExist(true);
+        setisGroupAlreadyExist(true);
         setTitle((title) => title.trim());
         return;
       }
       console.log(error.data?.zodError);
     },
 
-    onSuccess: (activity) => {
+    onSuccess: (group) => {
       if (formRef.current) {
         setTitle("");
         formRef.current.reset();
       }
-
-      store.addActivity({
-        ...activity,
-        isFavorite: false,
-        isRegistered: false,
-        favoritesCount: 0,
-        registrationsCount: 0,
-        groups: [],
+      store.addGroup({
+        ...group,
         channel: {
           createdAt: new Date(),
           description: "",
           id: "temp",
           messages: [],
-          title: activity.title,
+          title: group.title,
           users: [],
         },
       });
-      onNewActivity();
+      onNewGroup();
     },
 
     onSettled: () => setIsWaitingForServer(false),
@@ -88,10 +84,11 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
     setIsWaitingForServer(true);
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
+    data.activityId = activityId;
     try {
-      const activity = addActivityInput.parse(data);
-      activity.description = capitalizeFirstCharacter(activity.description);
-      mutate(activity);
+      const group = addGroupInput.parse(data);
+      group.description = capitalizeFirstCharacter(group.description);
+      addGroup(group);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.log(error);
@@ -112,8 +109,8 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
       return;
     }
 
-    if (isActivityAlreadyExist) {
-      setIsActivityAlreadyExist(false);
+    if (isGroupAlreadyExist) {
+      setisGroupAlreadyExist(false);
     }
     setTitle(formatTitle(title + character));
   }
@@ -140,7 +137,7 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
           className="z-50 max-w-md flex flex-col gap-4 rounded-xl bg-white/10 p-8 text-white"
         >
           <div className="flex justify-center">
-            <h2 className="text-2xl font-bold">New Activity</h2>
+            <h2 className="text-2xl font-bold">New Group</h2>
           </div>
           <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
@@ -149,15 +146,18 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
             name="title"
             type="text"
             className={`p-2 rounded-lg text-2xl bg-gradient-to-br from-[#2b1747] to-[#232338] ${
-              isActivityAlreadyExist && "text-orange-300"
+              isGroupAlreadyExist && "text-orange-300"
             }`}
             required
             value={title}
             onChange={onTitleChange}
           />
 
-          {isActivityAlreadyExist && (
-            <ActivityAlreadyExist slug={createSlug(title)} />
+          {isGroupAlreadyExist && (
+            <GroupAlreadyExist
+              groupSlug={createSlug(title)}
+              activitySlug={activitySlug}
+            />
           )}
 
           <label htmlFor="description" className="text-2xl">
@@ -179,7 +179,7 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
                 "hover:bg-black/5 hover:border-white hover:text-white"
               }`}
             >
-              {isWaitingForServer ? <Spinner /> : "Create Activity"}
+              {isWaitingForServer ? <Spinner /> : "Create Group"}
             </button>
           </div>
         </form>
@@ -188,7 +188,9 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
   );
 };
 
-function ActivityAlreadyExist({ slug }: { slug: string }) {
+function GroupAlreadyExist(
+  { activitySlug, groupSlug }: { activitySlug: string; groupSlug: string },
+) {
   return (
     <>
       <i className="flex items-center font-medium mt-2 text-sm text-orange-300">
@@ -196,12 +198,12 @@ function ActivityAlreadyExist({ slug }: { slug: string }) {
           className="fill-orange-300 stroke-orange-300 w-6 h-6 mr-1"
           viewBox="0 0 24 24"
         />{" "}
-        This activity already exists
+        This group already exists
       </i>
       <i className="flex font-medium ml-7 mb-4 text-sm text-[#e8c5fa]">
         Click
         <Link
-          href={`/activities/${slug}`}
+          href={`/activities/${activitySlug}/${groupSlug}`}
           className="flex justify-center ml-1 font-medium text-[#cc66ff] transition underline hover:text-white [&>svg]:hover:fill-white"
         >
           here
@@ -226,4 +228,4 @@ function trim(title: string) {
   return title.trim();
 }
 
-export default CreateActivityDialog;
+export default CreateGroupDialog;

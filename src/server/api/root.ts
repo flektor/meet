@@ -4,6 +4,8 @@ import { createTRPCRouter } from "~/server/api/trpc";
 import { registrationsRouter } from "~/server/api/routers/registrations";
 import { chatRouter } from "./routers/chat";
 import { activityViewerRouter } from "./routers/activityViewer";
+import { groupViewerRouter } from "./routers/groupViewer";
+import { groupsRouter } from "./routers/groups";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +18,8 @@ export const appRouter = createTRPCRouter({
   registrations: registrationsRouter,
   chat: chatRouter,
   activityViewer: activityViewerRouter,
+  groupViewer: groupViewerRouter,
+  groups: groupsRouter,
 });
 
 // export type definition of API

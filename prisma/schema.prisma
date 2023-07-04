@@ -19,6 +19,7 @@ model Channel {
     Users       User[]
     Message     Message[]
     activity    Activity?
+    Group       Group?
 }
 
 model Activity {
@@ -32,6 +33,7 @@ model Activity {
     channelId      String           @unique
     channel        Channel          @relation(fields: [channelId], references: [id])
     ActivityViewer ActivityViewer[]
+    groups         Group[]
 }
 
 model Favorites {
@@ -43,8 +45,54 @@ model Favorites {
     @@unique([userId, activityId])
 }
 
+model Group {
+    id            String          @id @default(cuid())
+    slug          String          @unique
+    title         String          @unique
+    description   String
+    createdAt     DateTime        @default(now())
+    userId        String
+    user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    channelId     String          @unique
+    channel       Channel         @relation(fields: [channelId], references: [id])
+    GroupViewer   GroupViewer[]
+    PendingInvite PendingInvite[]
+    activityId    String
+    activity      Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    Membership    Membership[]
+
+    @@unique([id, userId, activityId])
+}
+
+model Membership {
+    userId  String
+    groupId String
+    user    User   @relation(fields: [userId], references: [id])
+    group   Group  @relation(fields: [groupId], references: [id])
+
+    @@id([userId, groupId])
+}
+
+model PendingInvite {
+    userId    String
+    groupId   String
+    group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([userId, groupId])
+}
+
+model GroupViewer {
+    userId  String @unique
+    groupId String
+    group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, groupId])
+}
+
 model ActivityViewer {
-    id         String   @id @default(cuid())
     userId     String
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
@@ -81,12 +129,12 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String?
+    access_token      String?
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String?
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -115,6 +163,10 @@ model User {
     Message        Message[]
     Channel        Channel?         @relation(fields: [channelId], references: [id])
     ActivityViewer ActivityViewer[]
+    PendingInvite  PendingInvite[]
+    Group          Group[]
+    GroupViewer    GroupViewer?
+    Membership     Membership[]
 }
 
 model VerificationToken {

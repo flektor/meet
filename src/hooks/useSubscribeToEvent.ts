@@ -15,6 +15,7 @@ export default function useSubscribeToEvent<MessageType>(
   }, [callback]);
 
   useEffect(() => {
+    if (!eventName || !channel) return;
     const reference = (data: MessageType) => {
       stableCallback.current(data);
     };

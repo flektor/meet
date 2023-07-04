@@ -22,7 +22,6 @@ export const PusherProvider = (
 
     const userId = session.data?.user.id;
     const newStore = createPusherStore({ slug: `user-${userId}`, userId });
-    console.log({ userId });
     if (!newStore) {
       return;
     }
@@ -38,11 +37,9 @@ export const PusherProvider = (
     };
   }, [session]);
 
-  if (!store) return null;
-
   return (
     <>
-      {session
+      {session && store
         ? (
           <PusherContext.Provider value={store}>
             {children}

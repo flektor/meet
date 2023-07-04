@@ -5,11 +5,14 @@ import { useSession } from "next-auth/react";
 import { api } from "../../utils/api";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
 import DotsLoader from "~/components/DotsLoader";
+import useSubscribeToEvent from "~/hooks/useSubscribeToEvent";
+import { PusherMessage } from "~/types";
 
 export type RegisterButtonProps = {
   activityId: string;
   className?: string;
   showText?: boolean;
+  onPusherMessage: (activityId: string) => void;
 };
 
 const Button = (
@@ -48,7 +51,8 @@ const Button = (
 };
 
 const RegisterButton = (
-  { activityId, className = "", showText }: RegisterButtonProps,
+  { activityId, className = "", showText, onPusherMessage }:
+    RegisterButtonProps,
 ) => {
   const store = useStore();
   const session = useSession();
@@ -60,6 +64,10 @@ const RegisterButton = (
 
   const activity = store.activities.find(({ id }) => id === activityId);
   const isRegistered = activity?.isRegistered ?? false;
+
+  const eventName = activity ? `quick-${activity.id}` : "";
+
+  useSubscribeToEvent(eventName, () => onPusherMessage(activity!.id));
 
   let registrationsCount = 0;
   if (activity?.registrationsCount) {

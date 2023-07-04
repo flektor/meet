@@ -8,11 +8,18 @@ export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type getActivitiesOutput = RouterOutput["activities"]["getActivities"];
 export type addActivityOutput = RouterOutput["activities"]["addActivity"];
 export type getActivityOutput = RouterOutput["activities"]["getActivity"];
+
+export type getUserGroupsOutput = RouterOutput["groups"]["getUserGroups"];
+export type addGroupOutput = RouterOutput["groups"]["addGroup"];
+export type getGroupOutput = RouterOutput["groups"]["getGroup"];
+
 // this does not work
 // export type Channel = Pick<getActivityOutput, "channel">;
 
 export type Channel = {
   users: {
+    image: string | null;
+    name: string | null;
     userId: string;
     slug: string;
   }[];
@@ -28,6 +35,14 @@ export const addActivityInput = z.object({
   description: z.string(),
 });
 
+export const addGroupInput = z.object({
+  title: z.string().trim(),
+  description: z.string(),
+  activityId: z.string(),
+  // startingAt: z.date()
+  // endingAt: z.date().optional()
+});
+
 export type AddActivityValidator = z.infer<typeof addActivityInput>;
 
 export type addToFavoritesOutput = RouterOutput["favorites"]["addToFavorites"];
@@ -38,7 +53,7 @@ export type addToActivityViewerOutput = RouterOutput["activityViewer"]["add"];
 export type removeFromActivityViewerOutput =
   RouterOutput["activityViewer"]["remove"];
 export type getAllActivityViewersOutput =
-  RouterOutput["activityViewer"]["getAll"];
+  RouterOutput["activityViewer"]["getActivityViewers"];
 
 export type addToRegistrationsOutput = RouterOutput["registrations"]["add"];
 export type removeFromRegistratiosOutput =
@@ -64,3 +79,11 @@ export const sendMessageInput = z.object({
   channelId: z.string(),
   receivers: receiversInput,
 });
+
+export type PusherMessage = "message" | "quick" | "viewer" | "invite";
+
+export type PusherSendProps = {
+  receivers: string[] | string;
+  slug: string;
+  action: PusherMessage;
+};

@@ -1,39 +1,47 @@
 import { create } from "zustand";
-import type { getActivitiesOutput, getActivityOutput } from "~/types";
+import type {
+  getActivitiesOutput,
+  getActivityOutput,
+  getGroupOutput,
+} from "~/types";
 
 type Store = {
-  activities: getActivitiesOutput;
-  setActivities: (activities: getActivitiesOutput) => void;
-  addActivity: (activity: getActivityOutput) => void;
+  activities: NonNullable<getActivitiesOutput>;
+  groups: NonNullable<getGroupOutput>[];
+  setActivities: (activities: NonNullable<getActivitiesOutput>) => void;
+  addActivity: (activity: NonNullable<getActivityOutput>) => void;
   removeActivity: (activityId: string) => void;
-  updateActivity: (activity: getActivityOutput) => void;
+  updateActivity: (activity: NonNullable<getActivityOutput>) => void;
+
+  addGroup: (group: NonNullable<getGroupOutput>) => void;
+  removeGroup: (groupId: string) => void;
+  updateGroup: (group: NonNullable<getGroupOutput>) => void;
 
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
 
   addToRegistrations: (activityId: string) => void;
   removeFromRegistrations: (activityId: string) => void;
-  // channels: getChannelFromActivity[];
-  // setChannel: (channel: getChannelFromActivity) => void;
-  // addMessage: (message: Message) => void;
 };
 
 export const useStore = create<Store>((set) => ({
   activities: [],
+  groups: [],
   channels: [],
 
-  setActivities: (activities: getActivitiesOutput) => set({ activities }),
+  setActivities: (activities: NonNullable<getActivitiesOutput>) =>
+    set({ activities }),
 
-  addActivity: (activity: getActivityOutput) =>
-    activity && set((state) => ({
+  addActivity: (activity: NonNullable<getActivityOutput>) =>
+    set((state) => ({
       ...state,
       activities: [...state.activities, {
         ...activity,
       }],
     })),
 
-  updateActivity: (activity: getActivityOutput) => {
-    activity && set((state) => {
+  updateActivity: (activity: NonNullable<getActivityOutput>) => {
+    set((state) => {
       return {
         ...state,
         activities: state.activities.map((prevActivity) => {
@@ -54,33 +62,35 @@ export const useStore = create<Store>((set) => ({
       activities: state.activities.filter(({ id }) => id !== activityId),
     })),
 
-  // setChannel: (channel: getChannelOutput) =>
-  //   channel && set((state) => ({
-  //     ...state,
-  //     channels: [
-  //       ...state.channels,
-  //       channel,
-  //     ],
-  //   })),
+  addGroup: (group: NonNullable<getGroupOutput>) =>
+    set((state) => ({
+      ...state,
+      groups: [...state.groups, {
+        ...group,
+      }],
+    })),
 
-  // addMessage: (message: Message) =>
-  //   message && set((state) => {
-  //     const updatedChannels = state.channels.map((channel) => {
-  //       if (channel?.id !== message.channelId) {
-  //         return channel;
-  //       }
+  updateGroup: (group: NonNullable<getGroupOutput>) => {
+    set((state) => {
+      return {
+        ...state,
+        groups: state.groups.map((prevGroups) => {
+          if (prevGroups.id === group.id) {
+            return {
+              ...group,
+            };
+          }
+          return prevGroups;
+        }),
+      };
+    });
+  },
 
-  //       return {
-  //         ...channel,
-  //         Message: [...channel.Message, message],
-  //       };
-  //     });
-
-  //     return {
-  //       ...state,
-  //       channels: updatedChannels,
-  //     };
-  //   }),
+  removeGroup: (GroupId: string) =>
+    set((state) => ({
+      ...state,
+      groups: state.groups.filter(({ id }) => id !== GroupId),
+    })),
 
   addToFavorites: (activityId: string) =>
     set((state) => ({
