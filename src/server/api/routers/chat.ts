@@ -71,7 +71,10 @@ export const chatRouter = createTRPCRouter({
         pusherSend({
           receivers: input.receivers,
           slug: input.channelId,
-          action: "message",
+          body: {
+            action: "message",
+            sentBy: ctx.session.user.id,
+          },
         });
       }
 

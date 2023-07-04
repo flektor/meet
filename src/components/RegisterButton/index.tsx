@@ -12,7 +12,7 @@ export type RegisterButtonProps = {
   activityId: string;
   className?: string;
   showText?: boolean;
-  onPusherMessage: (activityId: string) => void;
+  onPusherMessage: (activityId: string, message: PusherMessage) => void;
 };
 
 const Button = (
@@ -67,7 +67,10 @@ const RegisterButton = (
 
   const eventName = activity ? `quick-${activity.id}` : "";
 
-  useSubscribeToEvent(eventName, () => onPusherMessage(activity!.id));
+  useSubscribeToEvent(
+    eventName,
+    (data) => onPusherMessage(activity!.id, data as PusherMessage),
+  );
 
   let registrationsCount = 0;
   if (activity?.registrationsCount) {

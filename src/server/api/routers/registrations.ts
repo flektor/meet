@@ -14,7 +14,10 @@ export const registrationsRouter = createTRPCRouter({
         pusherSend({
           receivers: `user-${user.userId}`,
           slug: `quick-${input.activityId}`,
-          action: "quick",
+          body: {
+            action: "quick",
+            sentBy: ctx.session.user.id,
+          },
         });
       }
 
