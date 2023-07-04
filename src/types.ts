@@ -8,6 +8,11 @@ export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type getActivitiesOutput = RouterOutput["activities"]["getActivities"];
 export type addActivityOutput = RouterOutput["activities"]["addActivity"];
 export type getActivityOutput = RouterOutput["activities"]["getActivity"];
+
+export type getUserGroupsOutput = RouterOutput["groups"]["getUserGroups"];
+export type addGroupOutput = RouterOutput["groups"]["addGroup"];
+export type getGroupOutput = RouterOutput["groups"]["getGroup"];
+
 // this does not work
 // export type Channel = Pick<getActivityOutput, "channel">;
 
@@ -28,6 +33,14 @@ export type Channel = {
 export const addActivityInput = z.object({
   title: z.string().trim(),
   description: z.string(),
+});
+
+export const addGroupInput = z.object({
+  title: z.string().trim(),
+  description: z.string(),
+  activityId: z.string(),
+  // startingAt: z.date()
+  // endingAt: z.date().optional()
 });
 
 export type AddActivityValidator = z.infer<typeof addActivityInput>;
