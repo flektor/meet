@@ -73,6 +73,15 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
           users: [],
         },
       });
+
+      store.addGroupOverview({
+        ...group,
+        activitySlug,
+        title,
+        slug: group.slug,
+        isMember: false,
+        viewersCount: 0,
+      });
       onNewGroup();
     },
 

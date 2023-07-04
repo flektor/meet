@@ -24,6 +24,13 @@ export default function useActivity(slug: string) {
     } else {
       store.addActivity(data);
     }
+    store.setGroupsOverview(data.groups.map((group) => ({
+      activitySlug: slug,
+      slug: group.slug,
+      title: group.title,
+      viewersCount: group.viewersCount,
+      isMember: false,
+    })));
   }, [data]);
 
   useEffect(() => {
