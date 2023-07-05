@@ -11,10 +11,11 @@ import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
 import { Chat } from "~/components/Chat";
 import { api } from "~/utils/api";
-import { Channel, PusherMessage } from "~/types";
+import { addDynamicGroupInput, Channel, PusherMessage } from "~/types";
 import CreateGroupDialog from "~/components/CreateGroupDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
 import Groups from "~/components/Groups";
+import { useStore } from "~/utils/store";
 
 const _initChannelData = {
   createdAt: new Date(),
@@ -27,10 +28,21 @@ const _initChannelData = {
 
 const Activity: NextPage = () => {
   const router = useRouter();
+  const store = useStore();
   const slug = router.query.slug as string;
   const { activity, error, isLoading, refetch } = useActivity(slug);
 
   const addToViewers = api.activityViewer.add.useMutation();
+
+  const addDynamicGroup = api.groups.addDynamicGroup.useMutation({
+    onError: (error) => {
+      console.log({ error });
+    },
+    onSuccess: (group) => {
+      if (!activity) return;
+      router.push(`/activities/${activity.slug}/${group.slug}`);
+    },
+  });
 
   const removeFromViewers = api.activityViewer.remove.useMutation();
 
@@ -48,7 +60,7 @@ const Activity: NextPage = () => {
     });
 
   const [toasts, setToasts] = useState<
-    { message: string; icon?: string }[]
+    { displayMessage: string; icon?: string; pusherMessage: PusherMessage }[]
   >(
     [],
   );
@@ -58,37 +70,89 @@ const Activity: NextPage = () => {
       ?.name || "user";
   }
 
-  function onUpdateHandler(
-    action: PusherMessage,
-  ) {
-    console.log(action);
-    switch (action) {
+  function onUpdateHandler(message: PusherMessage) {
+    console.log({ pusherMessage: message });
+    switch (message.action) {
       case "message":
         return refetch();
       case "viewer":
         return refetchViewers();
       case "invite":
         return setToasts(
-          (prev) => [...prev, { message: "'invite' not implemented yet" }],
+          (
+            prev,
+          ) => [...prev, {
+            displayMessage: "'invite' not implemented yet",
+            pusherMessage: message,
+          }],
         );
       case "quick":
         return setToasts(
-          (prev) => [...prev, { message: "'quick' not implemented yet" }],
+          (
+            prev,
+          ) => [...prev, {
+            displayMessage: "'quick' not implemented yet",
+            pusherMessage: message,
+          }],
         );
+
+      case "accepted":
+        return setToasts(
+          (
+            prev,
+          ) => [...prev, {
+            displayMessage:
+              `${message.sentBy} is interested on ${message.data.title}`,
+            pusherMessage: message,
+          }],
+        );
+
+        // message.sentBy;
+        // return router.push(`/activities/${activity.slug}/${group.slug}`);
     }
   }
 
-  function onFoundUserForRegisteredActivity(activityId: string) {
+  function onFoundUserForRegisteredActivity(
+    activityId: string,
+    message: PusherMessage,
+  ) {
+    const activity = store.activities.find(({ id }) => id === activityId);
+    const groupName = activity ? activity.title : activityId;
+
     setToasts((
       prev,
-    ) => [...prev, { message: `user invites to join ${activityId}` }]);
+    ) => [...prev, {
+      displayMessage: `user invites to join ${groupName}`,
+      pusherMessage: message,
+    }]);
   }
 
   function removeToast(index: number) {
     setToasts((prev) => [...(prev.filter((t, i) => i !== index))]);
   }
 
-  function onAcceptInvitation(index: number) {
+  function onAcceptInvitation(index: number, message: PusherMessage) {
+    if (!activity) {
+      return removeToast(index);
+    }
+
+    if (message.action === "accepted") {
+      removeToast(index);
+      router.push(message.data.pageSlug);
+    }
+
+    try {
+      const data = addDynamicGroupInput.parse({
+        title: activity.title,
+        description: activity.description,
+        activityId: activity.id,
+        otherUserId: message.sentBy,
+        activitySlug: activity.slug,
+      });
+
+      addDynamicGroup.mutate(data);
+    } catch (error) {}
+
     removeToast(index);
   }
 
@@ -178,11 +242,11 @@ const Activity: NextPage = () => {
         {error && <div className="text-white 2xl">There was an error.</div>}
 
         <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
-          {toasts.map(({ message }, index) => (
+          {toasts.map((toast, index) => (
             <li key={index}>
               <Toast
-                message={message}
-                onAccept={() => onAcceptInvitation(index)}
+                message={toast.displayMessage}
+                onAccept={() => onAcceptInvitation(index, toast.pusherMessage)}
                 onDecline={() => onDeclineInvitation(index)}
                 onDie={() => removeToast(index)}
               />
@@ -246,7 +310,7 @@ const Activity: NextPage = () => {
                 />
               )}
 
-              <Groups activityId={activity.id} />
+              <Groups activitySlug={slug} />
 
               {activity && (
                 <Chat
