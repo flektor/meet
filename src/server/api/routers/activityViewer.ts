@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { pusherServerClient } from "~/server/pusher";
 import { pusherSend } from "~/server/utils";
 
 export const activityViewerRouter = createTRPCRouter({
@@ -25,9 +24,11 @@ export const activityViewerRouter = createTRPCRouter({
         pusherSend({
           receivers,
           slug: input.activityId,
-          action: "viewer",
+          body: { action: "viewer", sentBy: ctx.session.user.id },
         });
       }
+
+      console.log("www");
 
       return viewer;
     }),
