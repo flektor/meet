@@ -1,9 +1,22 @@
 import { type Config } from "tailwindcss";
 
 export default {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/tw-elements/dist/js/**/*.js",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/tw-elements/dist/js/**/*.js",
+  ],
+
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#cc66ff",
+      },
+    },
   },
-  plugins: [],
-} satisfies Config;
+  darkMode: "class",
+  plugins: [require("tw-elements/dist/plugin.cjs")],
+};
