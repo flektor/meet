@@ -1,40 +1,28 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { GroupsOverview } from "~/types";
 import { useStore } from "~/utils/store";
 
-// export type GroupProps = {
-//   viewersCount: number;
-//   id: string;
-//   title: string;
-//   activityId: string;
-//   isMember: boolean;
-//   slug: string;
-//   activitySlug: string;
-// };
+export type GroupsProps = {
+  activitySlug: string;
+};
 
-const Groups = ({ activityId }: { activityId: string }) => {
-  // const Groups = ({ groups }: { groups: GroupProps[] }) => {
-  // if (groups.length === 0) return null;
-
+const Groups = ({ activitySlug }: GroupsProps) => {
   const store = useStore();
+  const [groups, setGroups] = useState<GroupsOverview>([]);
 
-  const activity = store.groups.find(({ activityId: id }) => id === activityId);
-
-  if (!activity) {
-    return;
-  }
-
-  const groups = store.groups.filter(({ activityId: id }) => id === activityId)
-    .map((group) => ({
-      title: group.title,
-      slug: group.slug,
-      isMember: false,
-      activitySlug: activity.slug,
-    }));
+  useEffect(() => {
+    const groups = store.groupsOverview.filter(({ activitySlug: slug }) =>
+      slug === activitySlug
+    );
+    console.log(groups);
+    setGroups(groups);
+  }, [store.groupsOverview]);
 
   return (
     <section>
       <div className="flex flex-col items-center pb-10">
-        <h2 className="p-4 text-white text-2xl font-bold">Activities</h2>
+        <h2 className="p-4 text-white text-2xl font-bold">Groups</h2>
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       </div>
       <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">

@@ -23,7 +23,6 @@ const _initChannelData = {
 const Group: NextPage = () => {
   const router = useRouter();
   const slug = router.query.group as string;
-  console.log(router.query);
 
   const { group, isLoading, error, refetch } = useGroup(slug);
 
@@ -53,9 +52,11 @@ const Group: NextPage = () => {
   }
 
   function onUpdateHandler(
-    action: PusherMessage,
+    message: PusherMessage,
   ) {
-    switch (action) {
+    console.log({ pusherMessage: message });
+
+    switch (message.action) {
       case "message":
         return refetch();
       case "viewer":

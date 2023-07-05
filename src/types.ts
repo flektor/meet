@@ -11,8 +11,8 @@ export type getActivityOutput = RouterOutput["activities"]["getActivity"];
 
 export type getUserGroupsOutput = RouterOutput["groups"]["getUserGroups"];
 export type addGroupOutput = RouterOutput["groups"]["addGroup"];
+export type addDynamicGroupOutput = RouterOutput["groups"]["addDynamicGroup"];
 export type getGroupOutput = RouterOutput["groups"]["getGroup"];
-
 // this does not work
 // export type Channel = Pick<getActivityOutput, "channel">;
 
@@ -30,6 +30,16 @@ export type Channel = {
   createdAt: Date;
 };
 
+export type GroupOverview = {
+  title: string;
+  slug: string;
+  isMember: boolean;
+  activitySlug: string;
+  viewersCount: number;
+};
+
+export type GroupsOverview = GroupOverview[];
+
 export const addActivityInput = z.object({
   title: z.string().trim(),
   description: z.string(),
@@ -43,6 +53,15 @@ export const addGroupInput = z.object({
   // endingAt: z.date().optional()
 });
 
+export const addDynamicGroupInput = z.object({
+  title: z.string().trim(),
+  description: z.string(),
+  activityId: z.string(),
+  activitySlug: z.string(),
+  otherUserId: z.string(),
+  // startingAt: z.date()
+  // endingAt: z.date().optional()
+});
 export type AddActivityValidator = z.infer<typeof addActivityInput>;
 
 export type addToFavoritesOutput = RouterOutput["favorites"]["addToFavorites"];
@@ -80,10 +99,20 @@ export const sendMessageInput = z.object({
   receivers: receiversInput,
 });
 
-export type PusherMessage = "message" | "quick" | "viewer" | "invite";
+export type PusherMessage = {
+  action: "message" | "quick" | "viewer" | "invite";
+  sentBy: string;
+} | {
+  action: "accepted";
+  sentBy: string;
+  data: {
+    title: string;
+    pageSlug: string;
+  };
+};
 
 export type PusherSendProps = {
   receivers: string[] | string;
   slug: string;
-  action: PusherMessage;
+  body: PusherMessage;
 };

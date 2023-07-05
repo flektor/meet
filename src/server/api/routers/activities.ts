@@ -66,7 +66,7 @@ export const activitiesRouter = createTRPCRouter({
         slug: `user-${user.id}`,
       }));
 
-      const { Favorites, Registrations, channel, ...rest } = activity;
+      const { Favorites, Registrations, channel, groups, ...rest } = activity;
 
       return {
         ...rest,
@@ -88,6 +88,10 @@ export const activitiesRouter = createTRPCRouter({
           description: channel.description,
           createdAt: channel.createdAt,
         },
+        groups: groups.map(({ _count, ...rest }) => ({
+          ...rest,
+          viewersCount: _count.GroupViewer,
+        })),
       };
     }),
 

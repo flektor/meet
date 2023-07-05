@@ -3,11 +3,14 @@ import type {
   getActivitiesOutput,
   getActivityOutput,
   getGroupOutput,
+  GroupOverview,
+  GroupsOverview,
 } from "~/types";
 
 type Store = {
   activities: NonNullable<getActivitiesOutput>;
   groups: NonNullable<getGroupOutput>[];
+  groupsOverview: GroupsOverview;
   setActivities: (activities: NonNullable<getActivitiesOutput>) => void;
   addActivity: (activity: NonNullable<getActivityOutput>) => void;
   removeActivity: (activityId: string) => void;
@@ -16,6 +19,9 @@ type Store = {
   addGroup: (group: NonNullable<getGroupOutput>) => void;
   removeGroup: (groupId: string) => void;
   updateGroup: (group: NonNullable<getGroupOutput>) => void;
+  setGroupsOverview: (group: GroupsOverview) => void;
+  addGroupOverview: (group: GroupOverview) => void;
+  removeGroupOverview: (group: GroupOverview) => void;
 
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
@@ -27,6 +33,7 @@ type Store = {
 export const useStore = create<Store>((set) => ({
   activities: [],
   groups: [],
+  groupsOverview: [],
   channels: [],
 
   setActivities: (activities: NonNullable<getActivitiesOutput>) =>
@@ -62,10 +69,29 @@ export const useStore = create<Store>((set) => ({
       activities: state.activities.filter(({ id }) => id !== activityId),
     })),
 
+  setGroupsOverview: (groups: GroupsOverview) =>
+    set({ groupsOverview: groups }),
+
   addGroup: (group: NonNullable<getGroupOutput>) =>
     set((state) => ({
       ...state,
       groups: [...state.groups, {
+        ...group,
+      }],
+    })),
+
+  addGroupOverview: (group: GroupOverview) =>
+    set((state) => ({
+      ...state,
+      groupsOverview: [...state.groupsOverview, {
+        ...group,
+      }],
+    })),
+
+  removeGroupOverview: (group: GroupOverview) =>
+    set((state) => ({
+      ...state,
+      groupsOverview: [...state.groupsOverview, {
         ...group,
       }],
     })),
