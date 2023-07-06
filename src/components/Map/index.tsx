@@ -94,6 +94,7 @@ const Map = (
         (
           <button
             onClick={toggleMarker}
+            type="button"
             className="flex justify-between items-center gap-2 rounded-full pl-6 pr-4 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-white/10 hover:border-white [&>svg]:hover:fill-white [&>svg]:hover:stroke-white"
           >
             Pin location <MarkerIcon />
