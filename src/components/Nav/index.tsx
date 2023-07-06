@@ -3,12 +3,13 @@ import React, { use, useState } from "react";
 import Svg from "../Svg";
 import { useRouter } from "next/router";
 import SearchDialog from "../SearchDialog";
+import { useSession } from "next-auth/react";
 
 export default function Nav() {
   const router = useRouter();
   const pathnameParts = router.pathname.split("/");
   const route = pathnameParts[pathnameParts.length - 1];
-
+  const session = useSession();
   const [showSearchDialog, setShowSearchDialog] = useState(false);
 
   function onSearchComplete() {
@@ -35,28 +36,24 @@ export default function Nav() {
 
             <Link
               href="/activities"
-              className={`hidden md:inline-block text-white hover:text-white pt-1 mr-4 ${
+              className={`text-white hover:text-white pt-1 mr-4 ${
                 route === "activities" && "underline"
               }`}
             >
               Activities
             </Link>
-            <Link
-              href="/favorites"
-              className={`hidden md:inline-block text-white hover:text-white pt-1 mr-4 ${
-                route === "favorites" && "underline"
-              }`}
-            >
-              Favorites
-            </Link>
-            <Link
-              href="/schedule"
-              className={`hidden md:inline-block text-white hover:text-white pt-1 ${
-                route === "schedule" && "underline"
-              }`}
-            >
-              Schedule
-            </Link>
+
+            {session.data &&
+              (
+                <Link
+                  href="/favorites"
+                  className={` text-white hover:text-white pt-1 mr-4 ${
+                    route === "favorites" && "underline"
+                  }`}
+                >
+                  Favorites
+                </Link>
+              )}
           </div>
 
           <button
@@ -79,12 +76,14 @@ export default function Nav() {
             </div>
           </button>
 
-          <Link
+          {
+            /* <Link
             href="#"
             className="md:hidden text-sm px-4 py-2 leading-none border rounded text-white hover:text-teal-500 hover:bg-white"
           >
             Menu
-          </Link>
+          </Link> */
+          }
         </div>
       </nav>
     </>

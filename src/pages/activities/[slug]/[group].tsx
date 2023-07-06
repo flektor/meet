@@ -10,6 +10,8 @@ import { Chat } from "~/components/Chat";
 import { api } from "~/utils/api";
 import { Channel, PusherMessage } from "~/types";
 import useGroup from "~/hooks/useGroup";
+import Map from "~/components/Map";
+import useScreenSize from "~/hooks/useScreenSize";
 
 const _initChannelData = {
   createdAt: new Date(),
@@ -23,6 +25,15 @@ const _initChannelData = {
 const Group: NextPage = () => {
   const router = useRouter();
   const slug = router.query.group as string;
+
+  const screenSize = useScreenSize();
+
+  const mapWidth = screenSize === "sm"
+    ? "90vw"
+    : screenSize === "md"
+    ? "80vw"
+    : "50vw";
+  const mapHeight = mapWidth;
 
   const { group, isLoading, error, refetch } = useGroup(slug);
 
@@ -157,6 +168,10 @@ const Group: NextPage = () => {
     };
   }, [group, addedToViewers]);
 
+  const name = group?.title.includes("-")
+    ? group.title?.split("-")[0]
+    : group?.title;
+
   return (
     <>
       <Head>
@@ -184,7 +199,7 @@ const Group: NextPage = () => {
           ))}
         </ul>
         {group && (
-          <div className="flex flex-col items-center justify-center pt-32">
+          <div className="flex flex-col items-center justify-center pt-20 ">
             <header className="w-full flex items-center justify-center">
               <button
                 className="inline-block"
@@ -193,14 +208,14 @@ const Group: NextPage = () => {
                 <LeaveIcon />
               </button>
               <span className=" mr-2 ml-2 text-white text-3xl">
-                {group.title}
+                {name! || group.title}
               </span>
             </header>
 
-            <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-              <div className="text-white/50">
+            <div className="container flex flex-col items-center justify-center gap-4 py-4 w-full">
+              <div className="text-white/50 flex justify-center items-center w-full ">
                 Description:
-                <p className="text-white text-2xl">{group.description}</p>
+                <p className="pl-3 text-white text-2xl">{group.description}</p>
               </div>
 
               {group && (
@@ -210,6 +225,7 @@ const Group: NextPage = () => {
                   isLoading={isLoading}
                 />
               )}
+              <Map width={mapWidth} height={mapHeight} draggable />
             </div>
           </div>
         )}

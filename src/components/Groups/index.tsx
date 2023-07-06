@@ -15,19 +15,24 @@ const Groups = ({ activitySlug }: GroupsProps) => {
     const groups = store.groupsOverview.filter(({ activitySlug: slug }) =>
       slug === activitySlug
     );
-    console.log(groups);
     setGroups(groups);
   }, [store.groupsOverview]);
 
   return (
     <section>
-      <div className="flex flex-col items-center pb-10">
+      {
+        /* <div className="flex flex-col items-center pb-10">
         <h2 className="p-4 text-white text-2xl font-bold">Groups</h2>
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
-      </div>
+      </div> */
+      }
       <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
         {groups.map(
-          ({ slug, activitySlug, title, isMember }) => {
+          ({ slug, activitySlug, title, isMember }, index) => {
+            const name = title.includes("-")
+              ? title.split("-")[0]! + "#" + index
+              : title;
+
             return (
               <li
                 key={slug}
@@ -40,7 +45,7 @@ const Groups = ({ activitySlug }: GroupsProps) => {
                     }`}
                     href={`/activities/${activitySlug}/${slug}`}
                   >
-                    {title}
+                    {name}
                   </Link>
 
                   {

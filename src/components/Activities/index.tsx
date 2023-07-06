@@ -46,31 +46,36 @@ const Activities: FunctionComponent = () => {
 
   return (
     <section>
-      <div className="flex flex-col items-center pb-10">
+      <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
+        {toasts.map(({ message }, index) => (
+          <li key={index}>
+            <Toast
+              message={message}
+              onAccept={() => onAcceptInvitation(index)}
+              onDecline={() => onDeclineInvitation(index)}
+              onDie={() => removeToast(index)}
+            />
+          </li>
+        ))}
+      </ul>
+      {
+        /* <div className="flex flex-col items-center pb-10">
         <h2 className="p-4 text-white text-2xl font-bold">Activities</h2>
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
-      </div>
-      <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
-        {isLoading && <Spinner />}
-
-        {error && <div className="text-white 2xl">There was an error.</div>}
-
-        <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
-          {toasts.map(({ message }, index) => (
-            <li key={index}>
-              <Toast
-                message={message}
-                onAccept={() => onAcceptInvitation(index)}
-                onDecline={() => onDeclineInvitation(index)}
-                onDie={() => removeToast(index)}
-              />
-            </li>
-          ))}
-        </ul>
-
-        {activities.length === 0 && (
-          <div className="text-white 2xl">There are no activities.</div>
-        )}
+      </div> */
+      }
+      <ul className="mt-16 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
+        {isLoading
+          ? (
+            <div className="mt-48">
+              <Spinner />
+            </div>
+          )
+          : error
+          ? <div className="text-white 2xl mt-48">There was an error.</div>
+          : activities.length === 0 && (
+            <div className="text-white 2xl mt-48">There are no activities.</div>
+          )}
 
         {activities.map(
           ({ id, slug, title, isRegistered }) => {

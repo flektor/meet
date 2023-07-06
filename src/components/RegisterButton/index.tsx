@@ -7,6 +7,7 @@ import LoginMessageDialog from "~/components/LoginMessageDialog";
 import DotsLoader from "~/components/DotsLoader";
 import useSubscribeToEvent from "~/hooks/useSubscribeToEvent";
 import { PusherMessage } from "~/types";
+import { useRouter } from "next/router";
 
 export type RegisterButtonProps = {
   activityId: string;
@@ -55,6 +56,7 @@ const RegisterButton = (
     RegisterButtonProps,
 ) => {
   const store = useStore();
+  const router = useRouter();
   const session = useSession();
 
   const { mutate: register } = api.registrations.add.useMutation();
@@ -66,10 +68,18 @@ const RegisterButton = (
   const isRegistered = activity?.isRegistered ?? false;
 
   const eventName = activity ? `quick-${activity.id}` : "";
+  const eventName1 = activity ? `accepted-${activity.id}` : "";
 
   useSubscribeToEvent(
     eventName,
-    (data) => onPusherMessage(activity!.id, data as PusherMessage),
+    (data: PusherMessage) => onPusherMessage(activity!.id, data),
+  );
+
+  useSubscribeToEvent(
+    eventName1,
+    (data: any) => {
+      router.push(data.data.pageSlug);
+    },
   );
 
   let registrationsCount = 0;
