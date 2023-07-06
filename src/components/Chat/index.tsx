@@ -29,11 +29,15 @@ export const Chat: FunctionComponent<
   }
 
   function scrollToBottom() {
-    if (!messagesListRef.current) return;
-    const lastListItem = messagesListRef.current.lastElementChild;
-
-    if (lastListItem) {
-      lastListItem.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (messagesListRef.current) {
+      const lastMessage = messagesListRef.current.lastElementChild;
+      if (lastMessage) {
+        lastMessage.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "start",
+        });
+      }
     }
   }
 
@@ -85,20 +89,17 @@ export const Chat: FunctionComponent<
       <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       <div
         id="message-scroll-container"
-        className="h-2/6 w-full md:w-[50vw] max-h-[50vh] overflow-y-auto	overflow-x-hidden rounded-t-xl h-80 scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
+        className="h-2/6 w-full md:w-[50vw] max-h-[50vh] overflow-y-auto	overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
       >
         <ul
           ref={messagesListRef}
           aria-label="messages"
-          className="w-full bg-black/20 p-2 mx-auto "
+          className="w-full min-h-[20vh] bg-black/20 p-2 mx-auto "
         >
           {isLoading && <Spinner />}
 
           {channel.messages.map((message, index) => {
             const msg_clr = message.sentBy === username ? "#cc66ff" : "red-300";
-            const rct_clr = message.sentBy === username
-              ? "[#25213C]"
-              : "[#cc66ff]";
 
             const float = message.sentBy === username
               ? "justify-self-end"
