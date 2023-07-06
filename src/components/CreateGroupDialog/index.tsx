@@ -16,6 +16,18 @@ import AlarmIcon from "../icons/Alarm";
 import { useStore } from "~/utils/store";
 import { createSlug } from "~/utils";
 import { addGroupInput } from "~/types";
+import { initTE, Input } from "tw-elements";
+import dynamic from "next/dynamic";
+import Map from "../Map";
+import useScreenSize from "~/hooks/useScreenSize";
+
+const DynamicDatepicker = dynamic(() => import("../DatePicker"), {
+  ssr: false,
+});
+
+const DynamicTimepicker = dynamic(() => import("../TimePicker"), {
+  ssr: false,
+});
 
 function capitalizeFirstCharacter(text: string) {
   if (!text) return "";
@@ -40,6 +52,15 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
 
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  const screenSize = useScreenSize();
+
+  const mapWidth = screenSize === "sm"
+    ? "62vw"
+    : screenSize === "md"
+    ? "70vw"
+    : "50vw";
+  const mapHeight = mapWidth;
 
   function onCancel(event?: MouseEvent<HTMLDialogElement>) {
     if (!event || event.target === dialogRef.current) {
@@ -131,7 +152,7 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
   return (
     <dialog
       open
-      className="fixed left-0 top-0 h-full w-full  outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-10"
+      className="fixed left-0 top-0 h-full outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-10"
       onMouseDown={onCancel}
       ref={dialogRef}
     >
@@ -143,7 +164,7 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
 
         <form
           onSubmit={onSubmit}
-          className="z-50 max-w-md flex flex-col gap-4 rounded-xl bg-white/10 p-8 text-white"
+          className="z-50  w-full flex flex-col gap-4 rounded-xl bg-white/10 p-8 text-white  max-h-[70vh] overflow-y-auto w-[80vw] "
         >
           <div className="flex justify-center">
             <h2 className="text-2xl font-bold">New Group</h2>
@@ -154,6 +175,7 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
           <input
             name="title"
             type="text"
+            placeholder="Give a title"
             className={`p-2 rounded-lg text-2xl bg-gradient-to-br from-[#2b1747] to-[#232338] ${
               isGroupAlreadyExist && "text-orange-300"
             }`}
@@ -169,16 +191,52 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
             />
           )}
 
-          <label htmlFor="description" className="text-2xl">
-            Description
+          <label className="text-white text-2xl">
+            When would you like to do the activiy
           </label>
 
-          <textarea
-            name="description"
-            className="p-2 rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
-            rows={2}
-            required
-          />
+          <div className="flex justify-between items-center  gap-16">
+            <label className="text-white text-xl">Date</label>
+            <DynamicDatepicker />
+          </div>
+
+          <div className="flex justify-between items-center  gap-16">
+            <label className="text-white text-xl">Time</label>
+            <DynamicTimepicker />
+          </div>
+
+          <label htmlFor="description" className="text-2xl p-2">
+            Description (Optional)
+          </label>
+
+          <div>
+            <textarea
+              name="description"
+              className="p-2 w-full h-fit rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
+              rows={2}
+              placeholder="Give a short description about your group"
+            />
+          </div>
+
+          <div className="flex justify-between items-center  gap-16">
+            <label className="text-white text-xl">
+              How many participants?
+            </label>
+            <input
+              name="participants"
+              className="p-2 w-full h-fit rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
+              placeholder="2"
+              type="number"
+              min={2}
+            />
+          </div>
+
+          <label className="text-white text-xl">
+            Where ?
+          </label>
+
+          <Map width={mapWidth} height={mapHeight} draggable />
+
           <div className="flex justify-center">
             <button
               disabled={isWaitingForServer}
