@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Activities from "~/components/Activities";
+import Map from "~/components/Map";
 import Nav from "~/components/Nav";
 
 const Home: NextPage = () => {

@@ -9,12 +9,17 @@ type ViewState = {
 };
 
 type MapProps = {
-  onPin: (latitude: number, longitude: number) => void;
-  draggable: boolean;
+  onPinMoved?: (latitude: number, longitude: number) => void;
+  draggable?: boolean;
   initPinPosition?: { latitude: number; longitude: number };
+  width?: string | number;
+  height?: string | number;
 };
 
-const Map = ({ onPin, draggable, initPinPosition }: MapProps) => {
+const Map = (
+  { onPinMoved, draggable, initPinPosition, width = "100%", height = "50vh" }:
+    MapProps,
+) => {
   const initLngLat = {
     longitude: 13.4050, // Berlin longitude
     latitude: 52.5200, // Berlin latitude
@@ -38,6 +43,12 @@ const Map = ({ onPin, draggable, initPinPosition }: MapProps) => {
     });
   }, []);
 
+  const onMarkerDragEnd = useCallback((event: any) => {
+    if (!onPinMoved) return;
+    //@ts-ignore
+    onPinMoved(event.lngLat[0], event.lngLat[1]);
+  }, []);
+
   function toggleMarker() {
     setMarker({ longitude: viewport.longitude, latitude: viewport.latitude });
     setShowMarker((prevhowMarker) => !prevhowMarker);
@@ -45,20 +56,11 @@ const Map = ({ onPin, draggable, initPinPosition }: MapProps) => {
 
   return (
     <>
-      {draggable &&
-        (
-          <button
-            onClick={toggleMarker}
-            className="flex justify-between items-center gap-2 rounded-full pl-6 pr-4 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-white/10 hover:border-white [&>svg]:hover:fill-white [&>svg]:hover:stroke-white"
-          >
-            Pin location <MarkerIcon />
-          </button>
-        )}
-      <div className="border border-[#cc66ff] w-full h-full">
+      <div className="border border-[#cc66ff]">
         <ReactMapGL
           {...viewport}
-          width="100%"
-          height="50vh"
+          width={width}
+          height={height}
           mapboxApiAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
           //   onViewportChange={(newViewport: ViewState) => setViewport(newViewport)}
           onViewportChange={handleViewportChange}
@@ -76,6 +78,7 @@ const Map = ({ onPin, draggable, initPinPosition }: MapProps) => {
                 latitude={marker.latitude}
                 draggable
                 onDrag={onMarkerDrag}
+                onDragEnd={onMarkerDragEnd}
               >
                 <MarkerIcon />
               </Marker>
@@ -87,6 +90,15 @@ const Map = ({ onPin, draggable, initPinPosition }: MapProps) => {
           />
         </ReactMapGL>
       </div>
+      {draggable &&
+        (
+          <button
+            onClick={toggleMarker}
+            className="flex justify-between items-center gap-2 rounded-full pl-6 pr-4 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-white/10 hover:border-white [&>svg]:hover:fill-white [&>svg]:hover:stroke-white"
+          >
+            Pin location <MarkerIcon />
+          </button>
+        )}
     </>
   );
 };
