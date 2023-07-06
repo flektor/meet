@@ -237,10 +237,6 @@ const Activity: NextPage = () => {
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Nav />
 
-        {isLoading && <Spinner />}
-
-        {error && <div className="text-white 2xl">There was an error.</div>}
-
         <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
           {toasts.map((toast, index) => (
             <li key={index}>
@@ -253,9 +249,19 @@ const Activity: NextPage = () => {
             </li>
           ))}
         </ul>
+
+        {isLoading
+          ? (
+            <div className="mt-48">
+              <Spinner />
+            </div>
+          )
+          : error && (
+            <div className="text-white 2xl mt-48">There was an error.</div>
+          )}
         {activity && (
           <div className="flex flex-col items-center justify-center pt-32">
-            <header className="w-full flex items-center justify-center">
+            <header className="w-full flex items-center justify-center mb-6">
               <button
                 className="inline-block"
                 onClick={() => router.back()}
@@ -273,7 +279,7 @@ const Activity: NextPage = () => {
             </header>
 
             <button
-              className="text-white round-full bg-white/30"
+              className="rounded-full px-8 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
               onClick={() => setShowCreateGroupDialog(true)}
             >
               Create Group
@@ -286,7 +292,7 @@ const Activity: NextPage = () => {
               onPusherMessage={onFoundUserForRegisteredActivity}
             />
 
-            <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+            <div className="container flex flex-col items-center justify-center gap-12 py-1 px-5 pb-3 ">
               <div className="text-white/50">
                 Description:
                 <p className="text-white text-2xl">{activity.description}</p>
