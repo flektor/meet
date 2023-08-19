@@ -5,12 +5,14 @@ import type {
   getGroupOutput,
   GroupOverview,
   GroupsOverview,
+  Toast,
 } from "~/types";
 
 type Store = {
   activities: NonNullable<getActivitiesOutput>;
   groups: NonNullable<getGroupOutput>[];
   groupsOverview: GroupsOverview;
+  toasts: Toast[];
   setActivities: (activities: NonNullable<getActivitiesOutput>) => void;
   addActivity: (activity: NonNullable<getActivityOutput>) => void;
   removeActivity: (activityId: string) => void;
@@ -26,6 +28,10 @@ type Store = {
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
 
+  addToast: (toast: Toast) => void;
+  removeToast: (toastId: string) => void;
+  addToasts: (toast: Toast[]) => void;
+
   addToRegistrations: (activityId: string) => void;
   removeFromRegistrations: (activityId: string) => void;
 };
@@ -35,6 +41,7 @@ export const useStore = create<Store>((set) => ({
   groups: [],
   groupsOverview: [],
   channels: [],
+  toasts: [],
 
   setActivities: (activities: NonNullable<getActivitiesOutput>) =>
     set({ activities }),
@@ -176,5 +183,25 @@ export const useStore = create<Store>((set) => ({
         }
         return activity;
       }),
+    })),
+
+  removeToast: (toastId: string) =>
+    set((state) => ({
+      ...state,
+      toasts: state.toasts.filter(({ id }) => id !== toastId),
+    })),
+
+  addToast: (toast: Toast) =>
+    set((state) => ({
+      ...state,
+      toasts: [...state.toasts, {
+        ...toast,
+      }],
+    })),
+
+  addToasts: (toasts: Toast[]) =>
+    set((state) => ({
+      ...state,
+      toasts: [...state.toasts, ...toasts],
     })),
 }));
