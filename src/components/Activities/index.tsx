@@ -22,9 +22,7 @@ const Activities: FunctionComponent = () => {
 
   const [toasts, setToasts] = useState<
     { message: string; icon?: string }[]
-  >(
-    [],
-  );
+  >([]);
 
   function onFoundUserForRegisteredActivity(activityId: string) {
     setToasts((
@@ -32,32 +30,8 @@ const Activities: FunctionComponent = () => {
     ) => [...prev, { message: `user invites to join ${activityId}` }]);
   }
 
-  function removeToast(index: number) {
-    setToasts((prev) => [...(prev.filter((t, i) => i !== index))]);
-  }
-
-  function onAcceptInvitation(index: number) {
-    removeToast(index);
-  }
-
-  function onDeclineInvitation(index: number) {
-    removeToast(index);
-  }
-
   return (
     <section>
-      <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
-        {toasts.map(({ message }, index) => (
-          <li key={index}>
-            <Toast
-              message={message}
-              onAccept={() => onAcceptInvitation(index)}
-              onDecline={() => onDeclineInvitation(index)}
-              onDie={() => removeToast(index)}
-            />
-          </li>
-        ))}
-      </ul>
       {
         /* <div className="flex flex-col items-center pb-10">
         <h2 className="p-4 text-white text-2xl font-bold">Activities</h2>
