@@ -3,16 +3,16 @@ import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
+import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
-import Toast from "~/components/InvitationToast";
 import Nav from "~/components/Nav";
 import { Chat } from "~/components/Chat";
-import { api } from "~/utils/api";
-import { Channel, PusherMessage } from "~/types";
+import { Channel, getGroupOutput, PusherMessage } from "~/types";
 import useGroup from "~/hooks/useGroup";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
-
+import { useStore } from "~/utils/store";
+import useGroupViewer from "~/hooks/useGroupViewer";
 const _initChannelData = {
   createdAt: new Date(),
   description: "",
@@ -25,9 +25,9 @@ const _initChannelData = {
 const Group: NextPage = () => {
   const router = useRouter();
   const slug = router.query.group as string;
+  const store = useStore();
 
   const screenSize = useScreenSize();
-
   const mapWidth = screenSize === "sm"
     ? "90vw"
     : screenSize === "md"
@@ -35,105 +35,60 @@ const Group: NextPage = () => {
     : "50vw";
   const mapHeight = mapWidth;
 
-  const { group, isLoading, error, refetch } = useGroup(slug);
+  const { group, isLoading, error, refetch: refetchGroup } = useGroup(slug);
 
-  const addToViewers = api.groupViewer.add.useMutation();
+  const { viewers, refetchViewers } = useGroupViewer(group);
 
-  const removeFromViewers = api.groupViewer.remove.useMutation();
-
-  const [addedToViewers, setAddedToViewers] = useState(false);
-
-  const { data: viewers, refetch: refetchViewers } = api.groupViewer
-    .getGroupViewers
-    .useQuery({
-      groupId: group ? group.id : "",
-    }, {
-      enabled: !!group,
-    });
-
-  const [toasts, setToasts] = useState<
-    { message: string; icon?: string }[]
-  >(
-    [],
-  );
+  const [channel, setChannel] = useState<Channel>(_initChannelData);
 
   function getUserNameById(userId: string) {
-    return group?.channel.users.find((user) => user.userId === userId)
-      ?.name || "user";
+    return group?.channel.users.find((user) => user.userId === userId)?.name ||
+      "user";
   }
 
-  function onUpdateHandler(
-    message: PusherMessage,
-  ) {
+  function updateSenderNamesOnMessages(group: NonNullable<getGroupOutput>) {
+    const updatedMessages = group.channel.messages.map((message) => ({
+      ...message,
+      sentBy: getUserNameById(message.sentBy),
+    }));
+    setChannel({ ...group.channel, messages: updatedMessages });
+  }
+
+  function onUpdateHandler(message: PusherMessage) {
     console.log({ pusherMessage: message });
 
     switch (message.action) {
       case "message":
-        return refetch();
+        return refetchGroup();
       case "viewer":
         return refetchViewers();
       case "invite":
-        return setToasts(
-          (prev) => [...prev, { message: "'invite' not implemented yet" }],
-        );
+        return store.addToast({
+          message: "'invite' not implemented yet",
+          id: message.id,
+        });
       case "quick":
-        return setToasts(
-          (prev) => [...prev, { message: "'quick' not implemented yet" }],
-        );
+        return store.addToast({
+          message: "'quick' not implemented yet",
+          id: message.id,
+        });
     }
   }
 
-  function onFoundUserForRegisteredActivity(groupId: string) {
-    setToasts((
-      prev,
-    ) => [...prev, { message: `user invites to join ${groupId}` }]);
-  }
+  // function onFoundUserForRegisteredActivity(groupId: string) {
+  //   store.addToast({
+  //     message: `user invites to join ${groupId}`,
+  //     id: `inv-${groupId}`,
+  //   });
+  // }
 
-  function removeToast(index: number) {
-    setToasts((prev) => [...(prev.filter((t, i) => i !== index))]);
-  }
-
-  function onAcceptInvitation(index: number) {
-    removeToast(index);
-  }
-
-  function onDeclineInvitation(index: number) {
-    removeToast(index);
-  }
-
-  const [channel, setChannel] = useState<Channel>(_initChannelData);
-
+  // Update usernames on messages
   useEffect(() => {
     if (!group) return;
 
-    if (viewers) {
-      for (const viewer of viewers) {
-        const index = group.channel.users.findIndex(({ userId }) =>
-          viewer.userId === userId
-        );
-        if (index > -1) {
-          group.channel.users[index] = viewer;
-          continue;
-        }
-        group.channel.users.push(viewer);
-        continue;
-      }
-    }
-    const updatedMessages = group.channel.messages.map((message) => {
-      return {
-        ...message,
-        sentBy: getUserNameById(message.sentBy),
-      };
-    });
+    updateSenderNamesOnMessages(group);
 
-    setChannel({
-      ...group.channel,
-      messages: updatedMessages,
-    });
-  }, [viewers, group]);
-
-  useEffect(() => {
-    if (!group || !viewers) return;
+    if (!viewers) return;
 
     for (const viewer of viewers) {
       const index = group.channel.users.findIndex(({ userId }) =>
@@ -141,32 +96,12 @@ const Group: NextPage = () => {
       );
       if (index > -1) {
         group.channel.users[index] = viewer;
-        return;
+        continue;
       }
       group.channel.users.push(viewer);
+      continue;
     }
-  }, [group]);
-
-  useEffect(() => {
-    const handleRouteChange = () => {
-      if (group) {
-        removeFromViewers.mutate({ groupId: group.id });
-      }
-    };
-
-    if (group && !addedToViewers) {
-      addToViewers.mutate({ groupId: group.id });
-      setAddedToViewers(true);
-    }
-
-    router.events.on("beforeHistoryChange", handleRouteChange);
-    window.addEventListener("beforeunload", handleRouteChange);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleRouteChange);
-      router.events.off("beforeHistoryChange", handleRouteChange);
-    };
-  }, [group, addedToViewers]);
+  }, [viewers, group]);
 
   const name = group?.title.includes("-")
     ? group.title?.split("-")[0]
@@ -185,19 +120,8 @@ const Group: NextPage = () => {
         {isLoading && <Spinner />}
 
         {error && <div className="text-white 2xl">There was an error.</div>}
+        <Toasts />
 
-        <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
-          {toasts.map(({ message }, index) => (
-            <li key={index}>
-              <Toast
-                message={message}
-                onAccept={() => onAcceptInvitation(index)}
-                onDecline={() => onDeclineInvitation(index)}
-                onDie={() => removeToast(index)}
-              />
-            </li>
-          ))}
-        </ul>
         {group && (
           <div className="flex flex-col items-center justify-center pt-20 ">
             <header className="w-full flex items-center justify-center">
