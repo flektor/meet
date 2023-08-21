@@ -1,32 +1,22 @@
 import { type NextPage } from "next";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
 import Nav from "~/components/Nav";
+import useChannelUpdater from "~/hooks/useChannelUpdater";
 import { Chat } from "~/components/Chat";
-import { Channel, getGroupOutput, PusherMessage } from "~/types";
 import useGroup from "~/hooks/useGroup";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
-import { useStore } from "~/utils/store";
-import useGroupViewer from "~/hooks/useGroupViewer";
-const _initChannelData = {
-  createdAt: new Date(),
-  description: "",
-  id: "temp",
-  messages: [],
-  title: "",
-  users: [],
-};
+import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 
 const Group: NextPage = () => {
   const router = useRouter();
   const slug = router.query.group as string;
-  const store = useStore();
-
+  const activitySlug = router.query.slug as string;
   const screenSize = useScreenSize();
   const mapWidth = screenSize === "sm"
     ? "90vw"
@@ -35,45 +25,32 @@ const Group: NextPage = () => {
     : "50vw";
   const mapHeight = mapWidth;
 
-  const { group, isLoading, error, refetch: refetchGroup } = useGroup(slug);
+  const { group, viewers, isLoading, error } = useGroup(activitySlug, slug);
 
-  const { viewers, refetchViewers } = useGroupViewer(group);
+  const { channel } = useChannelUpdater(slug, group, viewers);
 
-  const [channel, setChannel] = useState<Channel>(_initChannelData);
+  usePusherEventHandler();
 
-  function getUserNameById(userId: string) {
-    return group?.channel.users.find((user) => user.userId === userId)?.name ||
-      "user";
-  }
+  // function onUpdateHandler(message: PusherMessage) {
+  //   console.log({ pusherMessage: message });
 
-  function updateSenderNamesOnMessages(group: NonNullable<getGroupOutput>) {
-    const updatedMessages = group.channel.messages.map((message) => ({
-      ...message,
-      sentBy: getUserNameById(message.sentBy),
-    }));
-    setChannel({ ...group.channel, messages: updatedMessages });
-  }
-
-  function onUpdateHandler(message: PusherMessage) {
-    console.log({ pusherMessage: message });
-
-    switch (message.action) {
-      case "message":
-        return refetchGroup();
-      case "viewer":
-        return refetchViewers();
-      case "invite":
-        return store.addToast({
-          message: "'invite' not implemented yet",
-          id: message.id,
-        });
-      case "quick":
-        return store.addToast({
-          message: "'quick' not implemented yet",
-          id: message.id,
-        });
-    }
-  }
+  //   switch (message.action) {
+  //     case "message":
+  //       return refetchGroup();
+  //     case "viewer":
+  //       return refetchViewers();
+  //     case "invite":
+  //       return store.addToast({
+  //         displayMessage: "invite is not impenting yet",
+  //         pusherMessage: message,
+  //       });
+  //     case "quick":
+  //       return store.addToast({
+  //         displayMessage: "quick is not impenting yet",
+  //         pusherMessage: message,
+  //       });
+  //   }
+  // }
 
   // function onFoundUserForRegisteredActivity(groupId: string) {
   //   store.addToast({
@@ -81,27 +58,6 @@ const Group: NextPage = () => {
   //     id: `inv-${groupId}`,
   //   });
   // }
-
-  // Update usernames on messages
-  useEffect(() => {
-    if (!group) return;
-
-    updateSenderNamesOnMessages(group);
-
-    if (!viewers) return;
-
-    for (const viewer of viewers) {
-      const index = group.channel.users.findIndex(({ userId }) =>
-        viewer.userId === userId
-      );
-      if (index > -1) {
-        group.channel.users[index] = viewer;
-        continue;
-      }
-      group.channel.users.push(viewer);
-      continue;
-    }
-  }, [viewers, group]);
 
   const name = group?.title.includes("-")
     ? group.title?.split("-")[0]
@@ -120,6 +76,7 @@ const Group: NextPage = () => {
         {isLoading && <Spinner />}
 
         {error && <div className="text-white 2xl">There was an error.</div>}
+
         <Toasts />
 
         {group && (
@@ -142,13 +99,15 @@ const Group: NextPage = () => {
                 <p className="pl-3 text-white text-2xl">{group.description}</p>
               </div>
 
-              {group && (
+              {channel && (
                 <Chat
-                  update={onUpdateHandler}
                   channel={channel}
                   isLoading={isLoading}
+                  activitySlug={activitySlug}
+                  groupSlug={group.slug}
                 />
               )}
+
               <Map width={mapWidth} height={mapHeight} draggable />
             </div>
           </div>
