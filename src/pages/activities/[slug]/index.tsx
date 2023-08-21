@@ -11,7 +11,7 @@ import useActivityViewers from "~/hooks/useActivityViewers";
 import useChannelUpdater from "~/hooks/useChannelUpdater";
 import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
-import { Chat } from "~/components/Chat";
+import Chat from "~/components/Chat";
 import { PusherMessage } from "~/types";
 import CreateGroupDialog from "~/components/CreateGroupDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";

@@ -7,7 +7,7 @@ import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
 import Nav from "~/components/Nav";
 import useChannelUpdater from "~/hooks/useChannelUpdater";
-import { Chat } from "~/components/Chat";
+import Chat from "~/components/Chat";
 import useGroup from "~/hooks/useGroup";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
