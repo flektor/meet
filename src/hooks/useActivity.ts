@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../utils/store";
 import { api } from "../utils/api";
+import useActivityViewers from "./useActivityViewers";
 
 export default function useActivity(slug: string) {
   const store = useStore();
@@ -11,6 +12,8 @@ export default function useActivity(slug: string) {
     }, { enabled: !!slug });
 
   const [activity, setActivity] = useState(data);
+
+  const { viewers } = useActivityViewers(activity);
 
   useEffect(() => {
     if (!data) {
@@ -41,5 +44,5 @@ export default function useActivity(slug: string) {
     setActivity(data);
   }, [store.activities, data]);
 
-  return { activity, error, isLoading, refetch };
+  return { activity, viewers, error, isLoading, refetch };
 }

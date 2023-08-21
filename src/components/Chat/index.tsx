@@ -6,7 +6,12 @@ import React, {
 } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
-import { Channel, PusherMessage, sendMessageInput } from "~/types";
+import {
+  Channel,
+  MessageInput,
+  PusherMessage,
+  sendMessageInput,
+} from "~/types";
 import { useSession } from "next-auth/react";
 import useSubscribeToEvent from "~/hooks/useSubscribeToEvent";
 import Spinner from "../Spinner";
@@ -15,10 +20,12 @@ export const Chat: FunctionComponent<
   {
     channel: NonNullable<Channel>;
     isLoading: boolean;
-    update: (message: PusherMessage) => void;
+    activitySlug: string;
+    groupSlug?: string;
+    // update: (message: PusherMessage) => void;
   }
 > = (
-  { channel, isLoading, update },
+  { channel, isLoading, activitySlug, groupSlug },
 ) => {
   const { data: session } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
@@ -52,17 +59,22 @@ export const Chat: FunctionComponent<
     },
   });
 
-  useSubscribeToEvent(channel.id, (action) => update(action as any));
+  // useSubscribeToEvent(channel.id, (action) => update(action as any));
 
+  console.log({ channel });
   function onSubmitHandler(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = {
-      channelId: channel.id,
-      receivers: channel.users.map(({ slug }) => slug),
-      content: Object.fromEntries(new FormData(event.currentTarget))["content"],
-    };
-
     try {
+      const data = {
+        channelId: `${activitySlug}/${groupSlug}`,
+        receivers: channel.users.map(({ slug }) => slug),
+        activitySlug,
+        groupSlug,
+        content:
+          Object.fromEntries(new FormData(event.currentTarget))["content"],
+      };
+
+      console.log(data);
       const message = sendMessageInput.parse(data);
       sendMessage(message);
     } catch (error) {

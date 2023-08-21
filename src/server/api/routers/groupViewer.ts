@@ -1,10 +1,16 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { pusherServerClient } from "~/server/pusher";
+import { pusherSend } from "~/server/utils";
 
 export const groupViewerRouter = createTRPCRouter({
   add: protectedProcedure
-    .input(z.object({ groupId: z.string() }))
+    .input(
+      z.object({
+        activitySlug: z.string(),
+        groupSlug: z.string(),
+        groupId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const data = {
         userId: ctx.session.user.id,
@@ -12,37 +18,66 @@ export const groupViewerRouter = createTRPCRouter({
       };
 
       const others = await ctx.prisma.groupViewer
-        .findMany({
-          where: { groupId: input.groupId },
-        });
+        .findMany({ where: { groupId: input.groupId } });
 
-      const viewer = await ctx.prisma.groupViewer.create({ data });
+      await ctx.prisma.groupViewer.create({ data });
+
+      if (others.length === 0) {
+        return;
+      }
 
       const receivers = others.map(({ userId }) => `user-${userId}`);
 
-      if (receivers.length > 0) {
-        pusherServerClient.trigger(
-          receivers,
-          input.groupId,
-          "viewer",
-        );
-      }
-
-      return viewer;
+      pusherSend({
+        receivers,
+        channelId: `${input.activitySlug}/${input.groupSlug}`,
+        body: {
+          action: "add_viewer",
+          sentBy: ctx.session.user.id,
+          activitySlug: input.activitySlug,
+          groupSlug: input.groupSlug,
+        },
+      });
     }),
 
   remove: protectedProcedure
-    .input(z.object({ groupId: z.string() }))
-    .mutation(({ input, ctx }) =>
-      ctx.prisma.groupViewer.delete({
+    .input(
+      z.object({
+        activitySlug: z.string(),
+        groupSlug: z.string(),
+        groupId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.prisma.groupViewer.delete({
         where: {
           userId_groupId: {
             groupId: input.groupId,
             userId: ctx.session.user.id,
           },
         },
-      })
-    ),
+      });
+
+      const others = await ctx.prisma.groupViewer
+        .findMany({ where: { groupId: input.groupId } });
+
+      if (others.length === 0) {
+        return;
+      }
+
+      const receivers = others.map(({ userId }) => `user-${userId}`);
+
+      pusherSend({
+        receivers,
+        channelId: `${input.activitySlug}/${input.groupSlug}`,
+        body: {
+          action: "remove_viewer",
+          sentBy: ctx.session.user.id,
+          activitySlug: input.activitySlug,
+          groupSlug: input.groupSlug,
+        },
+      });
+    }),
 
   getGroupViewers: protectedProcedure
     .input(z.object({ groupId: z.string() }))

@@ -1,32 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { api } from "../utils/api";
 import { useRouter } from "next/dist/client/router";
 import { getGroupOutput } from "../types";
+import { useStore } from "~/utils/store";
 
-export default function useGroupViewer(group: getGroupOutput) {
+export default function useGroupViewer(
+  activitySlug: string,
+  group: getGroupOutput,
+) {
   const router = useRouter();
-
+  const store = useStore();
   const addToViewers = api.groupViewer.add.useMutation();
-
   const removeFromViewers = api.groupViewer.remove.useMutation();
 
-  const [addedToViewers, setAddedToViewers] = useState(false);
-
   const { data: viewers, refetch: refetchViewers } = api.groupViewer
-    .getGroupViewers.useQuery({
-      groupId: group ? group.id : "",
-    }, { enabled: !!group });
+    .getGroupViewers.useQuery({ groupId: group ? group.id : "" }, {
+      enabled: !!group,
+    });
 
   useEffect(() => {
     const handleRouteChange = () => {
       if (group) {
-        removeFromViewers.mutate({ groupId: group.id });
+        removeFromViewers.mutate({
+          activitySlug,
+          groupSlug: group.slug,
+          groupId: group.id,
+        });
+        store.userIsViewingPage = null;
       }
     };
 
-    if (group && !addedToViewers) {
-      addToViewers.mutate({ groupId: group.id });
-      setAddedToViewers(true);
+    if (group && !store.userIsViewingPage) {
+      addToViewers.mutate({
+        activitySlug,
+        groupSlug: group.slug,
+        groupId: group.id,
+      });
+      store.userIsViewingPage = group.slug;
     }
 
     router.events.on("beforeHistoryChange", handleRouteChange);
@@ -36,7 +46,7 @@ export default function useGroupViewer(group: getGroupOutput) {
       window.removeEventListener("beforeunload", handleRouteChange);
       router.events.off("beforeHistoryChange", handleRouteChange);
     };
-  }, [group, addedToViewers]);
+  }, [group]);
 
   return { viewers, refetchViewers };
 }

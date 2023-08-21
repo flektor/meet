@@ -4,7 +4,7 @@ import { pusherSend } from "~/server/utils";
 
 export const activityViewerRouter = createTRPCRouter({
   add: protectedProcedure
-    .input(z.object({ activityId: z.string() }))
+    .input(z.object({ activitySlug: z.string(), activityId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const data = {
         userId: ctx.session.user.id,
@@ -12,39 +12,58 @@ export const activityViewerRouter = createTRPCRouter({
       };
 
       const others = await ctx.prisma.activityViewer
-        .findMany({
-          where: { activityId: input.activityId },
-        });
+        .findMany({ where: { activityId: input.activityId } });
 
-      const viewer = await ctx.prisma.activityViewer.create({ data });
+      await ctx.prisma.activityViewer.create({ data });
+
+      if (others.length === 0) {
+        return;
+      }
 
       const receivers = others.map(({ userId }) => `user-${userId}`);
 
-      if (receivers.length > 0) {
-        pusherSend({
-          receivers,
-          slug: input.activityId,
-          body: { action: "viewer", sentBy: ctx.session.user.id },
-        });
-      }
-
-      console.log("www");
-
-      return viewer;
+      pusherSend({
+        receivers,
+        channelId: input.activitySlug,
+        body: {
+          action: "add_viewer",
+          sentBy: ctx.session.user.id,
+          activitySlug: input.activitySlug,
+        },
+      });
     }),
 
   remove: protectedProcedure
-    .input(z.object({ activityId: z.string() }))
-    .mutation(({ input, ctx }) =>
-      ctx.prisma.activityViewer.delete({
+    .input(z.object({ activitySlug: z.string(), activityId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.prisma.activityViewer.delete({
         where: {
           userId_activityId: {
             activityId: input.activityId,
             userId: ctx.session.user.id,
           },
         },
-      })
-    ),
+      });
+
+      const others = await ctx.prisma.activityViewer
+        .findMany({ where: { activityId: input.activityId } });
+
+      if (others.length === 0) {
+        return;
+      }
+
+      const receivers = others.map(({ userId }) => `user-${userId}`);
+
+      pusherSend({
+        receivers,
+        channelId: input.activitySlug,
+        body: {
+          action: "remove_viewer",
+          sentBy: ctx.session.user.id,
+          activitySlug: input.activitySlug,
+        },
+      });
+    }),
 
   // getAll: protectedProcedure
   //   .input(z.object({ activityId: z.string() }))

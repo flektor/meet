@@ -20,6 +20,7 @@ import { initTE, Input } from "tw-elements";
 import dynamic from "next/dynamic";
 import Map from "../Map";
 import useScreenSize from "~/hooks/useScreenSize";
+import { group } from "console";
 
 const DynamicDatepicker = dynamic(() => import("../DatePicker"), {
   ssr: false,
@@ -115,6 +116,7 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
     data.activityId = activityId;
+    data.activitySlug = activitySlug;
     try {
       const group = addGroupInput.parse(data);
       group.description = capitalizeFirstCharacter(group.description);

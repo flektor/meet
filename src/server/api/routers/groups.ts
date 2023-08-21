@@ -15,13 +15,7 @@ export const groupsRouter = createTRPCRouter({
       const group = await ctx.prisma.group
         .findUnique({
           where: { slug: input.slug },
-          include: {
-            channel: {
-              include: {
-                Message: true,
-              },
-            },
-          },
+          include: { channel: { include: { Message: true } } },
         });
 
       if (!group) {
@@ -60,10 +54,9 @@ export const groupsRouter = createTRPCRouter({
     .input(addGroupInput)
     .mutation(async ({ input, ctx }) => {
       const channel = await ctx.prisma.channel.create({
-        data: {
-          title: input.title,
-        },
+        data: { title: input.title },
       });
+
       return ctx.prisma.group.create({
         data: {
           ...input,
@@ -119,19 +112,19 @@ export const groupsRouter = createTRPCRouter({
 
       pusherSend({
         receivers: `user-${input.otherUserId}`,
-        slug: `accepted-${input.activityId}`,
+        // slug: `accepted-${input.activityId}`,
+        channelId: `${input.activitySlug}/${group.slug}`,
         body: {
-          action: "accepted",
+          action: "invite_accepted",
           sentBy: ctx.session.user.id,
-          data: {
-            pageSlug: `/activities/${input.activitySlug}/${group.slug}`,
-            title: input.title,
-          },
+          activitySlug: input.activitySlug,
+          groupSlug: group.slug,
+          requestId: input.activitySlug + group.slug + ctx.session.user.id,
         },
       });
 
       console.log(group);
-      return group;
+      return { ...group, activitySlug: input.activitySlug };
     }),
 });
 
