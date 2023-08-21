@@ -13,6 +13,7 @@ type Store = {
   groups: NonNullable<getGroupOutput>[];
   groupsOverview: GroupsOverview;
   toasts: Toast[];
+  userIsViewingPage: string | null;
   setActivities: (activities: NonNullable<getActivitiesOutput>) => void;
   addActivity: (activity: NonNullable<getActivityOutput>) => void;
   removeActivity: (activityId: string) => void;
@@ -42,37 +43,26 @@ export const useStore = create<Store>((set) => ({
   groupsOverview: [],
   channels: [],
   toasts: [],
+  userIsViewingPage: null,
 
   setActivities: (activities: NonNullable<getActivitiesOutput>) =>
     set({ activities }),
 
   addActivity: (activity: NonNullable<getActivityOutput>) =>
     set((state) => ({
-      ...state,
-      activities: [...state.activities, {
-        ...activity,
-      }],
+      activities: [...state.activities, { ...activity }],
     })),
 
   updateActivity: (activity: NonNullable<getActivityOutput>) => {
-    set((state) => {
-      return {
-        ...state,
-        activities: state.activities.map((prevActivity) => {
-          if (prevActivity.id === activity.id) {
-            return {
-              ...activity,
-            };
-          }
-          return prevActivity;
-        }),
-      };
-    });
+    set((state) => ({
+      activities: state.activities.map((prev) =>
+        prev.id === activity.id ? ({ ...activity }) : prev
+      ),
+    }));
   },
 
   removeActivity: (activityId: string) =>
     set((state) => ({
-      ...state,
       activities: state.activities.filter(({ id }) => id !== activityId),
     })),
 
@@ -80,128 +70,83 @@ export const useStore = create<Store>((set) => ({
     set({ groupsOverview: groups }),
 
   addGroup: (group: NonNullable<getGroupOutput>) =>
-    set((state) => ({
-      ...state,
-      groups: [...state.groups, {
-        ...group,
-      }],
-    })),
+    set((state) => ({ groups: [...state.groups, { ...group }] })),
 
   addGroupOverview: (group: GroupOverview) =>
     set((state) => ({
-      ...state,
-      groupsOverview: [...state.groupsOverview, {
-        ...group,
-      }],
+      groupsOverview: [...state.groupsOverview, { ...group }],
     })),
 
   removeGroupOverview: (group: GroupOverview) =>
     set((state) => ({
-      ...state,
-      groupsOverview: [...state.groupsOverview, {
-        ...group,
-      }],
+      groupsOverview: [...state.groupsOverview, { ...group }],
     })),
 
   updateGroup: (group: NonNullable<getGroupOutput>) => {
-    set((state) => {
-      return {
-        ...state,
-        groups: state.groups.map((prevGroups) => {
-          if (prevGroups.id === group.id) {
-            return {
-              ...group,
-            };
-          }
-          return prevGroups;
-        }),
-      };
-    });
+    set((state) => ({
+      groups: state.groups.map((prev) =>
+        prev.id === group.id ? ({ ...group }) : prev
+      ),
+    }));
   },
 
   removeGroup: (GroupId: string) =>
     set((state) => ({
-      ...state,
       groups: state.groups.filter(({ id }) => id !== GroupId),
     })),
 
   addToFavorites: (activityId: string) =>
     set((state) => ({
-      ...state,
-      activities: state.activities.map((activity) => {
-        if (activity.id === activityId) {
-          return {
-            ...activity,
-            isFavorite: true,
-            favoritesCount: ++activity.favoritesCount,
-          };
-        }
-        return activity;
-      }),
+      activities: state.activities.map((activity) =>
+        activity.id !== activityId ? activity : ({
+          ...activity,
+          isFavorite: true,
+          favoritesCount: activity.favoritesCount + 1,
+        })
+      ),
     })),
 
   removeFromFavorites: (activityId: string) =>
     set((state) => ({
-      ...state,
-      activities: state.activities.map((activity) => {
-        if (activity.id === activityId) {
-          return {
-            ...activity,
-            isFavorite: false,
-            favoritesCount: --activity.favoritesCount,
-          };
-        }
-        return activity;
-      }),
+      activities: state.activities.map((activity) =>
+        activity.id !== activityId ? activity : ({
+          ...activity,
+          isFavorite: false,
+          favoritesCount: activity.favoritesCount - 1,
+        })
+      ),
     })),
 
   addToRegistrations: (activityId: string) =>
     set((state) => ({
-      ...state,
-      activities: state.activities.map((activity) => {
-        if (activity.id === activityId) {
-          return {
-            ...activity,
-            isRegistered: true,
-            registrationsCount: ++activity.registrationsCount,
-          };
-        }
-        return activity;
-      }),
+      activities: state.activities.map((activity) =>
+        activity.id !== activityId ? activity : ({
+          ...activity,
+          isRegistered: true,
+          registrationsCount: activity.registrationsCount + 1,
+        })
+      ),
     })),
 
   removeFromRegistrations: (activityId: string) =>
     set((state) => ({
-      ...state,
-      activities: state.activities.map((activity) => {
-        if (activity.id === activityId) {
-          return {
-            ...activity,
-            isRegistered: false,
-            registrationsCount: --activity.registrationsCount,
-          };
-        }
-        return activity;
-      }),
+      activities: state.activities.map((
+        activity,
+      ) => (activity.id !== activityId ? activity : ({
+        ...activity,
+        isRegistered: false,
+        registrationsCount: activity.registrationsCount - 1,
+      }))),
     })),
 
   removeToast: (toastId: string) =>
     set((state) => ({
-      ...state,
       toasts: state.toasts.filter(({ id }) => id !== toastId),
     })),
 
   addToast: (toast: Toast) =>
-    set((state) => ({
-      ...state,
-      toasts: [...state.toasts, {
-        ...toast,
-      }],
-    })),
+    set((state) => ({ toasts: [...state.toasts, { ...toast }] })),
 
   addToasts: (toasts: Toast[]) =>
-    set((state) => ({
-      ...state,
-      toasts: [...state.toasts, ...toasts],
-    })),
+    set((state) => ({ toasts: [...state.toasts, ...toasts] })),
 }));
