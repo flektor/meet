@@ -5,15 +5,12 @@ import { useSession } from "next-auth/react";
 import { api } from "../../utils/api";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
 import DotsLoader from "~/components/DotsLoader";
-import useSubscribeToEvent from "~/hooks/useSubscribeToEvent";
-import { PusherMessage } from "~/types";
-import { useRouter } from "next/router";
 
 export type RegisterButtonProps = {
   activityId: string;
+  activitySlug: string;
   className?: string;
   showText?: boolean;
-  onPusherMessage: (activityId: string, message: PusherMessage) => void;
 };
 
 const Button = (
@@ -52,11 +49,9 @@ const Button = (
 };
 
 const RegisterButton = (
-  { activityId, className = "", showText, onPusherMessage }:
-    RegisterButtonProps,
+  { activitySlug, activityId, className = "", showText }: RegisterButtonProps,
 ) => {
   const store = useStore();
-  const router = useRouter();
   const session = useSession();
 
   const { mutate: register } = api.registrations.add.useMutation();
@@ -66,21 +61,6 @@ const RegisterButton = (
 
   const activity = store.activities.find(({ id }) => id === activityId);
   const isRegistered = activity?.isRegistered ?? false;
-
-  const eventName = activity ? `quick-${activity.id}` : "";
-  const eventName1 = activity ? `accepted-${activity.id}` : "";
-
-  useSubscribeToEvent(
-    eventName,
-    (data: PusherMessage) => onPusherMessage(activity!.id, data),
-  );
-
-  useSubscribeToEvent(
-    eventName1,
-    (data: any) => {
-      router.push(data.data.pageSlug);
-    },
-  );
 
   let registrationsCount = 0;
   if (activity?.registrationsCount) {
@@ -103,7 +83,7 @@ const RegisterButton = (
       return;
     }
 
-    register({ activityId });
+    register({ activity: activitySlug, activityId });
     store.addToRegistrations(activityId);
   }
   // const style = isRegistered
