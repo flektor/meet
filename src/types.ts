@@ -8,6 +8,8 @@ export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type getActivitiesOutput = RouterOutput["activities"]["getActivities"];
 export type addActivityOutput = RouterOutput["activities"]["addActivity"];
 export type getActivityOutput = RouterOutput["activities"]["getActivity"];
+export type getActivityViewersOutput =
+  RouterOutput["activityViewer"]["getActivityViewers"];
 
 export type getUserGroupsOutput = RouterOutput["groups"]["getUserGroups"];
 export type addGroupOutput = RouterOutput["groups"]["addGroup"];
@@ -29,6 +31,8 @@ export type Channel = {
   title: string | null;
   description: string | null;
   createdAt: Date;
+  activitySlug: string;
+  groupSlug?: string;
 };
 
 export type ChannelOverview = {
@@ -36,6 +40,7 @@ export type ChannelOverview = {
   title: string;
   slug: string;
   activitySlug: string;
+  groupSlug?: string;
   unreadMessagesCount: string;
   viewersCount: number;
 };
@@ -110,30 +115,50 @@ export const sendMessageInput = z.object({
   content: z.string(),
   channelId: z.string(),
   receivers: receiversInput,
+  activitySlug: z.string(),
+  groupSlug: z.string().optional(),
 });
 
-export type PusherMessage = {
-  id: string;
-  action: "message" | "quick" | "viewer" | "invite";
+export type MessageInput = z.infer<typeof sendMessageInput>;
+
+export type PusherMessageAction = "message";
+
+export type PusherMessegeViewAction = "add_viewer" | "remove_viewer";
+
+export type PusherMessegeJoinAction =
+  | "invite_request"
+  | "invite_accepted"
+  | "invite_declined"
+  | "quick_search_found";
+
+type BasePusherMessage = {
+  // id: string;
+  action:
+    | PusherMessegeViewAction
+    | PusherMessageAction
+    | PusherMessegeJoinAction;
   sentBy: string;
-} | {
-  id: string;
-  action: "accepted";
-  sentBy: string;
-  data: {
-    title: string;
-    pageSlug: string;
-  };
+  activitySlug: string;
+  groupSlug?: string;
 };
+
+export type PusherMessage =
+  | (BasePusherMessage & { action: PusherMessegeViewAction })
+  | (BasePusherMessage & { action: PusherMessageAction; content: string })
+  | (BasePusherMessage & {
+    action: PusherMessegeJoinAction;
+    requestId: string;
+  });
 
 export type PusherSendProps = {
   receivers: string[] | string;
-  slug: string;
+  channelId: string;
   body: PusherMessage;
 };
 
 export type Toast = {
+  displayMessage: string;
+  pusherMessage: PusherMessage;
   id: string;
-  message: string;
   icon?: string;
 };
