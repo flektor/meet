@@ -6,9 +6,8 @@ export const groupViewerRouter = createTRPCRouter({
   add: protectedProcedure
     .input(
       z.object({
-        activitySlug: z.string(),
-        groupSlug: z.string(),
         groupId: z.string(),
+        channelId: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -26,16 +25,12 @@ export const groupViewerRouter = createTRPCRouter({
         return;
       }
 
-      const receivers = others.map(({ userId }) => `user-${userId}`);
-
       pusherSend({
-        receivers,
-        channelId: `${input.activitySlug}/${input.groupSlug}`,
+        receivers: others.map(({ userId }) => userId),
+        channelId: input.channelId,
         body: {
           action: "add_viewer",
           sentBy: ctx.session.user.id,
-          activitySlug: input.activitySlug,
-          groupSlug: input.groupSlug,
         },
       });
     }),
@@ -43,9 +38,8 @@ export const groupViewerRouter = createTRPCRouter({
   remove: protectedProcedure
     .input(
       z.object({
-        activitySlug: z.string(),
-        groupSlug: z.string(),
         groupId: z.string(),
+        channelId: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -65,16 +59,12 @@ export const groupViewerRouter = createTRPCRouter({
         return;
       }
 
-      const receivers = others.map(({ userId }) => `user-${userId}`);
-
       pusherSend({
-        receivers,
-        channelId: `${input.activitySlug}/${input.groupSlug}`,
+        receivers: others.map(({ userId }) => userId),
+        channelId: input.channelId,
         body: {
           action: "remove_viewer",
           sentBy: ctx.session.user.id,
-          activitySlug: input.activitySlug,
-          groupSlug: input.groupSlug,
         },
       });
     }),
@@ -92,7 +82,6 @@ export const groupViewerRouter = createTRPCRouter({
         userId: user.id,
         image: user.image,
         name: user.name,
-        slug: `user-${user.id}`,
       }));
     }),
 });

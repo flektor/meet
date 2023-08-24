@@ -1,27 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { api } from "../utils/api";
 import { useRouter } from "next/dist/client/router";
-import { getActivityOutput } from "../types";
+import { Activity } from "../types";
 import { useStore } from "~/utils/store";
 
-export default function useActivityViewer(activity: getActivityOutput) {
+export default function useActivityViewers(activity: Activity | undefined) {
   const router = useRouter();
   const store = useStore();
   const addToViewers = api.activityViewer.add.useMutation();
   const removeFromViewers = api.activityViewer.remove.useMutation();
-
-  const { data: viewers, refetch: refetchViewers } = api.activityViewer
-    .getActivityViewers
-    .useQuery({ activityId: activity ? activity.id : "" }, {
-      enabled: !!activity,
-    });
 
   useEffect(() => {
     const handleRouteChange = () => {
       if (activity) {
         removeFromViewers.mutate({
           activityId: activity.id,
-          activitySlug: activity.slug,
+          channelId: activity.channelId,
         });
         store.userIsViewingPage = null;
       }
@@ -30,7 +24,7 @@ export default function useActivityViewer(activity: getActivityOutput) {
     if (activity && !store.userIsViewingPage) {
       addToViewers.mutate({
         activityId: activity.id,
-        activitySlug: activity.slug,
+        channelId: activity.channelId,
       });
       store.userIsViewingPage = activity.slug;
     }
@@ -43,6 +37,4 @@ export default function useActivityViewer(activity: getActivityOutput) {
       router.events.off("beforeHistoryChange", handleRouteChange);
     };
   }, [activity]);
-
-  return { viewers, refetchViewers };
 }

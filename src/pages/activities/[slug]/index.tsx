@@ -8,7 +8,7 @@ import Toast from "~/components/InvitationToast";
 import FavoriteButton from "~/components/FavoriteButton";
 import useActivity from "~/hooks/useActivity";
 import useActivityViewers from "~/hooks/useActivityViewers";
-import useChannelUpdater from "~/hooks/useChannelUpdater";
+// import useChannelUpdater from "~/hooks/useChannelUpdater";
 import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
 import Chat from "~/components/Chat";
@@ -22,30 +22,20 @@ import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 
 const Activity: NextPage = () => {
   const router = useRouter();
-  // const store = useStore();
+  const store = useStore();
   const slug = router.query.slug as string;
-  const { activity, viewers, error, isLoading } = useActivity(slug);
+  const { activity, groups, error, isLoading } = useActivity(slug);
 
-  const { channel } = useChannelUpdater(slug, activity, viewers);
+  useEffect(() => {
+    if (activity) {
+      store.pusherSubscribe(activity.channelId);
+    }
+  }, [activity]);
 
   usePusherEventHandler();
 
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
-
-  // function onFoundUserForRegisteredActivity(
-  //   activityId: string,
-  //   message: PusherMessage,
-  // ) {
-  //   const activity = store.activities.find(({ id }) => id === activityId);
-  //   const groupName = activity ? activity.title : activityId;
-
-  //   store.addToast({
-  //     id: message.sentBy + activity?.title,
-  //     displayMessage: `user invites to join ${groupName}`,
-  //     pusherMessage: message,
-  //   });
-  // }
 
   return (
     <>
@@ -57,7 +47,7 @@ const Activity: NextPage = () => {
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Nav />
 
-        <Toasts />
+        {/* <Toasts /> */}
 
         {isLoading
           ? (
@@ -108,8 +98,8 @@ const Activity: NextPage = () => {
                 <p className="text-white text-2xl">{activity.description}</p>
               </div>
 
-              {activity.groups.length === 0 && (
-                <div className="text-white 2xl">There are no activities.</div>
+              {groups.length === 0 && (
+                <div className="text-white 2xl">There are no groups.</div>
               )}
 
               {showCreateGroupDialog && (
@@ -128,14 +118,10 @@ const Activity: NextPage = () => {
 
               <Groups activitySlug={slug} />
 
-              {channel && (
-                <Chat
-                  // update={onUpdateHandler}
-                  channel={channel}
-                  isLoading={isLoading}
-                  activitySlug={activity.slug}
-                />
-              )}
+              <Chat
+                isLoading={isLoading}
+                channelId={activity.channelId}
+              />
             </div>
           </div>
         )}

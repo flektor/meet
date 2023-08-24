@@ -1,29 +1,20 @@
 import { useEffect } from "react";
 import { api } from "../utils/api";
 import { useRouter } from "next/dist/client/router";
-import { getGroupOutput } from "../types";
+import { Group } from "../types";
 import { useStore } from "~/utils/store";
 
-export default function useGroupViewer(
-  activitySlug: string,
-  group: getGroupOutput,
-) {
+export default function useGroupViewers(group: Group | undefined) {
   const router = useRouter();
   const store = useStore();
   const addToViewers = api.groupViewer.add.useMutation();
   const removeFromViewers = api.groupViewer.remove.useMutation();
 
-  const { data: viewers, refetch: refetchViewers } = api.groupViewer
-    .getGroupViewers.useQuery({ groupId: group ? group.id : "" }, {
-      enabled: !!group,
-    });
-
   useEffect(() => {
     const handleRouteChange = () => {
       if (group) {
         removeFromViewers.mutate({
-          activitySlug,
-          groupSlug: group.slug,
+          channelId: group.channelId,
           groupId: group.id,
         });
         store.userIsViewingPage = null;
@@ -32,10 +23,10 @@ export default function useGroupViewer(
 
     if (group && !store.userIsViewingPage) {
       addToViewers.mutate({
-        activitySlug,
-        groupSlug: group.slug,
         groupId: group.id,
+        channelId: group.channelId,
       });
+
       store.userIsViewingPage = group.slug;
     }
 
@@ -47,6 +38,4 @@ export default function useGroupViewer(
       router.events.off("beforeHistoryChange", handleRouteChange);
     };
   }, [group]);
-
-  return { viewers, refetchViewers };
 }

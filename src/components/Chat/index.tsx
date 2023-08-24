@@ -4,17 +4,21 @@ import { useSession } from "next-auth/react";
 import Spinner from "../Spinner";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
+import { useStore } from "~/utils/store";
+import { getUserNameById } from "~/utils";
 
 export type ChatProps = {
-  channel: NonNullable<Channel>;
   isLoading: boolean;
-  activitySlug: string;
-  groupSlug?: string;
+  channelId: string;
 };
 
-function Chat({ channel, isLoading, activitySlug, groupSlug }: ChatProps) {
+function Chat({ isLoading, channelId }: ChatProps) {
   const { data: session } = useSession();
   const messagesListRef = useRef<HTMLDivElement>(null);
+  const store = useStore();
+  const channel = store.channels.find(({ id }) => id === channelId);
+
+  // console.log(channelId, store.channels, channel);
 
   function scrollToBottom() {
     if (messagesListRef.current) {
@@ -29,13 +33,18 @@ function Chat({ channel, isLoading, activitySlug, groupSlug }: ChatProps) {
     }
   }
 
-  useEffect(() => scrollToBottom(), [channel.messages]);
+  useEffect(() => {
+    if (channel) {
+      scrollToBottom();
+    }
+  }, [channel?.messages]);
 
   if (!session || !session.user?.id) {
     return <span className="text-white text-2xl">Sign in to see the chat</span>;
   }
 
-  const username = session.user.name || "user";
+  const username = session.user.name || "you";
+  console.log({ username });
 
   return (
     <section
@@ -59,7 +68,7 @@ function Chat({ channel, isLoading, activitySlug, groupSlug }: ChatProps) {
         >
           {isLoading && <Spinner />}
 
-          {channel.messages.map((message, index) => (
+          {channel?.messages.map((message, index) => (
             <ChatMessage
               key={index}
               message={message}
@@ -70,11 +79,7 @@ function Chat({ channel, isLoading, activitySlug, groupSlug }: ChatProps) {
       </div>
       <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
-      <ChatInput
-        activitySlug={activitySlug}
-        groupSlug={groupSlug}
-        channel={channel}
-      />
+      {channel && <ChatInput channel={channel} />}
     </section>
   );
 }

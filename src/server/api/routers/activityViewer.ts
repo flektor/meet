@@ -4,7 +4,12 @@ import { pusherSend } from "~/server/utils";
 
 export const activityViewerRouter = createTRPCRouter({
   add: protectedProcedure
-    .input(z.object({ activitySlug: z.string(), activityId: z.string() }))
+    .input(
+      z.object({
+        activityId: z.string(),
+        channelId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const data = {
         userId: ctx.session.user.id,
@@ -20,21 +25,21 @@ export const activityViewerRouter = createTRPCRouter({
         return;
       }
 
-      const receivers = others.map(({ userId }) => `user-${userId}`);
-
       pusherSend({
-        receivers,
-        channelId: input.activitySlug,
+        receivers: others.map(({ userId }) => userId),
+        channelId: input.channelId,
         body: {
           action: "add_viewer",
           sentBy: ctx.session.user.id,
-          activitySlug: input.activitySlug,
         },
       });
     }),
 
   remove: protectedProcedure
-    .input(z.object({ activitySlug: z.string(), activityId: z.string() }))
+    .input(z.object({
+      activityId: z.string(),
+      channelId: z.string(),
+    }))
     .mutation(async ({ input, ctx }) => {
       await ctx.prisma.activityViewer.delete({
         where: {
@@ -52,15 +57,12 @@ export const activityViewerRouter = createTRPCRouter({
         return;
       }
 
-      const receivers = others.map(({ userId }) => `user-${userId}`);
-
       pusherSend({
-        receivers,
-        channelId: input.activitySlug,
+        receivers: others.map(({ userId }) => userId),
+        channelId: input.channelId,
         body: {
           action: "remove_viewer",
           sentBy: ctx.session.user.id,
-          activitySlug: input.activitySlug,
         },
       });
     }),
@@ -87,7 +89,6 @@ export const activityViewerRouter = createTRPCRouter({
         userId: user.id,
         image: user.image,
         name: user.name,
-        slug: `user-${user.id}`,
       }));
     }),
 });

@@ -75,8 +75,8 @@ const Activities: FunctionComponent = () => {
                     />
                     <RegisterButton
                       activityId={id}
+                      activitySlug={slug}
                       className="mt-1"
-                      onPusherMessage={onFoundUserForRegisteredActivity}
                     />
                   </div>
 

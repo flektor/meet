@@ -3,22 +3,22 @@ import { z } from "zod";
 import { api } from "../../utils/api";
 import { Channel, sendMessageInput } from "../../types";
 import { getUserNameById } from "../../utils";
+import { useStore } from "~/utils/store";
+import { useSession } from "next-auth/react";
 
 type ChatInputProps = {
-  activitySlug: string;
-  groupSlug?: string;
   channel: Channel;
 };
 
-function ChatInput({ channel, activitySlug, groupSlug }: ChatInputProps) {
+function ChatInput({ channel }: ChatInputProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const store = useStore();
 
   const { mutate: sendMessage } = api.chat.sendMessage.useMutation({
     onError: (error) => console.log(error),
     onSuccess: (message) => {
-      console.log(channel);
       message.sentBy = getUserNameById(channel, message.sentBy);
-      channel.messages.push(message);
+      store.addMessage(channel.id, message);
       formRef.current?.reset();
     },
   });
@@ -27,10 +27,8 @@ function ChatInput({ channel, activitySlug, groupSlug }: ChatInputProps) {
     event.preventDefault();
     try {
       const data = {
-        channelId: `${activitySlug}${groupSlug && `/${groupSlug}`}`,
-        receivers: channel.users.map(({ slug }) => slug),
-        activitySlug,
-        groupSlug,
+        channelId: channel.id,
+        receivers: channel.users.map(({ userId }) => userId),
         content:
           Object.fromEntries(new FormData(event.currentTarget))["content"],
       };

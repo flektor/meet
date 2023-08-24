@@ -1,8 +1,5 @@
 import React from "react";
-import { Channel } from "../../types";
-
-export type ChannelMessages = Pick<Channel, "messages">;
-export type ChannelMessage = ChannelMessages["messages"][number];
+import { ChannelMessage } from "../../types";
 
 export type ChatMessageProps = {
   message: ChannelMessage;

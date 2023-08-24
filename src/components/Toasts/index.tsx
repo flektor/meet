@@ -16,7 +16,7 @@ const Toasts: FunctionComponent = () => {
     },
     onSuccess: (group) => {
       if (!group.slug) return;
-      router.push(`/activities/${group.activity}/${group.slug}`);
+      router.push(`/activities/${group.activitySlug}/${group.slug}`);
     },
   });
 
@@ -26,11 +26,11 @@ const Toasts: FunctionComponent = () => {
     }
 
     const activity = store.activities.find((activity) =>
-      activity.slug === message.activity
+      activity.slug === message.activitySlug
     );
 
     store.removeToast(message.requestId);
-    router.push(`/activities/${message.activity}/${message.group}`);
+    router.push(`/activities/${message.activitySlug}/${message.groupSlug}`);
 
     if (!activity) {
       return;
@@ -38,7 +38,7 @@ const Toasts: FunctionComponent = () => {
 
     try {
       const data = addDynamicGroupInput.parse({
-        title: message.activity,
+        title: message.activitySlug,
         description: activity.description,
         activityId: activity.id,
         otherUserId: message.sentBy,

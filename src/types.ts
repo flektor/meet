@@ -1,61 +1,64 @@
 import { type inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 import { type AppRouter } from "./server/api/root";
-import { Message } from "@prisma/client";
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
-export type getActivitiesOutput = RouterOutput["activities"]["getActivities"];
-export type addActivityOutput = RouterOutput["activities"]["addActivity"];
-export type getActivityOutput = RouterOutput["activities"]["getActivity"];
-export type getActivityViewersOutput =
-  RouterOutput["activityViewer"]["getActivityViewers"];
+export type getActivitiesOutput = NonNullable<
+  RouterOutput["activities"]["getActivities"]
+>;
+export type addActivityOutput = NonNullable<
+  RouterOutput["activities"]["addActivity"]
+>;
+export type getActivityOutput = NonNullable<
+  RouterOutput["activities"]["getActivity"]
+>;
+type getActivityViewersOutput = NonNullable<
+  RouterOutput["activityViewer"]["getActivityViewers"]
+>;
 
-export type getUserGroupsOutput = RouterOutput["groups"]["getUserGroups"];
-export type addGroupOutput = RouterOutput["groups"]["addGroup"];
-export type addDynamicGroupOutput = RouterOutput["groups"]["addDynamicGroup"];
-export type getGroupOutput = RouterOutput["groups"]["getGroup"];
-export type getGroupViewers = RouterOutput["groupViewer"]["getGroupViewers"];
-// this does not work
-// export type Channel = Pick<getActivityOutput, "channel">;
+export type getUserGroupsOutput = NonNullable<
+  RouterOutput["groups"]["getUserGroups"]
+>;
+export type addGroupOutput = NonNullable<RouterOutput["groups"]["addGroup"]>;
+export type addDynamicGroupOutput = NonNullable<
+  RouterOutput["groups"]["addDynamicGroup"]
+>;
 
-export type Channel = {
-  users: {
-    image: string | null;
-    name: string | null;
-    userId: string;
-    slug: string;
-  }[];
-  messages: Message[];
-  id: string;
-  title: string | null;
-  description: string | null;
-  createdAt: Date;
-  activitySlug: string;
-  groupSlug?: string;
-};
+type getGroupViewersOutput = NonNullable<
+  RouterOutput["groupViewer"]["getGroupViewers"]
+>;
 
-export type ChannelOverview = {
-  id: string;
-  title: string;
-  slug: string;
-  activitySlug: string;
-  groupSlug?: string;
-  unreadMessagesCount: string;
-  viewersCount: number;
-};
+export type Viewers = getActivityViewersOutput | getGroupViewersOutput;
 
-export type ChannelsOverview = ChannelOverview[];
+type BaseChannel =
+  (Pick<getActivityOutput | getGroupOutput, "channel">)["channel"];
 
-export type GroupOverview = {
-  title: string;
-  slug: string;
-  isMember: boolean;
-  activitySlug: string;
-  viewersCount: number;
-};
+export type ChannelMessage = Omit<
+  Pick<BaseChannel, "messages">["messages"][number],
+  "channelId"
+>;
 
-export type GroupsOverview = GroupOverview[];
+export type Channel =
+  & Omit<BaseChannel, "messages">
+  & { messages: ChannelMessage[] };
+
+export type ActivityOutput =
+  & Omit<getActivityOutput, "channel">
+  & { channel: Channel };
+
+export type Activity = Omit<
+  NonNullable<ActivityOutput>,
+  "channel" | "groups"
+>;
+
+type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
+
+export type GroupOutput =
+  & Omit<getGroupOutput, "channel">
+  & { channel: Channel };
+
+export type Group = Omit<GroupOutput, "channel">;
 
 export const addActivityInput = z.object({
   title: z.string().trim(),
@@ -66,18 +69,13 @@ export const addGroupInput = z.object({
   title: z.string().trim(),
   description: z.string(),
   activityId: z.string(),
-  // startingAt: z.date()
-  // endingAt: z.date().optional()
 });
 
 export const addDynamicGroupInput = z.object({
   title: z.string().trim(),
   description: z.string(),
   activityId: z.string(),
-  activitySlug: z.string(),
   otherUserId: z.string(),
-  // startingAt: z.date()
-  // endingAt: z.date().optional()
 });
 
 export type AddActivityValidator = z.infer<typeof addActivityInput>;
@@ -96,9 +94,9 @@ export type addToRegistrationsOutput = RouterOutput["registrations"]["add"];
 export type removeFromRegistratiosOutput =
   RouterOutput["registrations"]["remove"];
 
-export type createChannelOutput = RouterOutput["chat"]["createChannel"];
+// export type createChannelOutput = RouterOutput["chat"]["createChannel"];
 // export type getChannelOutput = RouterOutput["chat"]["getChannel"];
-export type sendMessageOutput = RouterOutput["chat"]["sendMessage"];
+// export type sendMessageOutput = RouterOutput["chat"]["sendMessage"];
 
 export const createChannelInput = z.object({
   title: z.string().optional(),
@@ -115,43 +113,43 @@ export const sendMessageInput = z.object({
   content: z.string(),
   channelId: z.string(),
   receivers: receiversInput,
-  activitySlug: z.string(),
-  groupSlug: z.string().optional(),
 });
 
 export type MessageInput = z.infer<typeof sendMessageInput>;
 
-export type PusherMessageAction = "message";
+type PusherChatMessage = {
+  action: "message";
+} & ChannelMessage;
 
-export type PusherMessegeViewAction = "add_viewer" | "remove_viewer";
-
-export type PusherMessegeJoinAction =
-  | "invite_request"
-  | "invite_accepted"
-  | "invite_declined"
-  | "quick_search_found";
-
-type BasePusherMessage = {
-  // id: string;
-  action:
-    | PusherMessegeViewAction
-    | PusherMessageAction
-    | PusherMessegeJoinAction;
+type PusherViewerMessage = {
+  action: "add_viewer" | "remove_viewer";
   sentBy: string;
-  activitySlug: string;
-  groupSlug?: string;
+};
+
+type PusherInviteMessage = {
+  action:
+    | "invite_request"
+    | "invite_accepted"
+    | "invite_declined";
+  groupId: string;
+  activityId: string;
+  sentBy: string;
+};
+
+type PusherQuickSearchMessage = {
+  action: "quick_search_found";
+  activityId: string;
+  sentBy: string;
 };
 
 export type PusherMessage =
-  | (BasePusherMessage & { action: PusherMessegeViewAction })
-  | (BasePusherMessage & { action: PusherMessageAction; content: string })
-  | (BasePusherMessage & {
-    action: PusherMessegeJoinAction;
-    requestId: string;
-  });
+  | PusherViewerMessage
+  | PusherChatMessage
+  | PusherInviteMessage
+  | PusherQuickSearchMessage;
 
 export type PusherSendProps = {
-  receivers: string[] | string;
+  receivers: string | string[];
   channelId: string;
   body: PusherMessage;
 };

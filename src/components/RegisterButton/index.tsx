@@ -83,7 +83,7 @@ const RegisterButton = (
       return;
     }
 
-    register({ activitySlug, activityId });
+    register({ activityId });
     store.addToRegistrations(activityId);
   }
   // const style = isRegistered

@@ -4,7 +4,7 @@ import { pusherSend } from "~/server/utils";
 
 export const registrationsRouter = createTRPCRouter({
   add: protectedProcedure
-    .input(z.object({ activityId: z.string(), activitySlug: z.string() }))
+    .input(z.object({ activityId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const user = await ctx.prisma.registrations.findFirst({
         where: { activityId: input.activityId },
@@ -12,13 +12,12 @@ export const registrationsRouter = createTRPCRouter({
 
       if (user) {
         pusherSend({
-          receivers: `user-${user.userId}`,
-          channelId: `quick-${input.activityId}`,
+          receivers: user.userId,
+          channelId: input.activityId,
           body: {
             action: "quick_search_found",
             sentBy: ctx.session.user.id,
-            activitySlug: input.activitySlug,
-            requestId: `quick-${input.activityId}:${ctx.session.user.id}`,
+            activityId: input.activityId,
           },
         });
       }

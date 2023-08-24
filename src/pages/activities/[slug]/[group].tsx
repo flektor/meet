@@ -1,20 +1,21 @@
 import { type NextPage } from "next";
-import React from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
 import Nav from "~/components/Nav";
-import useChannelUpdater from "~/hooks/useChannelUpdater";
 import Chat from "~/components/Chat";
 import useGroup from "~/hooks/useGroup";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
+import { useStore } from "~/utils/store";
 
 const Group: NextPage = () => {
   const router = useRouter();
+  const store = useStore();
   const slug = router.query.group as string;
   const activitySlug = router.query.slug as string;
   const screenSize = useScreenSize();
@@ -25,39 +26,15 @@ const Group: NextPage = () => {
     : "50vw";
   const mapHeight = mapWidth;
 
-  const { group, viewers, isLoading, error } = useGroup(activitySlug, slug);
+  const { group, isLoading, error } = useGroup(activitySlug, slug);
 
-  const { channel } = useChannelUpdater(slug, group, viewers);
+  useEffect(() => {
+    if (group) {
+      store.pusherSubscribe(group.channelId);
+    }
+  }, [group]);
 
   usePusherEventHandler();
-
-  // function onUpdateHandler(message: PusherMessage) {
-  //   console.log({ pusherMessage: message });
-
-  //   switch (message.action) {
-  //     case "message":
-  //       return refetchGroup();
-  //     case "viewer":
-  //       return refetchViewers();
-  //     case "invite":
-  //       return store.addToast({
-  //         displayMessage: "invite is not impenting yet",
-  //         pusherMessage: message,
-  //       });
-  //     case "quick":
-  //       return store.addToast({
-  //         displayMessage: "quick is not impenting yet",
-  //         pusherMessage: message,
-  //       });
-  //   }
-  // }
-
-  // function onFoundUserForRegisteredActivity(groupId: string) {
-  //   store.addToast({
-  //     message: `user invites to join ${groupId}`,
-  //     id: `inv-${groupId}`,
-  //   });
-  // }
 
   const name = group?.title.includes("-")
     ? group.title?.split("-")[0]
@@ -99,14 +76,10 @@ const Group: NextPage = () => {
                 <p className="pl-3 text-white text-2xl">{group.description}</p>
               </div>
 
-              {channel && (
-                <Chat
-                  channel={channel}
-                  isLoading={isLoading}
-                  activitySlug={activitySlug}
-                  groupSlug={group.slug}
-                />
-              )}
+              <Chat
+                isLoading={isLoading}
+                channelId={group.channelId}
+              />
 
               <Map width={mapWidth} height={mapHeight} draggable />
             </div>

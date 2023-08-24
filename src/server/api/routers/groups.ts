@@ -10,12 +10,31 @@ import { createSlug } from "~/utils";
 
 export const groupsRouter = createTRPCRouter({
   getGroup: publicProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ activitySlug: z.string(), slug: z.string() }))
     .query(async ({ input, ctx }) => {
       const group = await ctx.prisma.group
         .findUnique({
           where: { slug: input.slug },
-          include: { channel: { include: { Message: true } } },
+          include: {
+            _count: { select: { GroupViewer: true, Membership: true } },
+            channel: { include: { Message: true } },
+            // Favorites: true,
+            GroupViewer: {
+              include: {
+                user: { select: { id: true, name: true, image: true } },
+              },
+            },
+            Membership: {
+              select: { user: { select: { id: true } } },
+              where: {
+                userId: ctx.session?.user.id,
+                group: {
+                  activity: { slug: input.activitySlug },
+                  slug: input.slug,
+                },
+              },
+            },
+          },
         });
 
       if (!group) {
@@ -28,24 +47,34 @@ export const groupsRouter = createTRPCRouter({
           include: { user: true },
         });
 
-      const channelUsers = views.map(({ user }) => ({
+      const groupViewers = views.map(({ user }) => ({
         userId: user.id,
         image: user.image,
         name: user.name,
-        slug: `user-${user.id}`,
       }));
 
-      const { channel, ...rest } = group;
+      const { channel, GroupViewer, Membership, _count, ...activity } = group;
 
       return {
-        ...rest,
+        ...activity,
+        activityId: activity.id,
+        activitySlug: activity.slug,
+        viewersCount: group._count.GroupViewer,
+        isMember: group.Membership.length === 1,
+        membersCount: group._count.Membership,
+        favoritesCount: 0, // not impemented yey
+        isFavorite: false,
+        // isFavorite: ctx.session?.user.id
+        //   ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
+        //   : false,
+
         channel: {
-          users: channelUsers,
-          messages: channel.Message,
           id: channel.id,
+          messages: channel.Message,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,
+          users: groupViewers,
         },
       };
     }),
@@ -57,26 +86,33 @@ export const groupsRouter = createTRPCRouter({
         data: { title: input.title },
       });
 
-      return ctx.prisma.group.create({
+      const group = await ctx.prisma.group.create({
         data: {
           ...input,
           userId: ctx.session.user.id,
           slug: createSlug(input.title),
           channelId: channel.id,
-          // activityId: input.activityId,
         },
       });
+
+      await ctx.prisma.membership.create({
+        data: {
+          groupId: group.id,
+          userId: ctx.session.user.id,
+        },
+      });
+      return group;
     }),
 
   getUserGroups: protectedProcedure
     .query(async ({ ctx }) => {
       const groups = await ctx.prisma.group.findMany({
         where: { userId: ctx.session.user.id },
-        include: { GroupViewer: true },
+        include: { GroupViewer: true, activity: { select: { slug: true } } },
       });
 
-      return groups.map(({ GroupViewer, ...rest }) => ({
-        ...rest,
+      return groups.map(({ GroupViewer, activity, ...group }) => ({
+        ...group,
         viewersCount: GroupViewer.length,
       }));
     }),
@@ -89,8 +125,7 @@ export const groupsRouter = createTRPCRouter({
           title: input.title,
         },
       });
-      // console.log({ input });
-      const { otherUserId, activitySlug, ...rest } = input;
+      const { otherUserId, ...rest } = input;
       const title = input.title + "-" +
         Math.random().toString(16).substring(2);
 
@@ -111,26 +146,15 @@ export const groupsRouter = createTRPCRouter({
       });
 
       pusherSend({
-        receivers: `user-${input.otherUserId}`,
-        // slug: `accepted-${input.activityId}`,
-        channelId: `${input.activitySlug}/${group.slug}`,
+        channelId: group.channelId,
+        receivers: otherUserId,
         body: {
           action: "invite_accepted",
           sentBy: ctx.session.user.id,
-          activitySlug: input.activitySlug,
-          groupSlug: group.slug,
-          requestId: input.activitySlug + group.slug + ctx.session.user.id,
+          groupId: group.id,
+          activityId: group.activityId,
         },
       });
-
-      console.log(group);
-      return { ...group, activitySlug: input.activitySlug };
+      return { ...group };
     }),
 });
-
-// await ctx.prisma.membership.createMany({
-//   data: [{ userId: ctx.session.user.id, groupId: group.id }, {
-//     userId: otherUserId,
-//     groupId: group.id,
-//   }],
-// });

@@ -61,12 +61,13 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
         formRef.current.reset();
       }
 
-      store.addActivity({
+      store.setActivity({
         ...activity,
         isFavorite: false,
         isRegistered: false,
         favoritesCount: 0,
         registrationsCount: 0,
+        viewersCount: 0,
         groups: [],
         channel: {
           createdAt: new Date(),
