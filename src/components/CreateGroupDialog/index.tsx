@@ -16,7 +16,6 @@ import AlarmIcon from "../icons/Alarm";
 import { useStore } from "~/utils/store";
 import { createSlug } from "~/utils";
 import { addGroupInput } from "~/types";
-import { initTE, Input } from "tw-elements";
 import dynamic from "next/dynamic";
 import Map from "../Map";
 import useScreenSize from "~/hooks/useScreenSize";
@@ -83,26 +82,25 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
         setTitle("");
         formRef.current.reset();
       }
-      store.addGroup({
+      store.setGroup({
         ...group,
+        activitySlug,
+        viewersCount: 0,
+        isMember: true,
+        isFavorite: false,
+        membersCount: 1,
+        favoritesCount: 0,
+
         channel: {
+          id: `${activitySlug}/${group.slug}`,
           createdAt: new Date(),
-          description: "",
-          id: "temp",
+          description: group.description,
           messages: [],
           title: group.title,
           users: [],
         },
       });
 
-      store.addGroupOverview({
-        ...group,
-        activitySlug,
-        title,
-        slug: group.slug,
-        isMember: false,
-        viewersCount: 0,
-      });
       onNewGroup();
     },
 

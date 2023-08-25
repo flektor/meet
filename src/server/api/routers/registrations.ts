@@ -12,11 +12,12 @@ export const registrationsRouter = createTRPCRouter({
 
       if (user) {
         pusherSend({
-          receivers: `user-${user.userId}`,
-          slug: `quick-${input.activityId}`,
+          receivers: user.userId,
+          channelId: input.activityId,
           body: {
-            action: "quick",
+            action: "quick_search_found",
             sentBy: ctx.session.user.id,
+            activityId: input.activityId,
           },
         });
       }
@@ -38,6 +39,15 @@ export const registrationsRouter = createTRPCRouter({
             activityId: input.activityId,
             userId: ctx.session.user.id,
           },
+        },
+      });
+    }),
+
+  getAll: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await ctx.prisma.registrations.findMany({
+        where: {
+          userId: ctx.session.user.id,
         },
       });
     }),

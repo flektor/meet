@@ -22,9 +22,9 @@ const FavoriteButton = (
 
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
-  const activity = store.activities.find(({ id }) => id === activityId);
-  const isFavorite = activity?.isFavorite ?? false;
-  const favoritesCount = activity?.favoritesCount ?? 0;
+  const activityOverview = store.activities.find(({ id }) => id === activityId);
+  const isFavorite = activityOverview?.isFavorite ?? false;
+  const favoritesCount = activityOverview?.favoritesCount ?? 0;
 
   function toggleFavorite() {
     if (session.status !== "authenticated") {

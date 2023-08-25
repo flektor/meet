@@ -57,29 +57,50 @@ export const chatRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
       }
+      const message = await ctx.prisma.message.create({
+        data: {
+          content: input.content,
+          sentBy: ctx.session.user.id,
+          sentAt: new Date(),
+          channelId: input.channelId,
+        },
+      });
 
-      const message = {
-        content: input.content,
-        sentBy: ctx.session.user.id,
-        sentAt: new Date(),
-      };
-
-      if (
-        input.receivers !== "" &&
-        (input.receivers instanceof Array && input.receivers.length > 0)
-      ) {
-        pusherSend({
-          receivers: input.receivers,
-          slug: input.channelId,
-          body: {
-            action: "message",
-            sentBy: ctx.session.user.id,
+      const channel = await ctx.prisma.channel
+        .findUnique({
+          select: {
+            Group: { select: { GroupViewer: { select: { userId: true } } } },
+            activity: {
+              select: { ActivityViewer: { select: { userId: true } } },
+            },
           },
+          where: { id: input.channelId },
         });
+
+      console.log({ channelID: input.channelId, channel });
+
+      if (!channel) {
+        return message;
       }
 
-      return await ctx.prisma.message.create({
-        data: { ...message, channelId: input.channelId },
+      let receivers =
+        (channel.Group?.GroupViewer || channel.activity?.ActivityViewer || [])
+          .map(({ userId }) => userId);
+
+      if (receivers.length === 0) {
+        return message;
+      }
+
+      console.log({ receivers });
+
+      pusherSend({
+        receivers,
+        channelId: input.channelId,
+        body: {
+          action: "message",
+          ...message,
+        },
       });
+      return message;
     }),
 });

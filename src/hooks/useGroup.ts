@@ -1,38 +1,36 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../utils/store";
 import { api } from "../utils/api";
+import useGroupViewer from "./useGroupViewer";
 
-export default function useGroup(slug: string) {
+export default function useGroup(activitySlug: string, groupSlug: string) {
   const store = useStore();
 
   const { data, isLoading, error, refetch } = api.groups.getGroup
-    .useQuery({
-      slug,
-    }, { enabled: !!slug });
+    .useQuery({ activitySlug, slug: groupSlug }, { enabled: !!groupSlug });
 
-  const [group, setGroup] = useState(data);
+  const [group, setGroup] = useState(
+    store.groups.find(({ activitySlug: activitySlug2, slug: groupSlug2 }) =>
+      activitySlug === activitySlug2 && groupSlug2 === groupSlug
+    ) || data,
+  );
+
+  useGroupViewer(data);
 
   useEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    const isStored = store.groups.some(({ id }) => id === data.id);
-
-    if (isStored) {
-      store.updateGroup(data);
-    } else {
-      store.addGroup(data);
+    if (data) {
+      store.setGroup(data);
     }
   }, [data]);
 
   useEffect(() => {
-    if (!data) {
-      return;
-    }
+    const group =
+      store.groups.find(({ activitySlug: activitySlug2, slug: groupSlug2 }) =>
+        activitySlug === activitySlug2 && groupSlug2 === groupSlug
+      ) || data;
 
-    setGroup(data);
-  }, [store.groups, data]);
+    setGroup(group);
+  }, [store.groups]);
 
   return { group, error, isLoading, refetch };
 }

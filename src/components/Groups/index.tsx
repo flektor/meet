@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { GroupsOverview } from "~/types";
+import { Group } from "~/types";
 import { useStore } from "~/utils/store";
 
 export type GroupsProps = {
@@ -9,14 +9,14 @@ export type GroupsProps = {
 
 const Groups = ({ activitySlug }: GroupsProps) => {
   const store = useStore();
-  const [groups, setGroups] = useState<GroupsOverview>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
-    const groups = store.groupsOverview.filter(({ activitySlug: slug }) =>
+    const groups = store.groups.filter(({ activitySlug: slug }) =>
       slug === activitySlug
     );
     setGroups(groups);
-  }, [store.groupsOverview]);
+  }, [store.groups]);
 
   return (
     <section>

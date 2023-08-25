@@ -1,49 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
 import Spinner from "~/components/Spinner";
 import Nav from "~/components/Nav";
 import LeaveIcon from "~/components/icons/Leave";
 import useActivities from "~/hooks/useActivities";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
-import Toast from "~/components/InvitationToast";
 import Link from "next/link";
 import DotsLoader from "~/components/DotsLoader";
 import { useRouter } from "next/router";
+import Toasts from "~/components/Toasts";
+import { useStore } from "~/utils/store";
 
 const Favorites: NextPage = () => {
-  const { data: session } = useSession();
   const { activities, isLoading, error } = useActivities();
   const favorites = activities.filter((activity) => activity.isFavorite);
   const router = useRouter();
-  const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
-
-  const [toasts, setToasts] = useState<
-    { message: string; icon?: string }[]
-  >(
-    [],
-  );
-
-  function onFoundUserForRegisteredActivity(activityId: string) {
-    setToasts((
-      prev,
-    ) => [...prev, { message: `user invites to join ${activityId}` }]);
-  }
-
-  function removeToast(index: number) {
-    setToasts((prev) => [...(prev.filter((t, i) => i !== index))]);
-  }
-
-  function onAcceptInvitation(index: number) {
-    removeToast(index);
-  }
-
-  function onDeclineInvitation(index: number) {
-    removeToast(index);
-  }
-
   return (
     <>
       <Head>
@@ -53,19 +26,8 @@ const Favorites: NextPage = () => {
       </Head>
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Nav />
+        <Toasts />
 
-        <ul className="fixed top-20 right-3 z-20 flex flex-col gap-2">
-          {toasts.map(({ message }, index) => (
-            <li key={index}>
-              <Toast
-                message={message}
-                onAccept={() => onAcceptInvitation(index)}
-                onDecline={() => onDeclineInvitation(index)}
-                onDie={() => removeToast(index)}
-              />
-            </li>
-          ))}
-        </ul>
         <header className="w-full flex items-center justify-center mb-6 p-1">
           <div className="mt-32 flex items-center">
             <button
@@ -120,7 +82,7 @@ const Favorites: NextPage = () => {
                         <RegisterButton
                           activityId={id}
                           className="mt-1"
-                          onPusherMessage={onFoundUserForRegisteredActivity}
+                          activitySlug={slug}
                         />
                       </div>
 
