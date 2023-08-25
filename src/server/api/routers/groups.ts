@@ -16,15 +16,15 @@ export const groupsRouter = createTRPCRouter({
         .findUnique({
           where: { slug: input.slug },
           include: {
-            _count: { select: { GroupViewer: true, Membership: true } },
-            channel: { include: { Message: true } },
+            _count: { select: { viewers: true, memberships: true } },
+            channel: { include: { messages: true } },
             // Favorites: true,
-            GroupViewer: {
+            viewers: {
               include: {
                 user: { select: { id: true, name: true, image: true } },
               },
             },
-            Membership: {
+            memberships: {
               select: { user: { select: { id: true } } },
               where: {
                 userId: ctx.session?.user.id,
@@ -53,15 +53,15 @@ export const groupsRouter = createTRPCRouter({
         name: user.name,
       }));
 
-      const { channel, GroupViewer, Membership, _count, ...activity } = group;
+      const { channel, viewers, memberships, _count, ...activity } = group;
 
       return {
         ...activity,
         activityId: activity.id,
         activitySlug: activity.slug,
-        viewersCount: group._count.GroupViewer,
-        isMember: group.Membership.length === 1,
-        membersCount: group._count.Membership,
+        viewersCount: group._count.viewers,
+        isMember: group.memberships.length === 1,
+        membersCount: group._count.memberships,
         favoritesCount: 0, // not impemented yey
         isFavorite: false,
         // isFavorite: ctx.session?.user.id
@@ -70,7 +70,7 @@ export const groupsRouter = createTRPCRouter({
 
         channel: {
           id: channel.id,
-          messages: channel.Message,
+          messages: channel.messages,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,
@@ -89,7 +89,7 @@ export const groupsRouter = createTRPCRouter({
       const group = await ctx.prisma.group.create({
         data: {
           ...input,
-          userId: ctx.session.user.id,
+          createdBy: ctx.session.user.id,
           slug: createSlug(input.title),
           channelId: channel.id,
         },
@@ -107,13 +107,17 @@ export const groupsRouter = createTRPCRouter({
   getUserGroups: protectedProcedure
     .query(async ({ ctx }) => {
       const groups = await ctx.prisma.group.findMany({
-        where: { userId: ctx.session.user.id },
-        include: { GroupViewer: true, activity: { select: { slug: true } } },
+        include: {
+          memberships: true,
+          viewers: true,
+          activity: { select: { slug: true } },
+        },
+        where: { memberships: { every: { userId: ctx.session.user.id } } },
       });
 
-      return groups.map(({ GroupViewer, activity, ...group }) => ({
+      return groups.map(({ viewers, activity, ...group }) => ({
         ...group,
-        viewersCount: GroupViewer.length,
+        viewersCount: viewers.length,
       }));
     }),
 
@@ -133,10 +137,10 @@ export const groupsRouter = createTRPCRouter({
         data: {
           ...rest,
           title,
-          userId: ctx.session.user.id,
+          createdBy: ctx.session.user.id,
           slug: createSlug(title),
           channelId: channel.id,
-          Membership: {
+          memberships: {
             create: [
               { userId: ctx.session.user.id },
               { userId: otherUserId },

@@ -12,9 +12,9 @@ export const activitiesRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const activities = await ctx.prisma.activity.findMany({
         include: {
-          Favorites: true,
-          Registrations: true,
-          ActivityViewer: {
+          favorites: true,
+          registrations: true,
+          viewers: {
             include: {
               user: { select: { id: true, name: true, image: true } },
             },
@@ -23,9 +23,9 @@ export const activitiesRouter = createTRPCRouter({
       });
 
       return activities.map((
-        { Favorites, Registrations, ActivityViewer, ...activity },
+        { favorites, registrations, viewers, ...activity },
       ) => {
-        const activityViewers = ActivityViewer.map(({ user }) => ({
+        const activityViewers = viewers.map(({ user }) => ({
           userId: user.id,
           image: user.image,
           name: user.name,
@@ -34,14 +34,14 @@ export const activitiesRouter = createTRPCRouter({
         return ({
           ...activity,
           viewersCount: activityViewers.length,
-          registrationsCount: Registrations.length,
-          favoritesCount: Favorites.length,
+          registrationsCount: registrations.length,
+          favoritesCount: favorites.length,
           isFavorite: ctx.session?.user.id
-            ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
+            ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
             : false,
 
           isRegistered: ctx.session?.user.id
-            ? Registrations.some(({ userId }) =>
+            ? registrations.some(({ userId }) =>
               ctx.session?.user.id === userId
             )
             : false,
@@ -56,17 +56,17 @@ export const activitiesRouter = createTRPCRouter({
         .findUnique({
           where: { slug: input.slug },
           include: {
-            Favorites: true,
-            Registrations: true,
-            ActivityViewer: {
+            favorites: true,
+            registrations: true,
+            viewers: {
               include: {
                 user: { select: { id: true, name: true, image: true } },
               },
             },
             groups: {
               include: {
-                _count: { select: { GroupViewer: true, Membership: true } },
-                Membership: {
+                _count: { select: { viewers: true, memberships: true } },
+                memberships: {
                   select: { user: { select: { id: true } } },
                   where: {
                     userId: ctx.session?.user.id,
@@ -77,7 +77,7 @@ export const activitiesRouter = createTRPCRouter({
                 },
               },
             },
-            channel: { include: { Message: true } },
+            channel: { include: { messages: true } },
           },
         });
 
@@ -85,32 +85,32 @@ export const activitiesRouter = createTRPCRouter({
         return;
       }
 
-      const activityViewers = activity.ActivityViewer.map(({ user }) => ({
+      const activityViewers = activity.viewers.map(({ user }) => ({
         userId: user.id,
         image: user.image,
         name: user.name,
       }));
 
       const {
-        Favorites,
-        Registrations,
+        favorites,
+        registrations,
         channel,
         groups,
-        ActivityViewer,
+        viewers,
         ...rest
       } = activity;
 
       return {
         ...rest,
         viewersCount: activityViewers.length,
-        registrationsCount: Registrations.length,
-        favoritesCount: Favorites.length,
+        registrationsCount: registrations.length,
+        favoritesCount: favorites.length,
         isFavorite: ctx.session?.user.id
-          ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
+          ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
 
         isRegistered: ctx.session?.user.id
-          ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          ? registrations.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
 
         groups: groups.map((group) => ({
@@ -120,9 +120,9 @@ export const activitiesRouter = createTRPCRouter({
           slug: group.slug,
           activitySlug: activity.slug,
           channelId: group.channelId,
-          viewersCount: group._count.GroupViewer,
-          isMember: group.Membership.length === 1,
-          membersCount: group.Membership.length,
+          viewersCount: group._count.viewers,
+          isMember: group.memberships.length === 1,
+          membersCount: group.memberships.length,
           favoritesCount: 0, // not implemented yet
           isFavorite: false, // not implemented yet
         })),
@@ -130,7 +130,7 @@ export const activitiesRouter = createTRPCRouter({
         channel: {
           id: activity.channelId,
           users: activityViewers,
-          messages: channel.Message,
+          messages: channel.messages,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,
@@ -149,6 +149,7 @@ export const activitiesRouter = createTRPCRouter({
       return ctx.prisma.activity.create({
         data: {
           ...input,
+          createdBy: ctx.session.user.id,
           slug: createSlug(input.title),
           channelId: channel.id,
         },

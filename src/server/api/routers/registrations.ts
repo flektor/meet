@@ -6,7 +6,7 @@ export const registrationsRouter = createTRPCRouter({
   add: protectedProcedure
     .input(z.object({ activityId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const user = await ctx.prisma.registrations.findFirst({
+      const user = await ctx.prisma.registration.findFirst({
         where: { activityId: input.activityId },
       });
 
@@ -27,13 +27,13 @@ export const registrationsRouter = createTRPCRouter({
         activityId: input.activityId,
       };
 
-      return ctx.prisma.registrations.create({ data });
+      return ctx.prisma.registration.create({ data });
     }),
 
   remove: protectedProcedure
     .input(z.object({ activityId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await ctx.prisma.registrations.delete({
+      return await ctx.prisma.registration.delete({
         where: {
           userId_activityId: {
             activityId: input.activityId,
@@ -45,7 +45,7 @@ export const registrationsRouter = createTRPCRouter({
 
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      return await ctx.prisma.registrations.findMany({
+      return await ctx.prisma.registration.findMany({
         where: {
           userId: ctx.session.user.id,
         },
