@@ -11,6 +11,14 @@ import type {
   User,
 } from "~/types";
 
+const dummyBaseGroup = {
+  membersIds: [],
+  viewersIds: [],
+  description: "",
+  createdAt: new Date(),
+  createdBy: "",
+};
+
 type Store = {
   activities: Activity[];
   groups: Group[];
@@ -95,6 +103,7 @@ export const useStore = create<Store>((set) => ({
       );
 
       const userIds = users.map(({ id }) => id);
+      const restUsers = state.users.filter(({ id }) => !userIds.includes(id));
 
       return ({
         activities: [
@@ -104,19 +113,9 @@ export const useStore = create<Store>((set) => ({
         channels: [...restChannels, channel],
         groups: [
           ...restGroups,
-          ...groups.map((group) => ({
-            ...group,
-            membersIds: [],
-            viewersIds: [],
-            description: "",
-            createdAt: new Date(),
-            createdBy: "",
-          })),
+          ...groups.map((group) => ({ ...group, ...dummyBaseGroup })),
         ],
-        users: [
-          ...state.users.filter(({ id }) => !userIds.includes(id)),
-          ...users,
-        ],
+        users: [...restUsers, ...users],
       });
     }),
 
@@ -146,18 +145,16 @@ export const useStore = create<Store>((set) => ({
 
   setGroup: (group: GroupOutput) =>
     set((state) => {
-      const { channel, ...rest } = group;
+      const { channel, users, ...rest } = group;
+      const userIds = users.map(({ id }) => id);
+      const restGroups = state.groups.filter(({ id }) => id !== group.id);
+      const restChannels = state.channels.filter(({ id }) => id !== channel.id);
+      const restUsers = state.users.filter(({ id }) => !userIds.includes(id));
+      console.log(channel.messages[channel.messages.length - 1]);
       return ({
-        groups: !state.groups.some(({ id }) => id === group.id)
-          ? [...state.groups, group]
-          : state.groups.map((prev) =>
-            prev.id === group.id ? ({ ...rest }) : prev
-          ),
-        channels: !state.channels.some(({ id }) => id === channel.id)
-          ? [...state.channels, channel]
-          : state.channels.map((prev) =>
-            prev.id === group.id ? ({ ...channel }) : prev
-          ),
+        channels: [...restChannels, channel],
+        groups: [...restGroups, rest],
+        users: [...restUsers, ...users],
       });
     }),
 
