@@ -2,7 +2,12 @@ import { type FunctionComponent } from "react";
 import Toast from "../InvitationToast";
 import React from "react";
 import { useStore } from "../../utils/store";
-import { addDynamicGroupInput, PusherMessage } from "~/types";
+import {
+  addDynamicGroupInput,
+  PusherInviteMessage,
+  PusherMessage,
+  PusherQuickSearchMessage,
+} from "~/types";
 import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 
@@ -20,7 +25,14 @@ const Toasts: FunctionComponent = () => {
     },
   });
 
-  function onAcceptInvitation(toastId: string, message: PusherMessage) {
+  function getToastId(message: PusherInviteMessage | PusherQuickSearchMessage) {
+    if (message.action === "quick_search_found") {
+      return `${message.activitySlug}:${message.sentBy}`;
+    }
+    return `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`;
+  }
+
+  function onAcceptInvitation(message: PusherMessage) {
     if (message.action !== "invite_accepted") {
       return;
     }
@@ -29,7 +41,7 @@ const Toasts: FunctionComponent = () => {
       activity.slug === message.activitySlug
     );
 
-    store.removeToast(message.requestId);
+    store.removeToast(getToastId(message));
     router.push(`/activities/${message.activitySlug}/${message.groupSlug}`);
 
     if (!activity) {
@@ -48,11 +60,13 @@ const Toasts: FunctionComponent = () => {
       addDynamicGroup.mutate(data);
     } catch (error) {}
 
-    store.removeToast(toastId);
+    store.removeToast(getToastId(message));
   }
 
-  function onDeclineInvitation(toastId: string) {
-    store.removeToast(toastId);
+  function onDeclineInvitation(
+    message: PusherInviteMessage | PusherQuickSearchMessage,
+  ) {
+    store.removeToast(getToastId(message));
   }
 
   return (
@@ -61,9 +75,9 @@ const Toasts: FunctionComponent = () => {
         <li key={id}>
           <Toast
             message={displayMessage}
-            onAccept={() => onAcceptInvitation(id, pusherMessage)}
-            onDecline={() => onDeclineInvitation(id)}
-            onDie={() => store.removeToast(id)}
+            onAccept={() => onAcceptInvitation(pusherMessage)}
+            onDecline={() => onDeclineInvitation(pusherMessage)}
+            onDie={() => store.removeToast(getToastId(pusherMessage))}
           />
         </li>
       ))}

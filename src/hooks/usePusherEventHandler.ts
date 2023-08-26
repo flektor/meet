@@ -23,28 +23,28 @@ export default function usePusherEventHandler() {
 
       case "invite_request":
         return store.addToast({
-          id: `${message.activityId}-${message.groupId}:${message.sentBy}`,
+          id: `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`,
           displayMessage: "'invite' not implemented yet",
           pusherMessage: message,
         });
 
       case "quick_search_found":
         return store.addToast({
-          id: `${message.activityId}:${message.sentBy}`,
+          id: `${message.activitySlug}:${message.sentBy}`,
           displayMessage: "'quick' not implemented yet",
           pusherMessage: message,
         });
 
       case "invite_accepted":
         return store.addToast({
-          id: `${message.activityId}-${message.groupId}:${message.sentBy}`,
+          id: `${message.activitySlug}-${message.groupSlug}:${message.sentBy}`,
           displayMessage: `${message.sentBy} is interested on ${channel}`,
           pusherMessage: message,
         });
 
       case "invite_declined":
         return store.addToast({
-          id: `${message.activityId}-${message.groupId}:${message.sentBy}`,
+          id: `${message.activitySlug}-${message.groupSlug}:${message.sentBy}`,
           displayMessage: `${message.sentBy} is not interested on ${channel}`,
           pusherMessage: message,
         });
