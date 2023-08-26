@@ -80,6 +80,7 @@ export const addDynamicGroupInput = z.object({
   title: z.string().trim(),
   description: z.string(),
   activityId: z.string(),
+  activitySlug: z.string(),
   otherUserId: z.string(),
 });
 
@@ -131,19 +132,19 @@ type PusherViewerMessage = {
   sentBy: string;
 };
 
-type PusherInviteMessage = {
+export type PusherInviteMessage = {
   action:
     | "invite_request"
     | "invite_accepted"
     | "invite_declined";
-  groupId: string;
-  activityId: string;
+  groupSlug: string;
+  activitySlug: string;
   sentBy: string;
 };
 
-type PusherQuickSearchMessage = {
+export type PusherQuickSearchMessage = {
   action: "quick_search_found";
-  activityId: string;
+  activitySlug: string;
   sentBy: string;
 };
 
@@ -161,7 +162,7 @@ export type PusherSendProps = {
 
 export type Toast = {
   displayMessage: string;
-  pusherMessage: PusherMessage;
+  pusherMessage: PusherInviteMessage | PusherQuickSearchMessage;
   id: string;
   icon?: string;
 };
