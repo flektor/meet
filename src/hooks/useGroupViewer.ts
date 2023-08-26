@@ -21,7 +21,7 @@ export default function useGroupViewers(group: Group | undefined) {
       }
     };
 
-    if (group && !store.userIsViewingPage) {
+    if (group && store.userIsViewingPage !== group.slug) {
       addToViewers.mutate({
         groupId: group.id,
         channelId: group.channelId,

@@ -21,7 +21,7 @@ export default function useActivityViewers(activity: Activity | undefined) {
       }
     };
 
-    if (activity && !store.userIsViewingPage) {
+    if (activity && store.userIsViewingPage !== activity.slug) {
       addToViewers.mutate({
         activityId: activity.id,
         channelId: activity.channelId,
