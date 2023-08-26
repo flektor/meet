@@ -147,10 +147,10 @@ export const groupsRouter = createTRPCRouter({
         body: {
           action: "invite_accepted",
           sentBy: ctx.session.user.id,
-          groupId: group.id,
-          activityId: group.activityId,
+          groupSlug: group.slug,
+          activitySlug: group.slug,
         },
       });
-      return { ...group };
+      return { ...group, activitySlug: input.activitySlug };
     }),
 });
