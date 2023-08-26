@@ -39,6 +39,8 @@ function Chat({ isLoading, channelId }: ChatProps) {
     return <span className="text-white text-2xl">Sign in to see the chat</span>;
   }
 
+  const username = session.user.name || "you";
+
   return (
     <section
       aria-label="chat"
@@ -65,6 +67,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
             <ChatMessage
               key={index}
               message={message}
+              currentUsername={username}
             />
           ))}
         </div>
