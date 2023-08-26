@@ -5,8 +5,11 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { pusherSend } from "~/server/utils";
-import { addDynamicGroupInput, addGroupInput } from "~/types";
+import { addDynamicGroupInput, addGroupInput, User } from "~/types";
 import { createSlug } from "~/utils";
+
+const selectUserBaseFields = { select: { id: true, name: true, image: true } };
+const userBaseFields = { user: selectUserBaseFields };
 
 export const groupsRouter = createTRPCRouter({
   getGroup: publicProcedure
@@ -16,24 +19,11 @@ export const groupsRouter = createTRPCRouter({
         .findUnique({
           where: { slug: input.slug },
           include: {
-            _count: { select: { viewers: true, memberships: true } },
-            channel: { include: { messages: true } },
-            // Favorites: true,
-            viewers: {
-              include: {
-                user: { select: { id: true, name: true, image: true } },
-              },
+            channel: {
+              include: { messages: { include: userBaseFields, take: 20 } },
             },
-            memberships: {
-              select: { user: { select: { id: true } } },
-              where: {
-                userId: ctx.session?.user.id,
-                group: {
-                  activity: { slug: input.activitySlug },
-                  slug: input.slug,
-                },
-              },
-            },
+            viewers: { select: userBaseFields },
+            memberships: { select: userBaseFields },
           },
         });
 
@@ -41,40 +31,42 @@ export const groupsRouter = createTRPCRouter({
         return;
       }
 
-      const views = await ctx.prisma.groupViewer
-        .findMany({
-          where: { groupId: group.id },
-          include: { user: true },
-        });
+      const { channel, viewers, memberships, ...activity } = group;
+      const viewersIds = viewers.map(({ user }) => user.id);
+      const membersIds = memberships.map(({ user }) => user.id);
+      const channelUsersIds = channel.messages.map(({ user }) => user.id);
 
-      const groupViewers = views.map(({ user }) => ({
-        userId: user.id,
-        image: user.image,
-        name: user.name,
-      }));
+      const userMap = new Map();
+      const users = [
+        ...viewers.map(({ user }) => user),
+        ...memberships.map(({ user }) => user),
+        ...channel.messages.map(({ user }) => user),
+      ];
 
-      const { channel, viewers, memberships, _count, ...activity } = group;
+      users.forEach((user) => {
+        if (!userMap.has(user.id)) {
+          userMap.set(user.id, user);
+        }
+      });
+
+      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }));
 
       return {
         ...activity,
+        viewersIds,
+        membersIds,
+        users: [...userMap.values()] as typeof users,
         activityId: activity.id,
         activitySlug: activity.slug,
-        viewersCount: group._count.viewers,
-        isMember: group.memberships.length === 1,
-        membersCount: group._count.memberships,
-        favoritesCount: 0, // not impemented yey
-        isFavorite: false,
-        // isFavorite: ctx.session?.user.id
-        //   ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
-        //   : false,
-
+        membersCount: membersIds.length,
+        viewersCount: viewersIds.length,
         channel: {
           id: channel.id,
-          messages: channel.messages,
+          messages,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,
-          users: groupViewers,
+          usersIds: channelUsersIds,
         },
       };
     }),
@@ -104,22 +96,22 @@ export const groupsRouter = createTRPCRouter({
       return group;
     }),
 
-  getUserGroups: protectedProcedure
-    .query(async ({ ctx }) => {
-      const groups = await ctx.prisma.group.findMany({
-        include: {
-          memberships: true,
-          viewers: true,
-          activity: { select: { slug: true } },
-        },
-        where: { memberships: { every: { userId: ctx.session.user.id } } },
-      });
+  // getUserGroups: protectedProcedure
+  //   .query(async ({ ctx }) => {
+  //     const groups = await ctx.prisma.group.findMany({
+  //       include: {
+  //         memberships: true,
+  //         viewers: true,
+  //         activity: { select: { slug: true } },
+  //       },
+  //       where: { memberships: { every: { userId: ctx.session.user.id } } },
+  //     });
 
-      return groups.map(({ viewers, activity, ...group }) => ({
-        ...group,
-        viewersCount: viewers.length,
-      }));
-    }),
+  //     return groups.map(({ viewers, activity, ...group }) => ({
+  //       ...group,
+  //       viewersCount: viewers.length,
+  //     }));
+  //   }),
 
   addDynamicGroup: protectedProcedure
     .input(addDynamicGroupInput)

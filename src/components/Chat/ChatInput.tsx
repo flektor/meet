@@ -2,9 +2,7 @@ import React, { type FormEvent, useRef } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
 import { Channel, sendMessageInput } from "../../types";
-import { getUserNameById } from "../../utils";
 import { useStore } from "~/utils/store";
-import { useSession } from "next-auth/react";
 
 type ChatInputProps = {
   channel: Channel;
@@ -17,7 +15,7 @@ function ChatInput({ channel }: ChatInputProps) {
   const { mutate: sendMessage } = api.chat.sendMessage.useMutation({
     onError: (error) => console.log(error),
     onSuccess: (message) => {
-      message.sentBy = getUserNameById(channel, message.sentBy);
+      console.log(message);
       store.addMessage(channel.id, message);
       formRef.current?.reset();
     },
@@ -28,7 +26,6 @@ function ChatInput({ channel }: ChatInputProps) {
     try {
       const data = {
         channelId: channel.id,
-        receivers: channel.users.map(({ userId }) => userId),
         content:
           Object.fromEntries(new FormData(event.currentTarget))["content"],
       };

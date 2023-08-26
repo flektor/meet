@@ -4,8 +4,11 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { addActivityInput } from "~/types";
+import { addActivityInput, User } from "~/types";
 import { createSlug } from "~/utils";
+
+const selectUserBaseFields = { select: { id: true, name: true, image: true } };
+const userBaseFields = { user: selectUserBaseFields };
 
 export const activitiesRouter = createTRPCRouter({
   getActivities: publicProcedure
@@ -14,39 +17,26 @@ export const activitiesRouter = createTRPCRouter({
         include: {
           favorites: true,
           registrations: true,
-          viewers: {
-            include: {
-              user: { select: { id: true, name: true, image: true } },
-            },
-          },
+          _count: { select: { viewers: true } },
         },
       });
 
       return activities.map((
-        { favorites, registrations, viewers, ...activity },
-      ) => {
-        const activityViewers = viewers.map(({ user }) => ({
-          userId: user.id,
-          image: user.image,
-          name: user.name,
-        }));
+        { favorites, registrations, _count, ...activity },
+      ) => ({
+        ...activity,
+        viewersIds: [],
+        viewersCount: _count.viewers,
+        registrationsCount: registrations.length,
+        favoritesCount: favorites.length,
+        isFavorite: ctx.session?.user.id
+          ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
 
-        return ({
-          ...activity,
-          viewersCount: activityViewers.length,
-          registrationsCount: registrations.length,
-          favoritesCount: favorites.length,
-          isFavorite: ctx.session?.user.id
-            ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
-            : false,
-
-          isRegistered: ctx.session?.user.id
-            ? registrations.some(({ userId }) =>
-              ctx.session?.user.id === userId
-            )
-            : false,
-        });
-      });
+        isRegistered: ctx.session?.user.id
+          ? registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
+      }));
     }),
 
   getActivity: publicProcedure
@@ -59,37 +49,34 @@ export const activitiesRouter = createTRPCRouter({
             favorites: true,
             registrations: true,
             viewers: {
-              include: {
-                user: { select: { id: true, name: true, image: true } },
-              },
+              include: userBaseFields,
             },
             groups: {
               include: {
                 _count: { select: { viewers: true, memberships: true } },
                 memberships: {
-                  select: { user: { select: { id: true } } },
+                  select: userBaseFields,
                   where: {
                     userId: ctx.session?.user.id,
-                    group: {
-                      activity: { slug: input.slug },
-                    },
+                    group: { activity: { slug: input.slug } },
                   },
                 },
               },
             },
-            channel: { include: { messages: true } },
+            channel: {
+              include: {
+                messages: {
+                  include: userBaseFields,
+                  take: 20,
+                },
+              },
+            },
           },
         });
 
       if (!activity) {
         return;
       }
-
-      const activityViewers = activity.viewers.map(({ user }) => ({
-        userId: user.id,
-        image: user.image,
-        name: user.name,
-      }));
 
       const {
         favorites,
@@ -100,9 +87,28 @@ export const activitiesRouter = createTRPCRouter({
         ...rest
       } = activity;
 
+      const viewersIds = viewers.map(({ user }) => user.id);
+      const channelUsersIds = channel.messages.map(({ user }) => user.id);
+
+      const users = [
+        ...viewers.map(({ user }) => user),
+        ...channel.messages.map(({ user }) => user),
+      ];
+      const userMap = new Map<string, typeof users[number]>();
+
+      users.forEach((user) => {
+        if (!userMap.has(user.id)) {
+          userMap.set(user.id, user);
+        }
+      });
+
+      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }));
+
       return {
         ...rest,
-        viewersCount: activityViewers.length,
+        users: [...userMap.values()] as typeof users,
+        viewersIds,
+        viewersCount: activity.viewers.length,
         registrationsCount: registrations.length,
         favoritesCount: favorites.length,
         isFavorite: ctx.session?.user.id
@@ -122,15 +128,15 @@ export const activitiesRouter = createTRPCRouter({
           channelId: group.channelId,
           viewersCount: group._count.viewers,
           isMember: group.memberships.length === 1,
-          membersCount: group.memberships.length,
+          membersCount: group._count.memberships,
           favoritesCount: 0, // not implemented yet
           isFavorite: false, // not implemented yet
         })),
 
         channel: {
           id: activity.channelId,
-          users: activityViewers,
-          messages: channel.messages,
+          usersId: channelUsersIds,
+          messages: messages,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,

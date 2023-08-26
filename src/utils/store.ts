@@ -8,8 +8,8 @@ import type {
   Group,
   GroupOutput,
   Toast,
+  User,
 } from "~/types";
-import { renameChannelUsers, renameMessageUser } from ".";
 
 type Store = {
   activities: Activity[];
@@ -18,6 +18,8 @@ type Store = {
   userIsViewingPage: string | null;
   pusherSubscriptions: string[];
   channels: Channel[];
+  users: User[];
+
   setChannel: (channel: Channel) => void;
   removeChannel: (channelId: string) => void;
 
@@ -44,21 +46,42 @@ type Store = {
 
   pusherSubscribe: (channelId: string) => void;
   pusherUnsubscribe: (channelId: string) => void;
+
+  setUsers: (users: User[]) => void;
+  removeUsers: (users: User[]) => void;
 };
 
 export const useStore = create<Store>((set) => ({
   activities: [],
   groups: [],
   channels: [],
+  users: [],
   toasts: [],
   pusherSubscriptions: [],
   userIsViewingPage: null,
+
+  setUsers(users: User[]) {
+    const userIds = users.map(({ id }) => id);
+    return set((state) => ({
+      users: [
+        ...state.users.filter(({ id }) => !userIds.includes(id)),
+        ...users,
+      ],
+    }));
+  },
+
+  removeUsers(users: User[]) {
+    const userIds = users.map(({ id }) => id);
+    return set((state) => ({
+      users: state.users.filter(({ id }) => !userIds.includes(id)),
+    }));
+  },
 
   setActivities: (activities: getActivitiesOutput) => set({ activities }),
 
   setActivity: (activity: getActivityOutput) =>
     set((state) => {
-      const { channel, groups, ...rest } = activity;
+      const { channel, groups, users, ...rest } = activity;
       const groupIdsToAdd = activity.groups.map(({ id }) => id);
       const restGroups = state.groups.filter(({ id }) =>
         !groupIdsToAdd.includes(id)
@@ -71,17 +94,28 @@ export const useStore = create<Store>((set) => ({
         !channelIdsToAdd.includes(id)
       );
 
+      const userIds = users.map(({ id }) => id);
+
       return ({
         activities: [
           ...state.activities.filter(({ id }) => id !== activity.id),
           rest,
         ],
-        channels: [...restChannels, renameChannelUsers(channel)],
+        channels: [...restChannels, channel],
         groups: [
           ...restGroups,
-          ...groups.map(
-            (group) => ({ ...group, description: "" } as GroupOutput),
-          ),
+          ...groups.map((group) => ({
+            ...group,
+            membersIds: [],
+            viewersIds: [],
+            description: "",
+            createdAt: new Date(),
+            createdBy: "",
+          })),
+        ],
+        users: [
+          ...state.users.filter(({ id }) => !userIds.includes(id)),
+          ...users,
         ],
       });
     }),
@@ -120,9 +154,9 @@ export const useStore = create<Store>((set) => ({
             prev.id === group.id ? ({ ...rest }) : prev
           ),
         channels: !state.channels.some(({ id }) => id === channel.id)
-          ? [...state.channels, renameChannelUsers(channel)]
+          ? [...state.channels, channel]
           : state.channels.map((prev) =>
-            prev.id === group.id ? ({ ...renameChannelUsers(channel) }) : prev
+            prev.id === group.id ? ({ ...channel }) : prev
           ),
       });
     }),
@@ -192,7 +226,7 @@ export const useStore = create<Store>((set) => ({
       groups: state.groups.map((group) =>
         group.channelId !== channelId ? group : ({
           ...group,
-          viewersCount: group.viewersCount + 1,
+          viewersCount: group.viewersIds.length + 1,
         })
       ),
       activities: state.activities.map((activity) =>
@@ -237,7 +271,7 @@ export const useStore = create<Store>((set) => ({
     set((state) => ({
       channels: [
         ...state.channels.filter(({ id }) => id !== channel.id),
-        renameChannelUsers(channel),
+        channel,
       ],
     })),
 
@@ -254,10 +288,7 @@ export const useStore = create<Store>((set) => ({
       channels: state.channels.map((channel) =>
         channel.id !== channelId ? channel : {
           ...channel,
-          messages: [
-            ...channel.messages,
-            renameMessageUser(channel, message),
-          ],
+          messages: [...channel.messages, message],
         }
       ),
     }));

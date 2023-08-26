@@ -17,9 +17,9 @@ type getActivityViewersOutput = NonNullable<
   RouterOutput["activityViewer"]["getActivityViewers"]
 >;
 
-export type getUserGroupsOutput = NonNullable<
-  RouterOutput["groups"]["getUserGroups"]
->;
+// export type getUserGroupsOutput = NonNullable<
+//   RouterOutput["groups"]["getUserGroups"]
+// >;
 export type addGroupOutput = NonNullable<RouterOutput["groups"]["addGroup"]>;
 export type addDynamicGroupOutput = NonNullable<
   RouterOutput["groups"]["addDynamicGroup"]
@@ -39,6 +39,11 @@ export type ChannelMessage = Omit<
   "channelId"
 >;
 
+export type User = Pick<
+  getGroupOutput | getActivityOutput,
+  "users"
+>["users"][number];
+
 export type Channel =
   & Omit<BaseChannel, "messages">
   & { messages: ChannelMessage[] };
@@ -49,16 +54,16 @@ export type ActivityOutput =
 
 export type Activity = Omit<
   NonNullable<ActivityOutput>,
-  "channel" | "groups"
+  "channel" | "groups" | "users"
 >;
 
 type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
 
 export type GroupOutput =
-  & Omit<getGroupOutput, "channel">
-  & { channel: Channel };
+  & Omit<getGroupOutput, "channel" | "users">
+  & { channel: Channel; users: User[] };
 
-export type Group = Omit<GroupOutput, "channel">;
+export type Group = Omit<GroupOutput, "channel" | "users">;
 
 export const addActivityInput = z.object({
   title: z.string().trim(),
@@ -112,7 +117,7 @@ export const receiversInput = z.union([
 export const sendMessageInput = z.object({
   content: z.string(),
   channelId: z.string(),
-  receivers: receiversInput,
+  // receivers: receiversInput,
 });
 
 export type MessageInput = z.infer<typeof sendMessageInput>;

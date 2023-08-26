@@ -4,15 +4,11 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import LeaveIcon from "~/components/icons/Leave";
-import Toast from "~/components/InvitationToast";
 import FavoriteButton from "~/components/FavoriteButton";
 import useActivity from "~/hooks/useActivity";
-import useActivityViewers from "~/hooks/useActivityViewers";
-// import useChannelUpdater from "~/hooks/useChannelUpdater";
 import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
 import Chat from "~/components/Chat";
-import { PusherMessage } from "~/types";
 import CreateGroupDialog from "~/components/CreateGroupDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
 import Groups from "~/components/Groups";
@@ -47,7 +43,7 @@ const Activity: NextPage = () => {
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Nav />
 
-        {/* <Toasts /> */}
+        <Toasts />
 
         {isLoading
           ? (
@@ -89,7 +85,6 @@ const Activity: NextPage = () => {
               activityId={activity.id}
               showText={true}
               className="m-5"
-              // onPusherMessage={onFoundUserForRegisteredActivity}
             />
 
             <div className="container flex flex-col items-center justify-center gap-12 py-1 px-5 pb-3 ">

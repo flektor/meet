@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { Channel } from "~/types";
 import { useSession } from "next-auth/react";
 import Spinner from "../Spinner";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import { useStore } from "~/utils/store";
-import { getUserNameById } from "~/utils";
 
 export type ChatProps = {
   isLoading: boolean;
@@ -17,8 +15,6 @@ function Chat({ isLoading, channelId }: ChatProps) {
   const messagesListRef = useRef<HTMLDivElement>(null);
   const store = useStore();
   const channel = store.channels.find(({ id }) => id === channelId);
-
-  // console.log(channelId, store.channels, channel);
 
   function scrollToBottom() {
     if (messagesListRef.current) {
@@ -42,9 +38,6 @@ function Chat({ isLoading, channelId }: ChatProps) {
   if (!session || !session.user?.id) {
     return <span className="text-white text-2xl">Sign in to see the chat</span>;
   }
-
-  const username = session.user.name || "you";
-  console.log({ username });
 
   return (
     <section
@@ -72,7 +65,6 @@ function Chat({ isLoading, channelId }: ChatProps) {
             <ChatMessage
               key={index}
               message={message}
-              currentUsername={username}
             />
           ))}
         </div>
