@@ -13,23 +13,11 @@ export type addActivityOutput = NonNullable<
 export type getActivityOutput = NonNullable<
   RouterOutput["activities"]["getActivity"]
 >;
-type getActivityViewersOutput = NonNullable<
-  RouterOutput["activityViewer"]["getActivityViewers"]
->;
 
-// export type getUserGroupsOutput = NonNullable<
-//   RouterOutput["groups"]["getUserGroups"]
-// >;
 export type addGroupOutput = NonNullable<RouterOutput["groups"]["addGroup"]>;
 export type addDynamicGroupOutput = NonNullable<
   RouterOutput["groups"]["addDynamicGroup"]
 >;
-
-type getGroupViewersOutput = NonNullable<
-  RouterOutput["groupViewer"]["getGroupViewers"]
->;
-
-export type Viewers = getActivityViewersOutput | getGroupViewersOutput;
 
 type BaseChannel =
   (Pick<getActivityOutput | getGroupOutput, "channel">)["channel"];
@@ -89,12 +77,6 @@ export type AddActivityValidator = z.infer<typeof addActivityInput>;
 export type addToFavoritesOutput = RouterOutput["favorites"]["addToFavorites"];
 export type removeFromFavoritesOutput =
   RouterOutput["favorites"]["removeFromFavorites"];
-
-export type addToActivityViewerOutput = RouterOutput["activityViewer"]["add"];
-export type removeFromActivityViewerOutput =
-  RouterOutput["activityViewer"]["remove"];
-export type getAllActivityViewersOutput =
-  RouterOutput["activityViewer"]["getActivityViewers"];
 
 export type addToRegistrationsOutput = RouterOutput["registrations"]["add"];
 export type removeFromRegistratiosOutput =
