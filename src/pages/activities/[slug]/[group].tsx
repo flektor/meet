@@ -7,11 +7,11 @@ import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
 import Nav from "~/components/Nav";
 import Chat from "~/components/Chat";
-import useGroup from "~/hooks/useGroup";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
+import { api } from "~/utils/api";
 
 const Group: NextPage = () => {
   const router = useRouter();
@@ -26,10 +26,16 @@ const Group: NextPage = () => {
     : "50vw";
   const mapHeight = mapWidth;
 
-  const { group, isLoading, error } = useGroup(activitySlug, slug);
+  const { data: group, isLoading, error } = api.groups
+    .getGroup
+    .useQuery({
+      activitySlug,
+      slug,
+    }, { enabled: !!slug });
 
   useEffect(() => {
     if (group) {
+      store.setGroup(group);
       store.pusherSubscribe(group.channelId);
     }
   }, [group]);

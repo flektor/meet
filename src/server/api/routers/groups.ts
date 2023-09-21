@@ -36,6 +36,18 @@ export const groupsRouter = createTRPCRouter({
       const membersIds = memberships.map(({ user }) => user.id);
       const channelUsersIds = channel.messages.map(({ user }) => user.id);
 
+      if (ctx.session && !viewersIds.includes(ctx.session.user.id as string)) {
+        const data = { userId: ctx.session.user.id, groupId: group.id };
+        await ctx.prisma.groupViewer.upsert({
+          create: data,
+          update: data,
+          where: { userId: ctx.session.user.id },
+        });
+        await ctx.prisma.activityViewer.deleteMany({
+          where: { userId: ctx.session.user.id },
+        });
+      }
+
       const userMap = new Map();
       const users = [
         ...viewers.map(({ user }) => user),

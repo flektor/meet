@@ -88,6 +88,19 @@ export const activitiesRouter = createTRPCRouter({
       } = activity;
 
       const viewersIds = viewers.map(({ user }) => user.id);
+
+      if (ctx.session && !viewersIds.includes(ctx.session.user.id as string)) {
+        const data = { userId: ctx.session.user.id, activityId: activity.id };
+        await ctx.prisma.activityViewer.upsert({
+          create: data,
+          update: data,
+          where: { userId: ctx.session.user.id },
+        });
+        await ctx.prisma.groupViewer.deleteMany({
+          where: { userId: ctx.session.user.id },
+        });
+      }
+
       const channelUsersIds = channel.messages.map(({ user }) => user.id);
 
       const users = [

@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import LeaveIcon from "~/components/icons/Leave";
 import FavoriteButton from "~/components/FavoriteButton";
-import useActivity from "~/hooks/useActivity";
 import Nav from "~/components/Nav";
 import RegisterButton from "~/components/RegisterButton";
 import Chat from "~/components/Chat";
@@ -15,16 +14,23 @@ import Groups from "~/components/Groups";
 import { useStore } from "~/utils/store";
 import Toasts from "~/components/Toasts";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
+import { api } from "~/utils/api";
 
 const Activity: NextPage = () => {
   const router = useRouter();
   const store = useStore();
   const slug = router.query.slug as string;
-  const { activity, groups, error, isLoading } = useActivity(slug);
+
+  const { data: activity, isLoading, error } = api.activities
+    .getActivity
+    .useQuery({
+      slug,
+    }, { enabled: !!slug });
 
   useEffect(() => {
     if (activity) {
       store.pusherSubscribe(activity.channelId);
+      store.setActivity(activity);
     }
   }, [activity]);
 
@@ -93,7 +99,7 @@ const Activity: NextPage = () => {
                 <p className="text-white text-2xl">{activity.description}</p>
               </div>
 
-              {groups.length === 0 && (
+              {activity.groups.length === 0 && (
                 <div className="text-white 2xl">There are no groups.</div>
               )}
 
@@ -110,7 +116,6 @@ const Activity: NextPage = () => {
                   onCancel={() => setShowLoginMessageDialog(false)}
                 />
               )}
-
               <Groups activitySlug={slug} />
 
               <Chat
