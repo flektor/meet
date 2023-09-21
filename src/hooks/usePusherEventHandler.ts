@@ -1,17 +1,16 @@
 import { useStore } from "../utils/store";
 import { PusherMessage } from "../types";
 import usePusherStore from "./usePusherStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function usePusherEventHandler() {
   const store = useStore();
 
   function handleChatUpdate(channelId: string, message: PusherMessage) {
-    console.log({ message });
-
     switch (message.action) {
       case "message":
         const { action, ...body } = message;
+        body.sentAt = new Date(body.sentAt);
         store.addMessage(channelId, body);
         return;
 
@@ -53,6 +52,12 @@ export default function usePusherEventHandler() {
 
   const channel = usePusherStore((state) => state.channel);
 
+  const stableCallback = useRef(handleChatUpdate);
+
+  useEffect(() => {
+    stableCallback.current = handleChatUpdate;
+  }, [handleChatUpdate]);
+
   const [subscriptions, setSubscriptions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -60,32 +65,24 @@ export default function usePusherEventHandler() {
       return;
     }
 
-    for (const eventName of store.pusherSubscriptions) {
-      if (!subscriptions.includes(eventName)) {
-        channel.bind(eventName, handleChatUpdate);
-        setSubscriptions([...subscriptions, eventName]);
-      }
-    }
-  }, [store.pusherSubscriptions]);
-
-  useEffect(() => {
-    if (!channel) {
-      return;
-    }
-    channel.subscribe();
+    const reference = (eventName: string, message: PusherMessage) => {
+      stableCallback.current(eventName, message);
+    };
 
     for (const eventName of store.pusherSubscriptions) {
       if (!subscriptions.includes(eventName)) {
-        channel.bind(eventName, handleChatUpdate);
+        channel.bind(
+          eventName,
+          (message: PusherMessage) => reference(eventName, message),
+        );
         setSubscriptions([...subscriptions, eventName]);
       }
     }
 
     return () => {
       for (const eventName of subscriptions) {
-        channel.bind(eventName, handleChatUpdate);
-        channel.unsubscribe();
+        channel.unbind(eventName, reference);
       }
     };
-  }, [channel]);
+  }, [channel, store.pusherSubscriptions]);
 }
