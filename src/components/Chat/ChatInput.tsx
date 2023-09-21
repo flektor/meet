@@ -15,7 +15,6 @@ function ChatInput({ channel }: ChatInputProps) {
   const { mutate: sendMessage } = api.chat.sendMessage.useMutation({
     onError: (error) => console.log(error),
     onSuccess: (message) => {
-      console.log(message);
       store.addMessage(channel.id, message);
       formRef.current?.reset();
     },
