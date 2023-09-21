@@ -1,6 +1,5 @@
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Group } from "~/types";
 import { useStore } from "~/utils/store";
 
 export type GroupsProps = {
@@ -9,14 +8,11 @@ export type GroupsProps = {
 
 const Groups = ({ activitySlug }: GroupsProps) => {
   const store = useStore();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const session = useSession();
 
-  useEffect(() => {
-    const groups = store.groups.filter(({ activitySlug: slug }) =>
-      slug === activitySlug
-    );
-    setGroups(groups);
-  }, [store.groups]);
+  const groups = store.groups.filter(({ activitySlug: slug }) =>
+    slug === activitySlug
+  );
 
   return (
     <section>
@@ -28,10 +24,13 @@ const Groups = ({ activitySlug }: GroupsProps) => {
       }
       <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
         {groups.map(
-          ({ slug, activitySlug, title, isMember }, index) => {
+          ({ slug, activitySlug, title, membersIds }, index) => {
             const name = title.includes("-")
               ? title.split("-")[0]! + "#" + index
               : title;
+
+            const isMember = session.data &&
+              membersIds.includes(session.data.user.id);
 
             return (
               <li
