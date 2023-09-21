@@ -57,7 +57,7 @@ export type Activity = Omit<
   "channel" | "groups" | "users"
 >;
 
-type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
+export type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
 
 export type GroupOutput =
   & Omit<getGroupOutput, "channel" | "users">

@@ -15,6 +15,7 @@ import type {
   ChannelMessage,
   getActivitiesOutput,
   getActivityOutput,
+  getGroupOutput,
   Group,
   GroupOutput,
   Toast,
@@ -39,7 +40,7 @@ export type Store = {
   setActivity: (activity: getActivityOutput) => void;
   removeActivity: (activityId: string) => void;
 
-  setGroup: (group: GroupOutput) => void;
+  setGroup: (group: getGroupOutput) => void;
   removeGroup: (groupId: string) => void;
 
   addToFavorites: (activityId: string) => void;
@@ -83,7 +84,7 @@ export const useStore = create<Store>((set) => ({
   removeActivity: (activityId: string) =>
     set((state) => removeActivity(state, activityId)),
 
-  setGroup: (group: GroupOutput) => set((state) => setGroup(state, group)),
+  setGroup: (group: getGroupOutput) => set((state) => setGroup(state, group)),
 
   removeGroup: (groupId: string) => set((state) => removeGroup(state, groupId)),
 

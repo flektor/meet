@@ -1,7 +1,7 @@
-import { GroupOutput } from "../../types";
+import { getGroupOutput } from "../../types";
 import { Store } from "../store";
 
-export function setGroup(state: Store, group: GroupOutput) {
+export function setGroup(state: Store, group: getGroupOutput) {
   const { channel, users, ...rest } = group;
   const userIds = users.map(({ id }) => id);
   const restGroups = state.groups.filter(({ id }) => id !== group.id);
