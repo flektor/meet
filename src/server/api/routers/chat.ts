@@ -77,21 +77,19 @@ export const chatRouter = createTRPCRouter({
           where: { id: input.channelId },
         });
 
-      console.log({ channelID: input.channelId, channel });
-
       if (!channel) {
         return message;
       }
 
-      let receivers =
+      const receivers =
         (channel.group?.viewers || channel.activity?.viewers || [])
-          .map(({ userId }) => userId);
+          .map(({ userId }) => userId).filter((id) =>
+            id !== ctx.session.user.id
+          );
 
       if (receivers.length === 0) {
         return message;
       }
-
-      console.log({ receivers });
 
       pusherSend({
         receivers,
