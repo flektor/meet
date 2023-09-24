@@ -2,23 +2,19 @@ import { type FunctionComponent, useState } from "react";
 import FavoriteButton from "../FavoriteButton";
 import Toast from "../InvitationToast";
 import Link from "next/link";
-import useActivities from "~/hooks/useActivities";
 import Spinner from "../Spinner";
 import { env } from "process";
 import RegisterButton from "../RegisterButton";
 import DotsLoader from "../DotsLoader";
+import { useStore } from "~/utils/store";
 
 const Activities: FunctionComponent = () => {
-  const { activities, isLoading, error } = useActivities();
-
-  if (error && env.NODE_ENV === "development") {
-    console.error(error);
-  }
-
   // function getUserNameById(userId: string) {
   //   return activity?.channel.users.find((user) => user.userId === userId)
   //     ?.name || "user";
   // }
+
+  const store = useStore();
 
   const [toasts, setToasts] = useState<
     { message: string; icon?: string }[]
@@ -39,19 +35,7 @@ const Activities: FunctionComponent = () => {
       </div> */
       }
       <ul className="mt-16 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
-        {isLoading
-          ? (
-            <div className="mt-48">
-              <Spinner />
-            </div>
-          )
-          : error
-          ? <div className="text-white 2xl mt-48">There was an error.</div>
-          : activities.length === 0 && (
-            <div className="text-white 2xl mt-48">There are no activities.</div>
-          )}
-
-        {activities.map(
+        {store.activities.map(
           ({ id, slug, title, isRegistered }) => {
             return (
               <li

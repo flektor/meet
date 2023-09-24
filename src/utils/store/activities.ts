@@ -9,8 +9,25 @@ const dummyBaseGroup = {
   createdBy: "",
 };
 
+function getCurrentPusherSubscriptions(
+  state: Store,
+  activity: getActivityOutput,
+) {
+  if (activity.isRegistered) {
+    return state.pusherSubscriptions.includes(activity.channelId)
+      ? state.pusherSubscriptions
+      : [...state.pusherSubscriptions, activity.channelId];
+  }
+
+  return state.pusherSubscriptions.includes(activity.channelId)
+    ? state.pusherSubscriptions.filter((id) => id === activity.channelId)
+    : state.pusherSubscriptions;
+}
+
 export const setActivities = (activities: getActivitiesOutput) => ({
   activities,
+  pusherSubscriptions: activities.filter((activity) => activity.isRegistered)
+    .map((activity) => activity.channelId),
 });
 
 export const setActivity = (state: Store, activity: getActivityOutput) => {
@@ -27,8 +44,10 @@ export const setActivity = (state: Store, activity: getActivityOutput) => {
     !channelIdsToAdd.includes(id)
   );
 
-  const userIds = users.map(({ id }) => id);
+  const userIds = users.map(({ id }) => id) ?? [];
   const restUsers = state.users.filter(({ id }) => !userIds.includes(id));
+
+  const pusherSubscriptions = getCurrentPusherSubscriptions(state, activity);
 
   return ({
     activities: [
@@ -41,6 +60,7 @@ export const setActivity = (state: Store, activity: getActivityOutput) => {
       ...groups.map((group) => ({ ...group, ...dummyBaseGroup })),
     ],
     users: [...restUsers, ...users],
+    pusherSubscriptions,
   });
 };
 
