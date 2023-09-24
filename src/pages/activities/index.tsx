@@ -1,22 +1,35 @@
 import { type NextPage } from "next";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Spinner from "../../components/Spinner";
 import Nav from "../../components/Nav";
 import Activities from "../../components/Activities";
 import { useSession } from "next-auth/react";
-import useActivities from "~/hooks/useActivities";
 import CreateActivityDialog from "~/components/CreateActivityDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
 import LeaveIcon from "~/components/icons/Leave";
 import { useRouter } from "next/router";
+import usePusherEventHandler from "~/hooks/usePusherEventHandler";
+import { useStore } from "~/utils/store";
+import { api } from "~/utils/api";
 
 const Activity: NextPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const { activities, isLoading, error } = useActivities();
+  const store = useStore();
   const [showCreateActivity, setShowCreateActivity] = useState(false);
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
+
+  usePusherEventHandler();
+
+  const { data, error, isLoading } = api.activities.getActivities
+    .useQuery();
+
+  useEffect(() => {
+    if (data) {
+      store.setActivities(data);
+    }
+  }, [data]);
 
   return (
     <>
@@ -61,7 +74,7 @@ const Activity: NextPage = () => {
             )
             : error
             ? <div className="text-white 2xl mt-48">There was an error.</div>
-            : activities.length === 0 && (
+            : store.activities.length === 0 && (
               <div className="text-white 2xl mt-48">
                 There are no activities.
               </div>
@@ -79,6 +92,19 @@ const Activity: NextPage = () => {
             />
           )}
 
+          {isLoading
+            ? (
+              <div className="mt-48">
+                <Spinner />
+              </div>
+            )
+            : error
+            ? <div className="text-white 2xl mt-48">There was an error.</div>
+            : store.activities.length === 0 && (
+              <div className="text-white 2xl mt-48">
+                There are no activities.
+              </div>
+            )}
           <Activities />
         </div>
       </main>
