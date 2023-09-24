@@ -2,23 +2,25 @@ import { useStore } from "../utils/store";
 import { PusherMessage } from "../types";
 import usePusherStore from "./usePusherStore";
 import { useEffect, useRef, useState } from "react";
+import activities from "~/utils/store/activities";
 
 export default function usePusherEventHandler() {
   const store = useStore();
 
-  function handleChatUpdate(channelId: string, message: PusherMessage) {
+  function handleChatUpdate(eventName: string, message: PusherMessage) {
+    console.log(eventName, message);
     switch (message.action) {
       case "message":
         const { action, ...body } = message;
         body.sentAt = new Date(body.sentAt);
-        store.addMessage(channelId, body);
+        store.addMessage(eventName, body);
         return;
 
       case "add_viewer":
-        return store.addViewer(channelId);
+        return store.addViewer(eventName);
 
       case "remove_viewer":
-        return store.removeViewer(channelId);
+        return store.removeViewer(eventName);
 
       case "invite_request":
         return store.addToast({
@@ -58,16 +60,22 @@ export default function usePusherEventHandler() {
     stableCallback.current = handleChatUpdate;
   }, [handleChatUpdate]);
 
-  const [subscriptions, setSubscriptions] = useState<string[]>([]);
+  const registrations = store.activities.filter((activity) =>
+    activity.isRegistered
+  ).map((activity) => activity.id);
+
+  const reference = (eventName: string, message: PusherMessage) => {
+    stableCallback.current(eventName, message);
+  };
 
   useEffect(() => {
     if (!channel) {
       return;
     }
 
-    const reference = (eventName: string, message: PusherMessage) => {
-      stableCallback.current(eventName, message);
-    };
+    const subscriptions = Object.keys(channel.callbacks._callbacks).map((key) =>
+      key.substring(1)
+    );
 
     for (const eventName of store.pusherSubscriptions) {
       if (!subscriptions.includes(eventName)) {
@@ -75,7 +83,6 @@ export default function usePusherEventHandler() {
           eventName,
           (message: PusherMessage) => reference(eventName, message),
         );
-        setSubscriptions([...subscriptions, eventName]);
       }
     }
 
