@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Spinner from "~/components/Spinner";
 import Nav from "~/components/Nav";
 import LeaveIcon from "~/components/icons/Leave";
-import useActivities from "~/hooks/useActivities";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
 import Link from "next/link";
@@ -12,11 +11,26 @@ import DotsLoader from "~/components/DotsLoader";
 import { useRouter } from "next/router";
 import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
+import { api } from "~/utils/api";
 
 const Favorites: NextPage = () => {
-  const { activities, isLoading, error } = useActivities();
-  const favorites = activities.filter((activity) => activity.isFavorite);
   const router = useRouter();
+  const store = useStore();
+  const favorites = store.activities.filter((activity) => activity.isFavorite);
+  const queryInput = store.fetchedActivitiesTimestamp;
+
+  const { data, error, isLoading } = api.activities.getActivities
+    .useQuery(undefined, {
+      enabled: store.fetchedActivitiesTimestamp === false,
+    });
+
+  useEffect(() => {
+    console.log({ data });
+
+    if (data) {
+      store.setActivities(data);
+    }
+  }, [data]);
   return (
     <>
       <Head>
@@ -43,7 +57,8 @@ const Favorites: NextPage = () => {
         </header>
 
         <div className="flex flex-col items-center justify-center">
-          {isLoading
+          {
+            /* {isLoading
             ? (
               <div className="mt-48">
                 <Spinner />
@@ -51,11 +66,15 @@ const Favorites: NextPage = () => {
             )
             : error
             ? <div className="text-white 2xl mt-48">There was an error.</div>
-            : favorites.length === 0 && (
-              <div className="text-white 2xl mt-48">
-                Your favorites are empty..
-              </div>
-            )}
+            } */
+          }
+
+          {favorites.length === 0 && (
+            <div className="text-white 2xl mt-48">
+              Your favorites are empty..
+            </div>
+          )}
+
           <ul className="mt-32 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
             {favorites.map(
               ({ id, slug, title, isRegistered }) => {
