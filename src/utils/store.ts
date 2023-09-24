@@ -21,6 +21,7 @@ import type {
   Toast,
   User,
 } from "~/types";
+import { string } from "zod";
 
 export type Store = {
   activities: Activity[];
@@ -30,6 +31,7 @@ export type Store = {
   pusherSubscriptions: string[];
   channels: Channel[];
   users: User[];
+  fetchedActivitiesTimestamp: number | false;
 
   setChannel: (channel: Channel) => void;
   removeChannel: (channelId: string) => void;
@@ -70,6 +72,7 @@ export const useStore = create<Store>((set) => ({
   toasts: [],
   pusherSubscriptions: [],
   userIsViewingPage: null,
+  fetchedActivitiesTimestamp: false,
 
   setUsers: (users: User[]) => set((state) => setUsers(state, users)),
 

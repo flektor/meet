@@ -26,6 +26,7 @@ function getCurrentPusherSubscriptions(
 
 export const setActivities = (activities: getActivitiesOutput) => ({
   activities,
+  fetchedActivitiesTimestamp: Date.now(),
   pusherSubscriptions: activities.filter((activity) => activity.isRegistered)
     .map((activity) => activity.channelId),
 });
