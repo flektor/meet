@@ -182,7 +182,7 @@ model User {
     messages       Message[]
     pendingInvites PendingInvite[]
     memberships    Membership[]
-    activity       Activity[]
+    activities     Activity[]
     groups         Group[]
 }
 

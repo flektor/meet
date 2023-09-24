@@ -12,6 +12,7 @@ CREATE TABLE "Channel" (
 CREATE TABLE "Activity" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -21,7 +22,7 @@ CREATE TABLE "Activity" (
 );
 
 -- CreateTable
-CREATE TABLE "Favorites" (
+CREATE TABLE "Favorite" (
     "userId" TEXT NOT NULL,
     "activityId" TEXT NOT NULL
 );
@@ -30,12 +31,12 @@ CREATE TABLE "Favorites" (
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
+    "activityId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT NOT NULL,
     "channelId" TEXT NOT NULL,
-    "activityId" TEXT NOT NULL,
 
     CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
 );
@@ -68,7 +69,7 @@ CREATE TABLE "ActivityViewer" (
 );
 
 -- CreateTable
-CREATE TABLE "Registrations" (
+CREATE TABLE "Registration" (
     "userId" TEXT NOT NULL,
     "activityId" TEXT NOT NULL
 );
@@ -119,7 +120,6 @@ CREATE TABLE "User" (
     "email" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
-    "channelId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -141,7 +141,13 @@ CREATE UNIQUE INDEX "Activity_title_key" ON "Activity"("title");
 CREATE UNIQUE INDEX "Activity_channelId_key" ON "Activity"("channelId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Favorites_userId_activityId_key" ON "Favorites"("userId", "activityId");
+CREATE INDEX "Activity_createdBy_idx" ON "Activity"("createdBy");
+
+-- CreateIndex
+CREATE INDEX "Favorite_activityId_idx" ON "Favorite"("activityId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Favorite_userId_activityId_key" ON "Favorite"("userId", "activityId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Group_slug_key" ON "Group"("slug");
@@ -153,7 +159,22 @@ CREATE UNIQUE INDEX "Group_title_key" ON "Group"("title");
 CREATE UNIQUE INDEX "Group_channelId_key" ON "Group"("channelId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Group_id_userId_activityId_key" ON "Group"("id", "userId", "activityId");
+CREATE INDEX "Group_activityId_idx" ON "Group"("activityId");
+
+-- CreateIndex
+CREATE INDEX "Group_createdBy_idx" ON "Group"("createdBy");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Group_id_activityId_key" ON "Group"("id", "activityId");
+
+-- CreateIndex
+CREATE INDEX "Membership_groupId_idx" ON "Membership"("groupId");
+
+-- CreateIndex
+CREATE INDEX "Membership_userId_idx" ON "Membership"("userId");
+
+-- CreateIndex
+CREATE INDEX "PendingInvite_groupId_idx" ON "PendingInvite"("groupId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PendingInvite_userId_groupId_key" ON "PendingInvite"("userId", "groupId");
@@ -162,22 +183,46 @@ CREATE UNIQUE INDEX "PendingInvite_userId_groupId_key" ON "PendingInvite"("userI
 CREATE UNIQUE INDEX "GroupViewer_userId_key" ON "GroupViewer"("userId");
 
 -- CreateIndex
+CREATE INDEX "GroupViewer_groupId_idx" ON "GroupViewer"("groupId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "GroupViewer_userId_groupId_key" ON "GroupViewer"("userId", "groupId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ActivityViewer_userId_key" ON "ActivityViewer"("userId");
+
+-- CreateIndex
+CREATE INDEX "ActivityViewer_activityId_idx" ON "ActivityViewer"("activityId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ActivityViewer_userId_activityId_key" ON "ActivityViewer"("userId", "activityId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Registrations_userId_activityId_key" ON "Registrations"("userId", "activityId");
+CREATE INDEX "Registration_activityId_idx" ON "Registration"("activityId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Registration_userId_activityId_key" ON "Registration"("userId", "activityId");
+
+-- CreateIndex
+CREATE INDEX "Message_sentBy_idx" ON "Message"("sentBy");
+
+-- CreateIndex
+CREATE INDEX "Message_channelId_idx" ON "Message"("channelId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Message_id_channelId_sentBy_key" ON "Message"("id", "channelId", "sentBy");
+
+-- CreateIndex
+CREATE INDEX "Account_userId_idx" ON "Account"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
+
+-- CreateIndex
+CREATE INDEX "Session_userId_idx" ON "Session"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
