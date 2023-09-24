@@ -17,11 +17,9 @@ import type {
   getActivityOutput,
   getGroupOutput,
   Group,
-  GroupOutput,
   Toast,
   User,
 } from "~/types";
-import { string } from "zod";
 
 export type Store = {
   activities: Activity[];
