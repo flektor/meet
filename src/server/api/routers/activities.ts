@@ -148,7 +148,7 @@ export const activitiesRouter = createTRPCRouter({
 
         channel: {
           id: activity.channelId,
-          usersId: channelUsersIds,
+          usersIds: channelUsersIds,
           messages: messages,
           title: channel.title,
           description: channel.description,
