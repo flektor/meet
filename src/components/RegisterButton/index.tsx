@@ -76,14 +76,16 @@ const RegisterButton = (
       setShowLoginMessageDialog(true);
       return;
     }
-
+    if (!activity) {
+      return;
+    }
     if (isRegistered) {
       store.removeFromRegistrations(activityId);
       unregister({ activityId });
       return;
     }
 
-    register({ activityId, activitySlug });
+    register({ activityId, activitySlug, channelId: activity.channelId });
     store.addToRegistrations(activityId);
   }
   // const style = isRegistered
