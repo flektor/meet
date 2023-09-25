@@ -9,6 +9,8 @@ export default function usePusherEventHandler() {
 
   function handleChatUpdate(eventName: string, message: PusherMessage) {
     console.log(eventName, message);
+    const sender = store.users.find((user) => user.id === message.sentBy)
+      ?.name?.split(" ")[0] || "user";
     switch (message.action) {
       case "message":
         const { action, ...body } = message;
@@ -32,21 +34,26 @@ export default function usePusherEventHandler() {
       case "quick_search_found":
         return store.addToast({
           id: `${message.activitySlug}:${message.sentBy}`,
-          displayMessage: "'quick' not implemented yet",
+          displayMessage:
+            `${sender} invites you to join ${message.activitySlug}`,
           pusherMessage: message,
         });
 
       case "invite_accepted":
         return store.addToast({
           id: `${message.activitySlug}-${message.groupSlug}:${message.sentBy}`,
-          displayMessage: `${message.sentBy} is interested on ${channel}`,
+          displayMessage: `${sender} is interested on ${
+            message.groupSlug || message.activitySlug
+          }`,
           pusherMessage: message,
         });
 
       case "invite_declined":
         return store.addToast({
           id: `${message.activitySlug}-${message.groupSlug}:${message.sentBy}`,
-          displayMessage: `${message.sentBy} is not interested on ${channel}`,
+          displayMessage: `${sender} is not interested on ${
+            message.groupSlug || message.activitySlug
+          }`,
           pusherMessage: message,
         });
     }

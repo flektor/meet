@@ -33,6 +33,10 @@ const Toasts: FunctionComponent = () => {
   }
 
   function onAcceptInvitation(message: PusherMessage) {
+    if (message.action === "quick_search_found") {
+      return onAcceptQuickInvitation(message);
+    }
+
     if (message.action !== "invite_accepted") {
       return;
     }
@@ -41,8 +45,21 @@ const Toasts: FunctionComponent = () => {
       activity.slug === message.activitySlug
     );
 
+    if (!activity) {
+      return;
+    }
+
     store.removeToast(getToastId(message));
-    router.push(`/activities/${message.activitySlug}/${message.groupSlug}`);
+  }
+
+  function onAcceptQuickInvitation(message: PusherMessage) {
+    if (message.action !== "quick_search_found") {
+      return;
+    }
+
+    const activity = store.activities.find((activity) =>
+      activity.slug === message.activitySlug
+    );
 
     if (!activity) {
       return;
