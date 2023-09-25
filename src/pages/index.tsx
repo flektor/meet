@@ -1,11 +1,24 @@
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import { useEffect } from "react";
 import Activities from "~/components/Activities";
-import Map from "~/components/Map";
 import Nav from "~/components/Nav";
+import Spinner from "~/components/Spinner";
+import { api } from "~/utils/api";
+import { useStore } from "~/utils/store";
 
 const Home: NextPage = () => {
+  const store = useStore();
+  const { data, error, isLoading } = api.activities.getActivities.useQuery();
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+      store.setActivities(data);
+    }
+  }, [data]);
+
   return (
     <>
       <Head>
@@ -23,8 +36,21 @@ const Home: NextPage = () => {
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>
+          {isLoading
+            ? (
+              <div className="mt-48">
+                <Spinner />
+              </div>
+            )
+            : error
+            ? <div className="text-white 2xl mt-48">There was an error.</div>
+            : data.length === 0 && (
+              <div className="text-white 2xl mt-48">
+                Be the first to create an activity!
+              </div>
+            )}
 
-          {<Activities />}
+          <Activities />
         </div>
       </main>
     </>
