@@ -1,3 +1,4 @@
+import { connect } from "http2";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -13,7 +14,13 @@ const userBaseFields = { user: selectUserBaseFields };
 
 export const groupsRouter = createTRPCRouter({
   getGroup: publicProcedure
-    .input(z.object({ activitySlug: z.string(), slug: z.string() }))
+    .input(
+      z.object({
+        activityId: z.string(),
+        activitySlug: z.string(),
+        slug: z.string(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const group = await ctx.prisma.group
         .findUnique({
@@ -31,7 +38,7 @@ export const groupsRouter = createTRPCRouter({
         return;
       }
 
-      const { channel, viewers, memberships, ...activity } = group;
+      const { channel, viewers, memberships, ...rest } = group;
       const viewersIds = viewers.map(({ user }) => user.id);
       const membersIds = memberships.map(({ user }) => user.id);
       const channelUsersIds = channel.messages.map(({ user }) => user.id);
@@ -62,16 +69,13 @@ export const groupsRouter = createTRPCRouter({
       });
 
       const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }));
-
       return {
-        ...activity,
+        ...rest,
         viewersIds,
         membersIds,
         users: [...userMap.values()] as typeof users,
-        activityId: activity.id,
-        activitySlug: activity.slug,
-        membersCount: membersIds.length,
-        viewersCount: viewersIds.length,
+        activityId: input.activityId,
+        activitySlug: input.activitySlug,
         channel: {
           id: channel.id,
           messages,
@@ -87,25 +91,33 @@ export const groupsRouter = createTRPCRouter({
     .input(addGroupInput)
     .mutation(async ({ input, ctx }) => {
       const channel = await ctx.prisma.channel.create({
-        data: { title: input.title },
+        data: {
+          title: input.title,
+        },
       });
 
-      const group = await ctx.prisma.group.create({
+      console.log(addGroupInput);
+      return await ctx.prisma.group.create({
         data: {
           ...input,
           createdBy: ctx.session.user.id,
           slug: createSlug(input.title),
-          channelId: channel.id,
-        },
+          // channelId: channel.id,
+          channel: {
+            create: {
+              title: input.title,
+            },
+          },
+        } as any,
       });
 
-      await ctx.prisma.membership.create({
-        data: {
-          groupId: group.id,
-          userId: ctx.session.user.id,
-        },
-      });
-      return group;
+      // await ctx.prisma.membership.create({
+      //   data: {
+      //     groupId: group.id,
+      //     userId: ctx.session.user.id,
+      //   },
+      // });
+      // return group;
     }),
 
   // getUserGroups: protectedProcedure
@@ -128,11 +140,6 @@ export const groupsRouter = createTRPCRouter({
   addDynamicGroup: protectedProcedure
     .input(addDynamicGroupInput)
     .mutation(async ({ input, ctx }) => {
-      const channel = await ctx.prisma.channel.create({
-        data: {
-          title: input.title,
-        },
-      });
       const { otherUserId, ...rest } = input;
       const title = input.title + "-" +
         Math.random().toString(16).substring(2);
@@ -143,14 +150,18 @@ export const groupsRouter = createTRPCRouter({
           title,
           createdBy: ctx.session.user.id,
           slug: createSlug(title),
-          channelId: channel.id,
+          channel: {
+            create: {
+              title: input.title,
+            },
+          },
           memberships: {
             create: [
               { userId: ctx.session.user.id },
               { userId: otherUserId },
             ],
           },
-        },
+        } as any,
       });
 
       pusherSend({

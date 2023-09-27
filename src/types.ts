@@ -62,6 +62,7 @@ export const addGroupInput = z.object({
   title: z.string().trim(),
   description: z.string(),
   activityId: z.string(),
+  activitySlug: z.string(),
 });
 
 export const addDynamicGroupInput = z.object({

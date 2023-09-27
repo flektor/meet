@@ -84,20 +84,19 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
       }
       store.setGroup({
         ...group,
-        activitySlug,
-        viewersCount: 0,
-        isMember: true,
-        isFavorite: false,
-        membersCount: 1,
-        favoritesCount: 0,
-
+        viewersIds: [],
+        membersIds: [],
+        users: [],
+        activitySlug: activitySlug,
+        title: group.title,
+        slug: group.slug,
         channel: {
-          id: `${activitySlug}/${group.slug}`,
           createdAt: new Date(),
-          description: group.description,
+          description: "",
+          id: "temp",
           messages: [],
           title: group.title,
-          users: [],
+          usersIds: [],
         },
       });
 
@@ -113,9 +112,11 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
     data.activityId = activityId;
+    data.activitySlug = activitySlug;
     try {
       const group = addGroupInput.parse(data);
       group.description = capitalizeFirstCharacter(group.description);
+      console.log(group);
       addGroup(group);
     } catch (error) {
       if (error instanceof z.ZodError) {
