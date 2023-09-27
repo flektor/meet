@@ -41,6 +41,15 @@ function ChatInput({ channel }: ChatInputProps) {
     }
   }
 
+  function onKeyDownHandler(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === "Enter" && !event.shiftKey && !event.ctrlKey &&
+      !event.altKey
+    ) {
+      formRef.current?.requestSubmit();
+    }
+  }
+
   const [showEmojis, setShowEmojis] = useState(false);
 
   function onSelectEmojiHandler(emoji: string) {
@@ -81,6 +90,7 @@ function ChatInput({ channel }: ChatInputProps) {
         className="w-full resize-none p-2 rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e]"
         rows={1}
         required
+        onKeyDown={onKeyDownHandler}
       />
       <div className=" max-h-96 flex justify-center items-center -m-2 -ml-3">
         <Send
