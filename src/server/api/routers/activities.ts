@@ -140,10 +140,8 @@ export const activitiesRouter = createTRPCRouter({
           activitySlug: activity.slug,
           channelId: group.channelId,
           viewersCount: group._count.viewers,
-          isMember: group.memberships.length === 1,
+          isMember: false,
           membersCount: group._count.memberships,
-          favoritesCount: 0, // not implemented yet
-          isFavorite: false, // not implemented yet
         })),
 
         channel: {
