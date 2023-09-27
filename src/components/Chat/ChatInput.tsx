@@ -3,6 +3,7 @@ import { z } from "zod";
 import { api } from "../../utils/api";
 import { Channel, sendMessageInput } from "../../types";
 import { useStore } from "~/utils/store";
+import Send from "~/components/icons/Send";
 
 type ChatInputProps = {
   channel: Channel;
@@ -41,23 +42,21 @@ function ChatInput({ channel }: ChatInputProps) {
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="flex w-full flex-col gap-4 rounded-b-xl bg-white/10 p-4 text-white"
+      className="flex w-full gap-4 rounded-b-xl bg-white/10 p-4 text-white"
       ref={formRef}
     >
       <textarea
         name="content"
         aria-label="message content input"
-        className="p-2 rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e]"
-        rows={2}
+        className="w-full p-2 rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e]"
+        rows={1}
         required
       />
-      <div className="flex justify-center">
-        <button
-          type="submit"
-          className="rounded-full px-10 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
-        >
-          Send
-        </button>
+      <div className="flex justify-center items-center">
+        <Send
+          className="cursor-pointer fill-[#cc66ff] hover:fill-white"
+          onClick={() => formRef.current?.requestSubmit()}
+        />
       </div>
     </form>
   );
