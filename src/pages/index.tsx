@@ -5,12 +5,16 @@ import { useEffect } from "react";
 import Activities from "~/components/Activities";
 import Nav from "~/components/Nav";
 import Spinner from "~/components/Spinner";
+import Toasts from "~/components/Toasts";
+import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { api } from "~/utils/api";
 import { useStore } from "~/utils/store";
 
 const Home: NextPage = () => {
   const store = useStore();
   const { data, error, isLoading } = api.activities.getActivities.useQuery();
+
+  usePusherEventHandler();
 
   useEffect(() => {
     if (data) {
@@ -36,6 +40,9 @@ const Home: NextPage = () => {
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>
+
+          <Toasts />
+
           {isLoading
             ? (
               <div className="mt-48">
