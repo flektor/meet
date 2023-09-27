@@ -44,12 +44,8 @@ function Chat({ isLoading, channelId }: ChatProps) {
   return (
     <section
       aria-label="chat"
-      className="w-full md:w-3/6 lg:w-2/3  "
+      className="w-full md:w-3/6 lg:w-2/3"
     >
-      <div className="flex justify-center w-full">
-        <h2 className="text-2xl text-white/50">Chat</h2>
-      </div>
-
       <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
       <div
