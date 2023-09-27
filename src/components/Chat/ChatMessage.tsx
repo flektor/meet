@@ -14,7 +14,7 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
   const senderName = sender?.name?.split(" ")[0] || "user";
   return (
     <div
-      className={`m-2 rounded-lg bg-${msg_clr} p-4 text-white w-fit break-words ${float} ${
+      className={`mt-2 mb-1 mr-1 rounded-lg bg-${msg_clr} p-1 pl-2 pr-3 text-white w-fit break-words ${float} ${
         isCurrentUser
           ? "ml-auto border border-white/20  bg-white/10"
           : "mr-auto border border-white/20  bg-white/5"
@@ -26,7 +26,7 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
             src={sender?.image}
             width={32}
             height={32}
-            className="rounded-full m-1"
+            className="rounded-full m-1 mr-2"
           >
           </img>
         )}
@@ -35,7 +35,7 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
           {message.sentAt.toLocaleTimeString()}
         </i>
       </div>
-      <p className="whitespace-normal break-words">
+      <p className="whitespace-normal break-words pl-1">
         {message.content}
       </p>
     </div>
