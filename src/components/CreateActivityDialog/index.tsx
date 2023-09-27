@@ -75,8 +75,10 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
           id: "temp",
           messages: [],
           title: activity.title,
-          users: [],
+          usersIds: [],
         },
+        users: [],
+        viewersIds: [],
       });
       onNewActivity();
     },
