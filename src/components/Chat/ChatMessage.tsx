@@ -14,7 +14,7 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
   const senderName = sender?.name?.split(" ")[0] || "user";
   return (
     <div
-      className={`mt-2 mb-1 mr-1 rounded-lg bg-${msg_clr} p-1 pl-2 pr-3 text-white w-fit break-words ${float} ${
+      className={`max-w-[80%] w-fit mt-2 mb-1 mr-1 rounded-lg bg-${msg_clr} p-1 pl-2 pr-3 text-white break-words ${float} ${
         isCurrentUser
           ? "ml-auto border border-white/20  bg-white/10"
           : "mr-auto border border-white/20  bg-white/5"
