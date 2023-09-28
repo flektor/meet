@@ -5,7 +5,6 @@ import Link from "next/link";
 import Spinner from "../Spinner";
 import { env } from "process";
 import RegisterButton from "../RegisterButton";
-import DotsLoader from "../DotsLoader";
 import { useStore } from "~/utils/store";
 
 const Activities: FunctionComponent = () => {
@@ -63,12 +62,6 @@ const Activities: FunctionComponent = () => {
                       className="mt-1"
                     />
                   </div>
-
-                  <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
-                    {isRegistered && (
-                      <DotsLoader className="fill-[#33BBFF] max-h-3" />
-                    )}
-                  </footer>
                 </div>
               </li>
             );
