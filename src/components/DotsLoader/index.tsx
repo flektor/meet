@@ -12,7 +12,7 @@ export default function DotsLoader(
 ) {
   return (
     <Svg className={className} viewBox="0 0 120 10">
-      <circle cx="15" cy="15" r="15">
+      <circle cx="15" cy="15" r="15" transform="scale(0.8) translate(3,0)">
         <animate
           attributeName="r"
           from="15"
@@ -34,7 +34,13 @@ export default function DotsLoader(
           repeatCount="indefinite"
         />
       </circle>
-      <circle cx="60" cy="15" r="9" fillOpacity="0.3">
+      <circle
+        cx="60"
+        cy="15"
+        r="9"
+        fillOpacity="0.3"
+        transform="scale(0.8) translate(3,0)"
+      >
         <animate
           attributeName="r"
           from="9"
@@ -56,7 +62,7 @@ export default function DotsLoader(
           repeatCount="indefinite"
         />
       </circle>
-      <circle cx="105" cy="15" r="15">
+      <circle cx="105" cy="15" r="15" transform="scale(0.8) translate(3,0)">
         <animate
           attributeName="r"
           from="15"
