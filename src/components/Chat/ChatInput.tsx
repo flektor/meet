@@ -41,12 +41,17 @@ function ChatInput({ channel }: ChatInputProps) {
     }
   }
 
-  function onKeyDownHandler(event: KeyboardEvent<HTMLTextAreaElement>) {
+  function onKeyDownHandler(
+    event: KeyboardEvent<HTMLTextAreaElement | HTMLDialogElement>,
+  ) {
     if (
-      event.key === "Enter" && !event.shiftKey && !event.ctrlKey &&
-      !event.altKey
+      event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey
     ) {
-      formRef.current?.requestSubmit();
+      return;
+    }
+    formRef.current?.requestSubmit();
+    if (showEmojis) {
+      setShowEmojis(false);
     }
   }
 
@@ -60,7 +65,7 @@ function ChatInput({ channel }: ChatInputProps) {
     const index = textareaRef.current.selectionStart;
     textareaRef.current.value = text.substring(0, index) + emoji +
       text.substring(index + 1);
-    setShowEmojis(false);
+    textareaRef.current.focus();
   }
 
   return (
@@ -79,6 +84,7 @@ function ChatInput({ channel }: ChatInputProps) {
       <dialog
         open={showEmojis}
         className="w-2/3 max-h-48 h-48 overflow-y-auto -mt-56 scroll-auto rounded-md border-[#cc66ff] border p-1 bg-gradient-to-b from-[#25213C] to-[#1b1b2e] shadow-lg shadow-white"
+        onKeyDown={onKeyDownHandler}
       >
         <Emojis onSelect={onSelectEmojiHandler} />
       </dialog>
