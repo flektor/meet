@@ -44,13 +44,13 @@ function Chat({ isLoading, channelId }: ChatProps) {
   return (
     <section
       aria-label="chat"
-      className="w-full md:w-3/6 lg:w-2/3"
+      className="w-full md:w-3/6 lg:w-2/3 absolute bottom-0"
     >
       <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
       <div
         id="message-scroll-container"
-        className="h-2/6 w-full md:w-[50vw] max-h-[50vh] overflow-y-auto	overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
+        className="w-full md:w-[50vw] max-h-[70vh] overflow-y-auto overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
       >
         <div
           ref={messagesListRef}
