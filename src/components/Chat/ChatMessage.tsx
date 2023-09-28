@@ -9,12 +9,11 @@ export type ChatMessageProps = {
 function ChatMessage({ message, currentUsername }: ChatMessageProps) {
   const sender = useStore().users.find(({ id }) => id === message.sentBy);
   const isCurrentUser = sender?.name === currentUsername;
-  const msg_clr = isCurrentUser ? "#cc66ff" : "red-300";
   const float = isCurrentUser ? "justify-self-end" : "justify-self-start";
   const senderName = sender?.name?.split(" ")[0] || "user";
   return (
     <div
-      className={`max-w-[80%] w-fit mt-2 mb-1 mr-1 rounded-lg bg-${msg_clr} p-1 pl-2 pr-3 text-white break-words ${float} ${
+      className={`max-w-[80%] w-fit mt-2 mb-1 mr-1 rounded-lg p-1 pl-2 pr-3 text-white break-words ${float} ${
         isCurrentUser
           ? "ml-auto border border-white/20  bg-white/10"
           : "mr-auto border border-white/20  bg-white/5"
