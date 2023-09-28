@@ -10,7 +10,6 @@ export type RegisterButtonProps = {
   activityId: string;
   activitySlug: string;
   className?: string;
-  showText?: boolean;
 };
 
 const Button = (
@@ -49,7 +48,7 @@ const Button = (
 };
 
 const RegisterButton = (
-  { activitySlug, activityId, className = "", showText }: RegisterButtonProps,
+  { activitySlug, activityId, className = "" }: RegisterButtonProps,
 ) => {
   const store = useStore();
   const session = useSession();
