@@ -99,37 +99,15 @@ const RegisterButton = (
           onCancel={() => setShowLoginMessageDialog(false)}
         />
       )}
-      {showText
-        ? (
-          <button
-            className={`flex items-center text-2xl bg-white/20 hover:bg-white/30 rounded-3xl py-1 px-5 pb-3 transition [&>span]:text-[#33BBFF] [&>span]:pt-2 ${className} ${
-              isRegistered
-                ? "[&>svg]:hover:fill-white [&>svg]:hover:stroke-2 [&>svg]:hover:fill-white"
-                : "[&>svg]:hover:stroke-white [&>svg]:hover:fill-white/10 [&>span]:hover:text-white"
-            }`}
-          >
-            {isRegistered
-              ? (
-                <div className="flex items-center justify-center">
-                  <span className="text-[#33BBFF] pt-1 mr-3">Searching</span>
-                  <DotsLoader className="fill-[#33BBFF]" />
-                </div>
-              )
-              : <span className="text-white pt-1 mr-3 ">Quick Search</span>}
-            <Button
-              isRegistered={isRegistered}
-              registrationsCount={registrationsCount}
-              onClick={toggleRegister}
-            />
-          </button>
-        )
-        : (
-          <Button
-            isRegistered={isRegistered}
-            registrationsCount={registrationsCount}
-            onClick={toggleRegister}
-          />
-        )}
+
+      <Button
+        isRegistered={isRegistered}
+        registrationsCount={registrationsCount}
+        onClick={toggleRegister}
+      />
+      {isRegistered && (
+        <DotsLoader className="fill-[#33BBFF] max-h-3 relative top-5 right-8 -mr-8 pr-1 z-0" />
+      )}
     </>
   );
 };
