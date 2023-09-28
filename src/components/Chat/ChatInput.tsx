@@ -49,6 +49,14 @@ function ChatInput({ channel }: ChatInputProps) {
     ) {
       return;
     }
+    submitMessage();
+  }
+
+  function submitMessage() {
+    if (!textareaRef.current || textareaRef.current.value.trim() === "") {
+      return;
+    }
+
     formRef.current?.requestSubmit();
     if (showEmojis) {
       setShowEmojis(false);
@@ -71,7 +79,7 @@ function ChatInput({ channel }: ChatInputProps) {
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="flex w-full gap-4 rounded-b-xl bg-white/10 p-4 text-white"
+      className="flex w-full gap-4 md:rounded-b-xl bg-white/10 p-4 text-white"
       ref={formRef}
     >
       <span
@@ -101,7 +109,7 @@ function ChatInput({ channel }: ChatInputProps) {
       <div className=" max-h-96 flex justify-center items-center -m-2 -ml-3">
         <Send
           className="cursor-pointer fill-[#cc66ff] hover:fill-white"
-          onClick={() => formRef.current?.requestSubmit()}
+          onClick={submitMessage}
         />
       </div>
     </form>
