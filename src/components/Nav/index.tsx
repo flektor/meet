@@ -29,7 +29,7 @@ export default function Nav() {
           <div className="flex items-center justify-center transition duration-1000 m-3">
             <Link
               href="/"
-              className="text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-2 ml-2 mr-10"
+              className="text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-3 ml-2 mr-10"
             >
               meet
             </Link>
