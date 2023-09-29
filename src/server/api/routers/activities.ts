@@ -67,7 +67,10 @@ export const activitiesRouter = createTRPCRouter({
               include: {
                 messages: {
                   include: userBaseFields,
-                  take: 20,
+                  orderBy: {
+                    sentAt: "desc",
+                  },
+                  take: 30,
                 },
               },
             },
@@ -115,7 +118,8 @@ export const activitiesRouter = createTRPCRouter({
         }
       });
 
-      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }));
+      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }))
+        .reverse();
 
       return {
         ...rest,

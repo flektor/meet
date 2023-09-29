@@ -27,7 +27,15 @@ export const groupsRouter = createTRPCRouter({
           where: { slug: input.slug },
           include: {
             channel: {
-              include: { messages: { include: userBaseFields, take: 20 } },
+              include: {
+                messages: {
+                  include: userBaseFields,
+                  orderBy: {
+                    sentAt: "desc",
+                  },
+                  take: 30,
+                },
+              },
             },
             viewers: { select: userBaseFields },
             memberships: { select: userBaseFields },
@@ -68,7 +76,8 @@ export const groupsRouter = createTRPCRouter({
         }
       });
 
-      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }));
+      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }))
+        .reverse();
       return {
         ...rest,
         viewersIds,
