@@ -1,5 +1,5 @@
 import { type NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
@@ -12,6 +12,7 @@ import useScreenSize from "~/hooks/useScreenSize";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
+import { Activity } from "~/types";
 
 const Group: NextPage = () => {
   const router = useRouter();
@@ -26,12 +27,45 @@ const Group: NextPage = () => {
     : "50vw";
   const mapHeight = mapWidth;
 
+  const {
+    data: activitiesData,
+    error: getActivitiesError,
+    isLoading: isLoadingActivities,
+  } = api.activities.getActivities
+    .useQuery(undefined, {
+      enabled: store.fetchedActivitiesTimestamp === false,
+    });
+
+  useEffect(() => {
+    if (activitiesData && store.fetchedActivitiesTimestamp === false) {
+      console.log(
+        "set activities",
+        activitiesData,
+        store.fetchedActivitiesTimestamp,
+      );
+      store.setActivities(activitiesData);
+    }
+  }, [activitiesData]);
+
+  const [activity, setActivity] = useState<Activity | null>(null);
+
+  useEffect(() => {
+    const act = store.activities.find((activity) =>
+      activity.slug === activitySlug
+    );
+
+    if (act) {
+      setActivity(act);
+    }
+  }, [store.activities]);
+
   const { data: group, isLoading, error } = api.groups
     .getGroup
     .useQuery({
       activitySlug,
+      activityId: activity!.id,
       slug,
-    }, { enabled: !!slug });
+    }, { enabled: !!slug && !!activity });
 
   useEffect(() => {
     if (group) {
