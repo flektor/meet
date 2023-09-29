@@ -50,12 +50,13 @@ function Chat({ isLoading, channelId }: ChatProps) {
 
       <div
         id="message-scroll-container"
-        className="w-full md:w-[50vw] max-h-[70vh] overflow-y-auto overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
+        className="w-full pt-32 md:w-[50vw] h-screen overflow-y-auto overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
       >
+        <div className="pt-3"></div>
         <div
           ref={messagesListRef}
           aria-label="messages"
-          className="w-full min-h-[20vh] bg-black/20 p-1 pl-2 mx-auto"
+          className="w-full min-h-screen bg-black/20 p-1 pl-2 mx-auto"
         >
           {isLoading && <Spinner />}
 
