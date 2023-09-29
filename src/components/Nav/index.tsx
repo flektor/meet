@@ -24,12 +24,12 @@ export default function Nav() {
       {showSearchDialog && (
         <SearchDialog onSearch={onSearchComplete} onCancel={onSearchCancel} />
       )}
-      <nav className="fixed left-0 top-0 w-full flex items-center justify-center backdrop-blur-sm">
-        <div className="flex items-center justify-between w-full max-w-7xl">
+      <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-gradient-to-b from-[#25213C] to-[#1b1b2e] z-10  ">
+        <div className="flex items-center justify-between w-full max-w-5xl">
           <div className="flex items-center justify-center transition duration-1000 m-3">
             <Link
               href="/"
-              className="text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-3 ml-2 mr-10"
+              className="hidden md:block text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-3 ml-2  mr-10"
             >
               meet
             </Link>
