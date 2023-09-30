@@ -1,8 +1,7 @@
+import React from "react";
 import Link from "next/link";
-import React, { use, useState } from "react";
-import Svg from "../Svg";
+import SearchBar from "./SearchBar";
 import { useRouter } from "next/router";
-import SearchDialog from "../SearchDialog";
 import { useSession } from "next-auth/react";
 
 export default function Nav() {
@@ -10,20 +9,9 @@ export default function Nav() {
   const pathnameParts = router.pathname.split("/");
   const route = pathnameParts[pathnameParts.length - 1];
   const session = useSession();
-  const [showSearchDialog, setShowSearchDialog] = useState(false);
-
-  function onSearchComplete() {
-  }
-
-  function onSearchCancel() {
-    setShowSearchDialog(false);
-  }
 
   return (
     <>
-      {showSearchDialog && (
-        <SearchDialog onSearch={onSearchComplete} onCancel={onSearchCancel} />
-      )}
       <div className="absolute w-full h-14 left-0 top-0 w-full bg-[#2e026d]" />
       <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-gradient-to-b from-[#25213C] to-[#1b1b2e] z-10  ">
         <div className="flex items-center justify-between w-full max-w-5xl">
@@ -57,26 +45,7 @@ export default function Nav() {
               )}
           </div>
 
-          <button
-            type="button"
-            aria-label="Search"
-            className="hidden md:inline-block float-right flex w-1/4 cursor-text items-center justify-between rounded-lg text-sm font-medium border border-white/40 hover:border-white/60 hover:bg-white/5 text-white/80 px-4 py-2 mr-2"
-            onClick={() => setShowSearchDialog(true)}
-          >
-            <div className="float-left flex items-center justify-center gap-1 lg:gap-3">
-              <Svg className="transition stroke-white/80">
-                <path
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                </path>
-              </Svg>
-              <span>Search</span>
-            </div>
-          </button>
-
+          <SearchBar />
           {
             /* <Link
             href="#"
