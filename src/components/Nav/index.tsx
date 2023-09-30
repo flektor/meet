@@ -24,6 +24,7 @@ export default function Nav() {
       {showSearchDialog && (
         <SearchDialog onSearch={onSearchComplete} onCancel={onSearchCancel} />
       )}
+      <div className="absolute w-full h-14 left-0 top-0 w-full bg-[#2e026d]" />
       <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-gradient-to-b from-[#25213C] to-[#1b1b2e] z-10  ">
         <div className="flex items-center justify-between w-full max-w-5xl">
           <div className="flex items-center justify-center transition duration-1000 m-3">
