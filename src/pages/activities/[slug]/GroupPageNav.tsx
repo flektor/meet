@@ -34,12 +34,11 @@ type GroupPageNavProps = {
   session: SessionContextValue;
   group: GroupOutput | undefined;
   displayChat: boolean;
-  toggleChat: () => void;
-  toggleMap: () => void;
+  onTabChanged: (tab: "map" | "about" | "chat") => void;
 };
 
 export default function GroupPageNav(
-  { session, group, toggleChat, toggleMap, displayChat }: GroupPageNavProps,
+  { session, group, onTabChanged }: GroupPageNavProps,
 ) {
   const router = useRouter();
   return (
@@ -69,13 +68,19 @@ export default function GroupPageNav(
       <div className="w-full flex justify-end items-center">
         <button
           className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
-          onClick={toggleChat}
+          onClick={() => onTabChanged("chat")}
         >
-          {displayChat ? "About" : "Chat"}
+          Chat
         </button>
         <button
           className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
-          onClick={toggleMap}
+          onClick={() => onTabChanged("about")}
+        >
+          About
+        </button>
+        <button
+          className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
+          onClick={() => onTabChanged("map")}
         >
           Map
         </button>

@@ -96,11 +96,9 @@ const Group: NextPage = () => {
 
       <GroupPageNav
         session={session}
-        toggleChat={() =>
-          setDisplayTab((prev) => prev === "chat" ? "about" : "chat")}
-        toggleMap={() => setDisplayTab("map")}
+        onTabChanged={(tab) => setDisplayTab(tab)}
         group={group}
-        displayChat={displayTab === "about"}
+        displayChat={displayTab === "chat"}
       />
 
       <main>
@@ -139,7 +137,7 @@ const Group: NextPage = () => {
                 )}
               {displayTab === "about" &&
                 (
-                  <div className="flex flex-col justify-start items-center">
+                  <div className="flex flex-col justify-start items-center mt-32">
                     <p className="text-white text-2xl flex">
                       <span className="text-gray-400 mr-2">About:</span>
                       {group.description}
@@ -149,7 +147,7 @@ const Group: NextPage = () => {
 
               {displayTab === "map" &&
                 (
-                  <div className="flex flex-col justify-center items-center">
+                  <div className="flex flex-col justify-center items-center mt-3 gap-3">
                     <Map width={mapWidth} height={mapHeight} draggable />
                   </div>
                 )}
