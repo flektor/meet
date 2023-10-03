@@ -71,7 +71,7 @@ export default function GroupPageNav(
           className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
           onClick={toggleChat}
         >
-          {displayChat ? "Group" : "Chat"}
+          {displayChat ? "About" : "Chat"}
         </button>
         <button
           className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"

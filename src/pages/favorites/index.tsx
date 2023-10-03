@@ -41,20 +41,6 @@ const Favorites: NextPage = () => {
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Toasts />
 
-        <header className="w-full flex items-center justify-center mb-6 p-1">
-          <div className="mt-32 flex items-center">
-            <button
-              className=" inline-block"
-              onClick={() => router.back()}
-            >
-              <LeaveIcon />
-            </button>
-            <span className=" mr-2 ml-2 text-white text-3xl">
-              Favorites
-            </span>
-          </div>
-        </header>
-
         <div className="flex flex-col items-center justify-center">
           {isLoading
             ? (

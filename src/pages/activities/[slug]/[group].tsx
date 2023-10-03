@@ -82,8 +82,8 @@ const Group: NextPage = () => {
     ? group.title?.split("-")[0]
     : group?.title;
 
-  const [displayTab, setDisplayTab] = useState<"chat" | "map" | "group">(
-    "group",
+  const [displayTab, setDisplayTab] = useState<"chat" | "map" | "about">(
+    "about",
   );
 
   return (
@@ -97,10 +97,10 @@ const Group: NextPage = () => {
       <GroupPageNav
         session={session}
         toggleChat={() =>
-          setDisplayTab((prev) => prev === "chat" ? "group" : "chat")}
+          setDisplayTab((prev) => prev === "chat" ? "about" : "chat")}
         toggleMap={() => setDisplayTab("map")}
         group={group}
-        displayChat={false}
+        displayChat={displayTab === "about"}
       />
 
       <main>
@@ -137,9 +137,9 @@ const Group: NextPage = () => {
                     channelId={group.channelId}
                   />
                 )}
-              {displayTab === "group" &&
+              {displayTab === "about" &&
                 (
-                  <div className="flex flex-col justify-center items-center">
+                  <div className="flex flex-col justify-start items-center">
                     <p className="text-white text-2xl flex">
                       <span className="text-gray-400 mr-2">About:</span>
                       {group.description}

@@ -20,7 +20,7 @@ const Activity: NextPage = () => {
   const store = useStore();
   const slug = router.query.slug as string;
 
-  const [displayChat, setDisplayChat] = useState(true);
+  const [displayChat, setDisplayChat] = useState(false);
 
   const { data: activity, isLoading, error } = api.activities
     .getActivity
