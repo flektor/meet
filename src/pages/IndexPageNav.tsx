@@ -39,7 +39,7 @@ export default function HomePageNav(
       session={session}
       menuChildren={<MenuOptions session={session} router={router} />}
     >
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-start w-full">
         <NavLogo />
 
         <Link

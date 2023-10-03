@@ -1,11 +1,12 @@
 import React from "react";
-import Link from "next/link";
-import Nav, { MenuOption, NavLogo } from "~/components/Nav";
-import { NextRouter, useRouter } from "next/router";
+import Nav, { MenuOption } from "~/components/Nav";
+import { useRouter } from "next/router";
 import { SessionContextValue, signIn, signOut } from "next-auth/react";
+import { GroupOutput } from "~/types";
+import LeaveIcon from "~/components/icons/Leave";
 
 const MenuOptions = (
-  { session }: { router: NextRouter; session: SessionContextValue },
+  { session }: { session: SessionContextValue },
 ) => (
   <>
     {
@@ -29,45 +30,55 @@ const MenuOptions = (
   </>
 );
 
+type GroupPageNavProps = {
+  session: SessionContextValue;
+  group: GroupOutput | undefined;
+  displayChat: boolean;
+  toggleChat: () => void;
+  toggleMap: () => void;
+};
+
 export default function GroupPageNav(
-  { session }: { session: SessionContextValue },
+  { session, group, toggleChat, toggleMap, displayChat }: GroupPageNavProps,
 ) {
   const router = useRouter();
   return (
     <Nav
-      className="flex"
+      className="flex items-center justify-center"
       session={session}
-      searchBar={false}
-      menuChildren={<MenuOptions session={session} router={router} />}
+      menuChildren={<MenuOptions session={session} />}
     >
+      {/* <NavLogo className={"hidden md:block"} /> */}
+      <button
+        className="inline-block"
+        onClick={() => router.back()}
+      >
+        <LeaveIcon className="fill-white ml-2 mr-1" />
+      </button>
+
       <div className="flex items-center justify-center">
-        <NavLogo />
+        {group && (
+          <>
+            <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
+              {group.title}
+            </span>
+          </>
+        )}
+      </div>
 
-        <Link
-          href="/activities"
-          className="text-white hover:underline pt-1 mr-4 underline"
+      <div className="w-full flex justify-end items-center">
+        <button
+          className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
+          onClick={toggleChat}
         >
-          Activities
-        </Link>
-
-        {session.data &&
-          (
-            <>
-              <Link
-                href="/favorites"
-                className="text-white hover:underline pt-1 mr-4"
-              >
-                Favorites
-              </Link>
-
-              <Link
-                href="/activities"
-                className="hidden md:block text-white hover:underline pt-1 mr-4"
-              >
-                Groups
-              </Link>
-            </>
-          )}
+          {displayChat ? "Group" : "Chat"}
+        </button>
+        <button
+          className="rounded-md font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2 pl-2 pr-2"
+          onClick={toggleMap}
+        >
+          Map
+        </button>
       </div>
     </Nav>
   );

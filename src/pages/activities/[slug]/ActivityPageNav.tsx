@@ -54,19 +54,18 @@ export default function ActivityPageNav(
       session={session}
       menuChildren={<MenuOptions session={session} />}
     >
+      {/* <NavLogo className={"hidden md:block"} /> */}
+      <button
+        className="inline-block"
+        onClick={() => router.back()}
+      >
+        <LeaveIcon className="fill-white ml-2 mr-1" />
+      </button>
+
       <div className="flex items-center justify-center">
-        {/* <NavLogo className={"hidden md:block"} /> */}
-
-        <button
-          className="inline-block"
-          onClick={() => router.back()}
-        >
-          <LeaveIcon className="fill-white" />
-        </button>
-
         {activity && (
           <>
-            <span className="text-white text-xl md:text-2xl">
+            <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
               {activity.title}
             </span>
 
@@ -78,9 +77,11 @@ export default function ActivityPageNav(
             />
           </>
         )}
+      </div>
 
+      <div className="w-full flex justify-end items-center">
         <button
-          className="justify-end rounded-md min-w-20 w-20 font-bold transition border-2 border-[##2F2C47] bg-black/20 hover:bg-black/5 hover:border-white border-[#cc66ff] text-sm hover:text-white text-[#cc66ff] ml-2"
+          className="rounded-md min-w-20 w-20 font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2"
           onClick={toggleChat}
         >
           {displayChat ? "Groups" : "Chat"}
