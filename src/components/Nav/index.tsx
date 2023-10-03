@@ -33,7 +33,7 @@ export default function Nav(
   return (
     <>
       <div className="absolute w-full h-14 left-0 top-0" />
-      <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-[#2e026d] z-10">
+      <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-[#2e026d] z-10 h-14 max-h-14">
         <div
           className={`w-full max-w-5xl mt-2 mb-2 ${className} flex justify-between`}
         >
