@@ -44,34 +44,32 @@ function Chat({ isLoading, channelId }: ChatProps) {
   return (
     <section
       aria-label="chat"
-      className="w-full md:w-3/6 lg:w-2/3 absolute bottom-0"
+      className="w-full md:w-3/6 lg:w-2/3 max-w-5xl "
     >
       <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
       <div
-        id="message-scroll-container"
-        className="w-full pt-32 md:w-[50vw] h-screen overflow-y-auto overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
+        ref={messagesListRef}
+        aria-label="messages"
+        className="w-full min-h-screen bg-black/20 p-1 pl-2 mt-9 mb-20 mx-auto"
       >
-        <div className="pt-3"></div>
-        <div
-          ref={messagesListRef}
-          aria-label="messages"
-          className="w-full min-h-screen bg-black/20 p-1 pl-2 mx-auto"
-        >
-          {isLoading && <Spinner />}
+        {isLoading && <Spinner />}
 
-          {channel?.messages.map((message, index) => (
-            <ChatMessage
-              key={index}
-              message={message}
-              currentUsername={username}
-            />
-          ))}
-        </div>
+        {channel?.messages.map((message, index) => (
+          <ChatMessage
+            key={index}
+            message={message}
+            currentUsername={username}
+          />
+        ))}
       </div>
       <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
-
-      {channel && <ChatInput channel={channel} />}
+      {channel &&
+        (
+          <div className="fixed bottom-0 w-full max-w-5xl">
+            <ChatInput channel={channel} />
+          </div>
+        )}
     </section>
   );
 }
