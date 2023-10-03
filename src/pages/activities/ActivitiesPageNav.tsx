@@ -45,7 +45,7 @@ export default function ActivitiesPageNav(
 
         <Link
           href="/activities"
-          className="text-white hover:text-white pt-1 mr-4 underline"
+          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4 underline"
         >
           Activities
         </Link>
@@ -55,14 +55,14 @@ export default function ActivitiesPageNav(
             <>
               <Link
                 href="/favorites"
-                className="text-white hover:text-white pt-1 mr-4"
+                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
               >
                 Favorites
               </Link>
 
               <Link
                 href="/activities"
-                className="hidden md:block text-white hover:text-white pt-1 mr-4"
+                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
               >
                 Groups
               </Link>

@@ -41,7 +41,7 @@ const Activity: NextPage = () => {
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b to-[#2e026d] from-[#15162c] ">
+    <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
       <Head>
         <title>Meet</title>
         <meta name="description" content="Spiced Chicory Final Project" />
@@ -70,7 +70,7 @@ const Activity: NextPage = () => {
                 <div className="text-white 2xl mt-48">There was an error.</div>
               )}
 
-            <div className="flex flex-col items-center justify-center pt-2">
+            <div className="flex flex-col items-center justify-center pt-12">
               <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
                 {showCreateGroupDialog && (
                   <CreateGroupDialog
