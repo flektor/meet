@@ -34,38 +34,42 @@ export default function Nav(
     <>
       <div className="absolute w-full h-14 left-0 top-0" />
       <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-[#2e026d] z-10">
-        <div className={`w-full max-w-5xl mt-2 mb-2 ${className}`}>
+        <div
+          className={`w-full max-w-5xl mt-2 mb-2 ${className} flex justify-between`}
+        >
           {children}
-
+          {
+            /*
           <div className="flex w-full items-center justify-center transition duration-1000 h-9">
-            {/* {searchBar && <SearchBar toggleSearchDialog />} */}
-          </div>
+            {searchBar && <SearchBar toggleSearchDialog />}
+          </div> */
+          }
 
-          <div className="flex justify-end items-center gap-2">
-            {
-              !session.data &&
-              (
+          {
+            !session.data &&
+            (
+              <div className="flex justify-end items-center gap-2">
                 <button
                   onClick={() => signIn()}
                   className="text-white hover:text-white pt-1 mr-4 whitespace-nowrap"
                 >
                   Sign In
                 </button>
-              )
-              // : (
-              //   <ProfileSvg
-              //     className="hidden md:block mt-[1px] hover:cursor-pointer hover:fill-[#cc66ff]"
-              //     onClick={() => setShowMenu(!showMenu)}
-              //   />
-              // )
-            }
-          </div>
+              </div>
+            )
+            // : (
+            //   <ProfileSvg
+            //     className="hidden md:block mt-[1px] hover:cursor-pointer hover:fill-[#cc66ff]"
+            //     onClick={() => setShowMenu(!showMenu)}
+            //   />
+            // )
+          }
 
           <div className="relative group">
             <button className="text-white group-hover:text-gray-400 focus:outline-none">
               <MenuSvg
                 active={showMenu}
-                className="mt-1 mr-2 lg:mr-0"
+                className="pt-2 ml-2 mr-2 lg:mr-0"
                 onClick={() => setShowMenu(!showMenu)}
               />
             </button>
