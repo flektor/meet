@@ -4,7 +4,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
-import LeaveIcon from "~/components/icons/Leave";
 import GroupPageNav from "./GroupPageNav";
 import Chat from "~/components/Chat";
 import Map from "~/components/Map";
@@ -25,8 +24,8 @@ const Group: NextPage = () => {
   const mapWidth = screenSize === "sm"
     ? "90vw"
     : screenSize === "md"
-    ? "80vw"
-    : "50vw";
+    ? "60vw"
+    : "40vw";
   const mapHeight = mapWidth;
 
   const {
@@ -83,54 +82,82 @@ const Group: NextPage = () => {
     ? group.title?.split("-")[0]
     : group?.title;
 
+  const [displayTab, setDisplayTab] = useState<"chat" | "map" | "group">(
+    "group",
+  );
+
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
       <Head>
         <title>Meet</title>
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <GroupPageNav session={session} />
+      <GroupPageNav
+        session={session}
+        toggleChat={() =>
+          setDisplayTab((prev) => prev === "chat" ? "group" : "chat")}
+        toggleMap={() => setDisplayTab("map")}
+        group={group}
+        displayChat={false}
+      />
 
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        {isLoading && <Spinner />}
-
-        {error && <div className="text-white 2xl">There was an error.</div>}
-
-        <Toasts />
-
+      <main>
         {group && (
-          <div className="flex flex-col items-center justify-center pt-20 ">
-            <header className="w-full flex items-center justify-center">
-              <button
-                className="inline-block"
-                onClick={() => router.back()}
-              >
-                <LeaveIcon />
-              </button>
-              <span className=" mr-2 ml-2 text-white text-3xl">
-                {name! || group.title}
-              </span>
-            </header>
+          <>
+            <Toasts />
 
-            <div className="container flex flex-col items-center justify-center gap-4 py-4 w-full">
-              <div className="text-white/50 flex justify-center items-center w-full ">
-                Description:
-                <p className="pl-3 text-white text-2xl">{group.description}</p>
-              </div>
+            {isLoading
+              ? (
+                <div className="mt-48">
+                  <Spinner />
+                </div>
+              )
+              : error && (
+                <div className="text-white 2xl mt-48">There was an error.</div>
+              )}
 
-              <Chat
-                isLoading={isLoading}
-                channelId={group.channelId}
-              />
+            <div className="flex flex-col items-center justify-center pt-12">
+              {
+                /* <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
 
-              <Map width={mapWidth} height={mapHeight} draggable />
+                {showLoginMessageDialog && (
+                  <LoginMessageDialog
+                    onCancel={() => setShowLoginMessageDialog(false)}
+                  />
+                )}
+              </div> */
+              }
+
+              {displayTab === "chat" &&
+                (
+                  <Chat
+                    isLoading={isLoading}
+                    channelId={group.channelId}
+                  />
+                )}
+              {displayTab === "group" &&
+                (
+                  <div className="flex flex-col justify-center items-center">
+                    <p className="text-white text-2xl flex">
+                      <span className="text-gray-400 mr-2">About:</span>
+                      {group.description}
+                    </p>
+                  </div>
+                )}
+
+              {displayTab === "map" &&
+                (
+                  <div className="flex flex-col justify-center items-center">
+                    <Map width={mapWidth} height={mapHeight} draggable />
+                  </div>
+                )}
             </div>
-          </div>
+          </>
         )}
       </main>
-    </>
+    </div>
   );
 };
 
