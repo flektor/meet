@@ -46,12 +46,12 @@ function Chat({ isLoading, channelId }: ChatProps) {
       aria-label="chat"
       className="w-full md:w-3/6 lg:w-2/3 max-w-5xl "
     >
-      <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
+      {/* <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" /> */}
 
       <div
         ref={messagesListRef}
         aria-label="messages"
-        className="w-full min-h-screen bg-black/20 p-1 pl-2 mt-9 mb-20 mx-auto"
+        className="w-full min-h-[calc(100vh-141px)] bg-black/20 p-1 pl-2 mb-20 mx-auto"
       >
         {isLoading && <Spinner />}
 
@@ -63,7 +63,6 @@ function Chat({ isLoading, channelId }: ChatProps) {
           />
         ))}
       </div>
-      <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       {channel &&
         (
           <div className="fixed bottom-0 w-full max-w-5xl">
