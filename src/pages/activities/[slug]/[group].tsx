@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
 import LeaveIcon from "~/components/icons/Leave";
-import Nav from "~/components/Nav";
+import GroupPageNav from "./GroupPageNav";
 import Chat from "~/components/Chat";
 import Map from "~/components/Map";
 import useScreenSize from "~/hooks/useScreenSize";
@@ -13,9 +13,11 @@ import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
 import { Activity } from "~/types";
+import { useSession } from "next-auth/react";
 
 const Group: NextPage = () => {
   const router = useRouter();
+  const session = useSession();
   const store = useStore();
   const slug = router.query.group as string;
   const activitySlug = router.query.slug as string;
@@ -63,9 +65,10 @@ const Group: NextPage = () => {
     .getGroup
     .useQuery({
       activitySlug,
-      activityId: activity!.id,
       slug,
     }, { enabled: !!slug && !!activity });
+
+  console.log(activity);
 
   useEffect(() => {
     if (group) {
@@ -87,9 +90,10 @@ const Group: NextPage = () => {
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Nav />
 
+      <GroupPageNav session={session} />
+
+      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         {isLoading && <Spinner />}
 
         {error && <div className="text-white 2xl">There was an error.</div>}

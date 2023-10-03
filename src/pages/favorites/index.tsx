@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Spinner from "~/components/Spinner";
-import Nav from "~/components/Nav";
+import FavoritesPageNav from "./FavoritesPageNav";
 import LeaveIcon from "~/components/icons/Leave";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
+import { useSession } from "next-auth/react";
 
 const Favorites: NextPage = () => {
   const router = useRouter();
@@ -29,7 +30,7 @@ const Favorites: NextPage = () => {
       store.setActivities(data);
     }
   }, [data]);
-
+  const session = useSession();
   return (
     <>
       <Head>
@@ -37,8 +38,8 @@ const Favorites: NextPage = () => {
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <FavoritesPageNav session={session} />
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Nav />
         <Toasts />
 
         <header className="w-full flex items-center justify-center mb-6 p-1">

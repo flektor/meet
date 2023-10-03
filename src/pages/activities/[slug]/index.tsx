@@ -3,10 +3,7 @@ import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
-import LeaveIcon from "~/components/icons/Leave";
-import FavoriteButton from "~/components/FavoriteButton";
-import Nav from "~/components/Nav";
-import RegisterButton from "~/components/RegisterButton";
+import ActivityPageNav from "./ActivityPageNav";
 import Chat from "~/components/Chat";
 import CreateGroupDialog from "~/components/CreateGroupDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
@@ -15,10 +12,11 @@ import { useStore } from "~/utils/store";
 import Toasts from "~/components/Toasts";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { api } from "~/utils/api";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const Activity: NextPage = () => {
   const router = useRouter();
+  const session = useSession();
   const store = useStore();
   const slug = router.query.slug as string;
 
@@ -43,52 +41,23 @@ const Activity: NextPage = () => {
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+    <div className="min-h-screen bg-gradient-to-b to-[#2e026d] from-[#15162c] ">
       <Head>
         <title>Meet</title>
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <ActivityPageNav
+        session={session}
+        activity={activity}
+        displayChat={displayChat}
+        toggleChat={() => setDisplayChat(!displayChat)}
+      />
+
       <main>
         {activity && (
           <>
-            <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-gradient-to-b from-[#25213C] to-[#1b1b2e] z-10  ">
-              <div className="flex items-center justify-between w-full max-w-5xl">
-                <div className="flex items-center justify-center transition duration-1000 m-3">
-                  {
-                    /* <Link
-                    href="/"
-                    className="hidden md:block text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-3 ml-2  mr-10"
-                  >
-                    meet
-                  </Link> */
-                  }
-
-                  <button
-                    className="inline-block"
-                    onClick={() => router.back()}
-                  >
-                    <LeaveIcon className="-mr-2 fill-white" />
-                  </button>
-                  <span className=" mr-2 ml-2 text-white text-2xl">
-                    {activity.title}
-                  </span>
-
-                  <FavoriteButton activityId={activity.id} />
-                  <RegisterButton
-                    activitySlug={activity.slug}
-                    activityId={activity.id}
-                  />
-                </div>
-                <button
-                  className="justify-end rounded-md w-20 font-bold transition border-2 border-[##2F2C47] bg-black/20 hover:bg-black/5 hover:border-white border-[#cc66ff] text-sm hover:text-white text-[#cc66ff] ml-3 mr-4"
-                  onClick={() => setDisplayChat(!displayChat)}
-                >
-                  {displayChat ? "Groups" : "Chat"}
-                </button>
-              </div>
-            </nav>
-
             <Toasts />
 
             {isLoading

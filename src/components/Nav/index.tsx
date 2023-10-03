@@ -1,61 +1,97 @@
-import React from "react";
-import Link from "next/link";
-import SearchBar from "./SearchBar";
-import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
+import React, { ReactNode, useState } from "react";
+// import SearchBar from "./SearchBar";
+import MenuSvg from "../icons/Menu";
+export { MenuOption } from "./MenuOption";
+export { NavLogo } from "./NavLogo";
+import { SessionContextValue, signIn } from "next-auth/react";
 
-export default function Nav() {
-  const router = useRouter();
-  const pathnameParts = router.pathname.split("/");
-  const route = pathnameParts[pathnameParts.length - 1];
-  const session = useSession();
+export type NavProps = {
+  children?: ReactNode | null;
+  session: SessionContextValue;
+  menuChildren?: ReactNode;
+  searchBar?: boolean;
+  className?: string;
+};
+
+export default function Nav(
+  {
+    className = "",
+    children = null,
+    menuChildren,
+    searchBar = true,
+    session,
+  }: NavProps,
+) {
+  const [showMenu, setShowMenu] = useState(false);
+
+  function onSearchComplete() {
+  }
+
+  function onSearchCancel() {
+  }
 
   return (
     <>
-      <div className="absolute w-full h-14 left-0 top-0 w-full bg-[#2e026d]" />
-      <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-gradient-to-b from-[#25213C] to-[#1b1b2e] z-10  ">
-        <div className="flex items-center justify-between w-full max-w-5xl">
-          <div className="flex items-center justify-center transition duration-1000 m-3">
-            <Link
-              href="/"
-              className="hidden md:block text-[#cc66ff] text-5xl font-extrabold tracking-tight -mt-3 ml-2  mr-10"
-            >
-              meet
-            </Link>
+      <div className="absolute w-full h-14 left-0 top-0" />
+      <nav className="fixed left-0 top-0 w-full flex items-center justify-center bg-[#2e026d] z-10">
+        <div className={`w-full max-w-5xl mt-2 mb-2 ${className}`}>
+          {children}
 
-            <Link
-              href="/activities"
-              className={`text-white hover:text-white pt-1 mr-4 ${
-                route === "activities" && "underline"
-              }`}
-            >
-              Activities
-            </Link>
-
-            {session.data &&
-              (
-                <Link
-                  href="/favorites"
-                  className={` text-white hover:text-white pt-1 mr-4 ${
-                    route === "favorites" && "underline"
-                  }`}
-                >
-                  Favorites
-                </Link>
-              )}
+          <div className="flex w-full items-center justify-center transition duration-1000 h-9">
+            {/* {searchBar && <SearchBar toggleSearchDialog />} */}
           </div>
 
-          <SearchBar />
-          {
-            /* <Link
-            href="#"
-            className="md:hidden text-sm px-4 py-2 leading-none border rounded text-white hover:text-teal-500 hover:bg-white"
-          >
-            Menu
-          </Link> */
-          }
+          <div className="flex justify-end items-center gap-2">
+            {
+              !session.data &&
+              (
+                <button
+                  onClick={() => signIn()}
+                  className="text-white hover:text-white pt-1 mr-4 whitespace-nowrap"
+                >
+                  Sign In
+                </button>
+              )
+              // : (
+              //   <ProfileSvg
+              //     className="hidden md:block mt-[1px] hover:cursor-pointer hover:fill-[#cc66ff]"
+              //     onClick={() => setShowMenu(!showMenu)}
+              //   />
+              // )
+            }
+          </div>
+
+          <div className="relative group">
+            <button className="text-white group-hover:text-gray-400 focus:outline-none">
+              <MenuSvg
+                active={showMenu}
+                className="mt-1 mr-2 lg:mr-0"
+                onClick={() => setShowMenu(!showMenu)}
+              />
+            </button>
+
+            {showMenu && (
+              <div onClick={() => setShowMenu(false)}>
+                <div
+                  className={`absolute right-0 flex flex-col w-28 text-center rounded-md bg-[#2e026d] text-white border border-[#cc66ff] drop-shadow-2xl`}
+                >
+                  {menuChildren}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
+
+      {
+        /* {store.showSearchDialog &&
+        (
+          <SearchDialog
+            onSearch={onSearchComplete}
+            onCancel={onSearchCancel}
+          />
+        )} */
+      }
     </>
   );
 }
