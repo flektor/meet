@@ -35,11 +35,11 @@ function Chat({ isLoading, channelId }: ChatProps) {
     }
   }, [channel?.messages]);
 
-  if (!session || !session.user?.id) {
-    return <span className="text-white text-2xl">Sign in to see the chat</span>;
-  }
+  // if (!session || !session.user?.id) {
+  //   return <span className="text-white text-2xl">Sign in to see the chat</span>;
+  // }
 
-  const username = session.user.name || "you";
+  const username = session?.user.name || "you";
 
   return (
     <section
