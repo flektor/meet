@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Spinner from "~/components/Spinner";
@@ -7,7 +7,6 @@ import LeaveIcon from "~/components/icons/Leave";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
 import Link from "next/link";
-import DotsLoader from "~/components/DotsLoader";
 import { useRouter } from "next/router";
 import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
@@ -100,12 +99,6 @@ const Favorites: NextPage = () => {
                           activitySlug={slug}
                         />
                       </div>
-
-                      <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
-                        {isRegistered && (
-                          <DotsLoader className="fill-[#33BBFF] max-h-3" />
-                        )}
-                      </footer>
                     </div>
                   </li>
                 );
