@@ -79,7 +79,7 @@ function ChatInput({ channel }: ChatInputProps) {
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="flex w-full gap-4 md:rounded-b-xl bg-white/10 p-4 text-white"
+      className="flex w-full gap-4 md:rounded-b-xl bg-[#2E2E42] p-4 text-white"
       ref={formRef}
     >
       <span
