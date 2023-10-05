@@ -31,3 +31,7 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #a258c7cb;
 }
+
+input {
+  color-scheme: dark;
+}
