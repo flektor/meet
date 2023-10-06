@@ -5,7 +5,6 @@ import { PusherProvider } from "~/utils/PusherProvider";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import "~/components/DotsLoader/index.css";
-import "tw-elements/dist/css/tw-elements.min.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
