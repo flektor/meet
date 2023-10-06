@@ -63,13 +63,16 @@ export const addGroupInput = z.object({
   description: z.string(),
   activityId: z.string(),
   activitySlug: z.string(),
+  locationTitle: z.string(),
+  locationPin: z.string().optional(),
+  startsAt: z.date(),
+  endsAt: z.date().optional(),
+  minParticipants: z.number(),
+  maxParticipants: z.number().optional(),
+  private: z.boolean(),
 });
 
-export const addDynamicGroupInput = z.object({
-  title: z.string().trim(),
-  description: z.string(),
-  activityId: z.string(),
-  activitySlug: z.string(),
+export const addDynamicGroupInput = addGroupInput.extend({
   otherUserId: z.string(),
 });
 

@@ -2,13 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
+    provider = "prisma-client-js"
 }
 
 datasource db {
-    provider     = "mysql"
-    // provider     = "postgresql"
+    // provider     = "mysql"
+    provider     = "postgresql"
     url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
@@ -52,20 +51,27 @@ model Favorite {
 }
 
 model Group {
-    id             String          @id @default(cuid())
-    slug           String          @unique
-    activityId     String
-    title          String          @unique
-    createdBy      String
-    description    String
-    createdAt      DateTime        @default(now())
-    channelId      String          @unique
-    channel        Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
-    activity       Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-    user           User            @relation(fields: [createdBy], references: [id])
-    viewers        GroupViewer[]
-    pendingInvites PendingInvite[]
-    memberships    Membership[]
+    id              String          @id @default(cuid())
+    slug            String          @unique
+    activityId      String
+    title           String          @unique
+    createdBy       String
+    description     String
+    createdAt       DateTime        @default(now())
+    locationTitle   String          @default("Berlin")
+    locationPin     String          @default("13.404954, 52.520008")
+    startsAt        DateTime        @default(now())
+    endsAt          DateTime?
+    minParticipants Int             @default(2)
+    maxParticipants Int?
+    private         Boolean         @default(false)
+    channelId       String          @unique
+    channel         Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
+    activity        Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    user            User            @relation(fields: [createdBy], references: [id])
+    viewers         GroupViewer[]
+    pendingInvites  PendingInvite[]
+    memberships     Membership[]
 
     @@unique([id, activityId])
     @@index([activityId])

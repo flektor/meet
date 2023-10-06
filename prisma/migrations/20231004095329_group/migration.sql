@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "Group" ADD COLUMN     "endsAt" TIMESTAMP(3),
+ADD COLUMN     "locationPin" TEXT,
+ADD COLUMN     "locationTitle" TEXT NOT NULL DEFAULT 'Berlin',
+ADD COLUMN     "maxParticipants" INTEGER,
+ADD COLUMN     "minParticipants" INTEGER NOT NULL DEFAULT 2,
+ADD COLUMN     "private" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
