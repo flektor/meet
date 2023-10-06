@@ -1,5 +1,5 @@
 import { type NextPage } from "next";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Spinner from "../../components/Spinner";
 import ActivitiesPageNav from "./ActivitiesPageNav";
@@ -7,55 +7,16 @@ import Activities from "../../components/Activities";
 import { useSession } from "next-auth/react";
 import CreateActivityDialog from "~/components/CreateActivityDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";
-import LeaveIcon from "~/components/icons/Leave";
-import { NextRouter, useRouter } from "next/router";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
-import Link from "next/link";
-
-const MenuLink = (
-  { children, className = "", href = "", onClick }: {
-    children?: ReactNode;
-    className?: string;
-    href?: string;
-    onClick?: () => void;
-  },
-) => (
-  <Link
-    href={href}
-    className={`${className} p-2 hover:bg-white/10 rounded-md`}
-    onClick={onClick}
-  >
-    {children}
-  </Link>
-);
-
-const MenuOptions = ({ router }: { router: NextRouter }) => (
-  <>
-    <MenuLink
-      className="hidden md:block"
-      onClick={() => {
-        router.push("favorites");
-      }}
-    >
-      Favorites
-    </MenuLink>
-    <MenuLink onClick={() => {}}>Settings</MenuLink>
-    <MenuLink onClick={() => {}}>Profile</MenuLink>
-    <MenuLink onClick={() => {}}>Logout</MenuLink>
-  </>
-);
 
 const Activity: NextPage = () => {
-  const router = useRouter();
   const session = useSession();
   const store = useStore();
   const [showCreateActivity, setShowCreateActivity] = useState(false);
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
-  const pathnameParts = router.pathname.split("/");
-  const route = pathnameParts[pathnameParts.length - 1];
   usePusherEventHandler();
 
   const { data, error, isLoading } = api.activities.getActivities
@@ -88,20 +49,6 @@ const Activity: NextPage = () => {
           >
             Create Activity
           </button>
-
-          {isLoading
-            ? (
-              <div className="mt-48">
-                <Spinner />
-              </div>
-            )
-            : error
-            ? <div className="text-white 2xl mt-48">There was an error.</div>
-            : store.activities.length === 0 && (
-              <div className="text-white 2xl mt-48">
-                There are no activities.
-              </div>
-            )}
 
           {showCreateActivity && (
             <CreateActivityDialog
