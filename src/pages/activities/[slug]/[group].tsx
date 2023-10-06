@@ -78,10 +78,6 @@ const Group: NextPage = () => {
 
   usePusherEventHandler();
 
-  const name = group?.title.includes("-")
-    ? group.title?.split("-")[0]
-    : group?.title;
-
   const [displayTab, setDisplayTab] = useState<"chat" | "map" | "about">(
     "about",
   );
@@ -148,7 +144,7 @@ const Group: NextPage = () => {
               {displayTab === "map" &&
                 (
                   <div className="flex flex-col justify-center items-center mt-3 gap-3">
-                    <Map width={mapWidth} height={mapHeight} draggable />
+                    <Map width={mapWidth} height={mapHeight} />
                   </div>
                 )}
             </div>
