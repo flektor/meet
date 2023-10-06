@@ -137,18 +137,9 @@ function CreateGroupDialog(
       endsAt,
     };
 
-    // if (data.locationPin) {
-    //   data.locationPin = data.locationPin as string;
-    // }
-
-    // if (groupData.endsAt) {
-    //   groupData.endsAt = groupData.endsAt;
-    // }
-
     try {
       const group = addGroupInput.parse(groupData);
       group.description = capitalizeFirstCharacter(group.description);
-      console.log({ group, data });
       addGroup(group);
     } catch (error) {
       if (error instanceof z.ZodError) {
