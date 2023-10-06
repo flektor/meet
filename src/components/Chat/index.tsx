@@ -51,7 +51,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
       <div
         ref={messagesListRef}
         aria-label="messages"
-        className="w-full min-h-[calc(100vh-141px)] bg-black/20 p-1 pl-2 mb-20 mx-auto"
+        className="w-full min-h-[calc(100vh-10px)] bg-black/20 p-1 pl-2 mb-20 mx-auto"
       >
         {isLoading && <Spinner />}
 
@@ -65,7 +65,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
       </div>
       {channel &&
         (
-          <div className="fixed bottom-0 w-full max-w-5xl">
+          <div className="fixed bottom-0 w-full md:w-3/6 lg:w-2/3 max-w-5xl">
             <ChatInput channel={channel} />
           </div>
         )}
