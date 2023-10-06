@@ -1,38 +1,17 @@
-import { type NextPage } from "next";
-import React, {
-  ChangeEvent,
-  type FormEvent,
-  MouseEvent,
-  useRef,
-  useState,
-} from "react";
+import { type FormEvent, MouseEvent, useRef, useState } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
 import Spinner from "../Spinner";
-import Link from "next/link";
-import EnterIcon from "../icons/Enter";
 import CloseIcon from "../icons/Close";
-import AlarmIcon from "../icons/Alarm";
+import MarkerIcon from "../icons/Marker";
 import { useStore } from "~/utils/store";
-import { createSlug } from "~/utils";
 import { addGroupInput } from "~/types";
-import dynamic from "next/dynamic";
-import Map from "../Map";
+import Map, { LngLat } from "../Map";
 import useScreenSize from "~/hooks/useScreenSize";
-
-const DynamicDatepicker = dynamic(() => import("../DatePicker"), {
-  ssr: false,
-});
-
-const DynamicTimepicker = dynamic(() => import("../TimePicker"), {
-  ssr: false,
-});
-
-function capitalizeFirstCharacter(text: string) {
-  if (!text) return "";
-  return text.charAt(0).toUpperCase() +
-    (text.length > 1 ? text.substring(1) : "");
-}
+import DatePicker from "./DatePicker";
+import TimePicker from "./TimePicker";
+import PublicGroupInput from "./PublicGroupInput";
+import TitleInput, { capitalizeFirstCharacter } from "./TitleInput";
 
 type CreateGroupDialogProps = {
   onNewGroup: () => void;
@@ -40,26 +19,42 @@ type CreateGroupDialogProps = {
   activitySlug: string;
   activityId: string;
 };
+type DateTimeInput = {
+  date: string; // "YYYY-MM-DD" format
+  time: string; // "HH:MM" format
+};
 
-const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
-  { onNewGroup, onClose, activitySlug, activityId },
-) => {
+function getDateTime({ date, time }: DateTimeInput): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+
+  if (!year || !month) {
+    return new Date();
+  }
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
+function CreateGroupDialog(
+  { onNewGroup, onClose, activitySlug, activityId }: CreateGroupDialogProps,
+) {
   const store = useStore();
   const [isWaitingForServer, setIsWaitingForServer] = useState(false);
-  const [isGroupAlreadyExist, setisGroupAlreadyExist] = useState(false);
-  const [title, setTitle] = useState("");
+  const [isGroupAlreadyExist, setIsGroupAlreadyExist] = useState(false);
+  const [showMarker, setShowMarker] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const screenSize = useScreenSize();
-
   const mapWidth = screenSize === "sm"
-    ? "62vw"
+    ? "86vw"
     : screenSize === "md"
-    ? "70vw"
-    : "50vw";
+    ? "75vw"
+    : screenSize === "lg"
+    ? "40vw"
+    : "30vw";
   const mapHeight = mapWidth;
+  const berlinLngLat: LngLat = [13.404954, 52.520008];
 
   function onCancel(event?: MouseEvent<HTMLDialogElement>) {
     if (!event || event.target === dialogRef.current) {
@@ -70,8 +65,7 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
   const { mutate: addGroup } = api.groups.addGroup.useMutation({
     onError: (error) => {
       if (error.message.includes("Unique constraint failed on the fields:")) {
-        setisGroupAlreadyExist(true);
-        setTitle((title) => title.trim());
+        setIsGroupAlreadyExist(true);
         return;
       }
       console.log(error.data?.zodError);
@@ -79,7 +73,6 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
 
     onSuccess: (group) => {
       if (formRef.current) {
-        setTitle("");
         formRef.current.reset();
       }
       store.setGroup({
@@ -109,14 +102,53 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsWaitingForServer(true);
-
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    data.activityId = activityId;
-    data.activitySlug = activitySlug;
+
+    const startsAt = getDateTime({
+      date: data.startingDate as string,
+      time: data.startingTime as string,
+    });
+
+    const endsAt = data.isEndingTimeEnabled === "on"
+      ? getDateTime({
+        date: (data.endingDate || data.startingDate) as string,
+        time: (data.endingTime || data.startingTime) as string,
+      })
+      : data.isEndingDateEnabled === "on"
+      ? new Date(data.endingDate as string)
+      : undefined;
+
+    const locationPin = (data.marker as string)?.substring(
+      1,
+      data.marker!.length - 2,
+    );
+
+    const groupData: z.infer<typeof addGroupInput> = {
+      activityId,
+      activitySlug,
+      description: data.description as string,
+      title: data.title as string,
+      locationTitle: data.locationTitle as string || "Berlin",
+      locationPin,
+      minParticipants: 2,
+      maxParticipants: Number(data.participants) || 2,
+      private: Boolean(data.isPrivate) || false,
+      startsAt,
+      endsAt,
+    };
+
+    // if (data.locationPin) {
+    //   data.locationPin = data.locationPin as string;
+    // }
+
+    // if (groupData.endsAt) {
+    //   groupData.endsAt = groupData.endsAt;
+    // }
+
     try {
-      const group = addGroupInput.parse(data);
+      const group = addGroupInput.parse(groupData);
       group.description = capitalizeFirstCharacter(group.description);
-      console.log(group);
+      console.log({ group, data });
       addGroup(group);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -125,122 +157,117 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
     }
   }
 
-  function onTitleChange(event: ChangeEvent<HTMLInputElement>) {
-    const text = event.target.value;
-
-    if (text.length < title.length) {
-      return setTitle(formatTitle(text));
-    }
-
-    const character = text.charAt(text.length - 1).toLowerCase();
-
-    if (!character.match(/^[A-Za-z ]+$/)) {
-      return;
-    }
-
-    if (isGroupAlreadyExist) {
-      setisGroupAlreadyExist(false);
-    }
-    setTitle(formatTitle(title + character));
-  }
-
-  function formatTitle(title: string): string {
-    return capitalizeFirstCharacter(trim(title));
-  }
-
   return (
     <dialog
       open
-      className="fixed left-0 top-0 h-full outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-10"
+      className=" text-white max-w-[100vw] h-[100vh] fixed left-0 top-0 w-full outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-10"
       onMouseDown={onCancel}
       ref={dialogRef}
     >
-      <div className="h-fit flex-col justfy-center rounded-lg bg-gradient-to-br from-[#2b1747] to-[#232338] text-white border-2 border-[#cc66ff] relative">
-        <CloseIcon
-          className="absolute top-4 right-4 fill-[#cc66ff] cursor-pointer hover:fill-white"
-          onClick={onCancel}
-        />
+      <div className="max-w-[95vw] max-h-[92vh] flex-col justfy-center rounded-2xl bg-gradient-to-br from-[#472872] to-[#232338] border-2 border-primary relative overflow-hidden">
+        <div className="w-full flex justify-between items-center">
+          <h2 className="w-full flex justify-center p-2 text-2xl font-bold pl-12">
+            New Group
+          </h2>
+          <CloseIcon
+            className="m-2 fill-primary cursor-pointer hover:fill-white"
+            onClick={onCancel}
+          />
+        </div>
+        <hr className="h-[3px] border-0 bg-gradient-to-r from-#0000000 via-primary to-#0000000" />
 
         <form
           onSubmit={onSubmit}
-          className="z-50  w-full flex flex-col gap-4 rounded-xl bg-white/10 p-8 text-white  max-h-[70vh] overflow-y-auto w-[80vw] "
+          className="z-50 flex flex-col gap-2 rounded-xl p-3 md:p-5 overflow-y-auto max-h-[94.5vh]"
         >
-          <div className="flex justify-center">
-            <h2 className="text-2xl font-bold">New Group</h2>
+          <div className="w-full flex flex-col md:flex-row gap-5 justify-center items-start">
+            <div className="w-full flex flex-col gap-4">
+              {/**/}
+              <TitleInput
+                isGroupAlreadyExist={isGroupAlreadyExist}
+                setIsGroupAlreadyExist={setIsGroupAlreadyExist}
+                activitySlug={activitySlug}
+              />
+
+              <label htmlFor="description" className="text-xl">
+                Description
+                <span className="text-gray-400 text-sm ml-1">(Optional)</span>
+              </label>
+
+              <textarea
+                name="description"
+                className="p-2 w-full rounded-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
+                rows={2}
+                placeholder="Give a short description about your group"
+              />
+
+              <PublicGroupInput />
+
+              <div className="flex justify-between items-center gap-5">
+                <label className="text-xl">
+                  How many participants?
+                </label>
+
+                <input
+                  name="participants"
+                  className="p-2 w-24 h-fit rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
+                  placeholder="2"
+                  type="number"
+                  min={2}
+                />
+              </div>
+
+              <label className="text-xl">
+                When would you like to schedule it?
+              </label>
+              <DatePicker />
+
+              <TimePicker />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <label className="text-xl pt-2 whitespace-nowrap">
+                In which place?
+              </label>
+
+              <div className="w-full flex justify-center items-center -mt-1 md:mt-0 md:mb-4">
+                <label className="text-xl">
+                  Location
+                </label>
+                <input
+                  name="locationTitle"
+                  type="text"
+                  placeholder="City"
+                  className="w-full mx-4 p-2 rounded-lg bg-gradient-to-br from-[#25213C] to-[#1b1b2e] w-4/5 text-gray-300"
+                  required
+                  value="Berlin"
+                  disabled
+                />
+
+                <button
+                  onClick={() => setShowMarker(!showMarker)}
+                  type="button"
+                  className="group flex justify-between transition items-center hover:text-primary font-semibold gap-2 rounded-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] hver:bg-gradient-to-b hover:from-[#2c2747] hover:to-[#1b1b2e] p-1 px-2"
+                >
+                  Pin
+                  <MarkerIcon className="fill-white stroke-white group-hover:fill-primary group-hover:stroke-primary" />
+                </button>
+              </div>
+
+              <Map
+                initViewLngLat={berlinLngLat}
+                width={mapWidth}
+                height={mapHeight}
+                showMarker={showMarker}
+              />
+            </div>
           </div>
-          <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
 
-          <label htmlFor="title" className="text-2xl">Title</label>
-          <input
-            name="title"
-            type="text"
-            placeholder="Give a title"
-            className={`p-2 rounded-lg text-2xl bg-gradient-to-br from-[#2b1747] to-[#232338] ${
-              isGroupAlreadyExist && "text-orange-300"
-            }`}
-            required
-            value={title}
-            onChange={onTitleChange}
-          />
-
-          {isGroupAlreadyExist && (
-            <GroupAlreadyExist
-              groupSlug={createSlug(title)}
-              activitySlug={activitySlug}
-            />
-          )}
-
-          <label className="text-white text-2xl">
-            When would you like to do the activiy
-          </label>
-
-          <div className="flex justify-between items-center  gap-16">
-            <label className="text-white text-xl">Date</label>
-            <DynamicDatepicker />
-          </div>
-
-          <div className="flex justify-between items-center  gap-16">
-            <label className="text-white text-xl">Time</label>
-            <DynamicTimepicker />
-          </div>
-
-          <label htmlFor="description" className="text-2xl p-2">
-            Description (Optional)
-          </label>
-
-          <div>
-            <textarea
-              name="description"
-              className="p-2 w-full h-fit rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
-              rows={2}
-              placeholder="Give a short description about your group"
-            />
-          </div>
-
-          <div className="flex justify-between items-center  gap-16">
-            <label className="text-white text-xl">
-              How many participants?
-            </label>
-            <input
-              name="participants"
-              className="p-2 w-full h-fit rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] overflow-y-auto overflow-x-hidden"
-              placeholder="2"
-              type="number"
-              min={2}
-            />
-          </div>
-
-          <label className="text-white text-xl">
-            Where ?
-          </label>
-
-          <Map width={mapWidth} height={mapHeight} draggable />
-
-          <div className="flex justify-center">
+          <div className="flex justify-end mt-2 mb-20 md:mb-0">
             <button
               disabled={isWaitingForServer}
               type="submit"
-              className={`rounded-full px-10 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 disabled:opacity-50 ${
+              className={`rounded-full px-4 py-2 w-36 font-semibold no-underline transition border-2 border-primary bg-black/20 disabled:opacity-50 ${
                 !isWaitingForServer &&
                 "hover:bg-black/5 hover:border-white hover:text-white"
               }`}
@@ -252,46 +279,6 @@ const CreateGroupDialog: NextPage<CreateGroupDialogProps> = (
       </div>
     </dialog>
   );
-};
-
-function GroupAlreadyExist(
-  { activitySlug, groupSlug }: { activitySlug: string; groupSlug: string },
-) {
-  return (
-    <>
-      <i className="flex items-center font-medium mt-2 text-sm text-orange-300">
-        <AlarmIcon
-          className="fill-orange-300 stroke-orange-300 w-6 h-6 mr-1"
-          viewBox="0 0 24 24"
-        />{" "}
-        This group already exists
-      </i>
-      <i className="flex font-medium ml-7 mb-4 text-sm text-[#e8c5fa]">
-        Click
-        <Link
-          href={`/activities/${activitySlug}/${groupSlug}`}
-          className="flex justify-center ml-1 font-medium text-[#cc66ff] transition underline hover:text-white [&>svg]:hover:fill-white"
-        >
-          here
-          <EnterIcon
-            className="fill-[#cc66ff] w-6 h-6"
-            viewBox="0 0 24 24"
-          />
-        </Link>
-        to check it out..
-      </i>
-    </>
-  );
-}
-
-function trim(title: string) {
-  if (title === " ") {
-    return "";
-  }
-  if (title.charAt(title.length - 1) === " ") {
-    return title.trim() + " ";
-  }
-  return title.trim();
 }
 
 export default CreateGroupDialog;
