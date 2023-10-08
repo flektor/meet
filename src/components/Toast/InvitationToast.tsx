@@ -4,15 +4,15 @@ export default function InvitationToast(
   { duration, message, onDie, onAccept, onDecline }: {
     message: string;
     duration?: number;
-    onDie: () => void;
-    onAccept: () => void;
-    onDecline: () => void;
+    onDie?: (...args: any) => void;
+    onAccept?: (...args: any) => void;
+    onDecline?: (...args: any) => void;
   },
 ) {
   const [showToast, setShowToast] = useState(true);
 
   useEffect(() => {
-    if (!showToast) {
+    if (!showToast && onDie) {
       onDie();
     }
   }, [showToast]);
