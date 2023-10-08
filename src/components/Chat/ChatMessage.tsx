@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { ChannelMessage } from "../../types";
 import { useStore } from "~/utils/store";
-import PersonPlus from "~/components/icons/PersonPlus";
+import UserMenu from "./UserMenu";
 
 export type ChatMessageProps = {
   message: ChannelMessage;
@@ -11,10 +11,7 @@ export type ChatMessageProps = {
 function ChatMessage({ message, currentUsername }: ChatMessageProps) {
   const sender = useStore().users.find(({ id }) => id === message.sentBy);
   const isCurrentUser = sender?.name === currentUsername;
-  // const float = isCurrentUser ? "justify-self-end" : "justify-self-start";
   const senderName = sender?.name?.split(" ")[0] || "user";
-
-  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <div
@@ -45,50 +42,8 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
             )}
 
             <span className="text-white/60">{senderName}</span>
-            {!isCurrentUser &&
-              (
-                <div className="relative group">
-                  <button
-                    className="text-white group-hover:text-gray-400 focus:outline-none"
-                    onBlur={() => setShowMenu(false)}
-                  >
-                    <PersonPlus
-                      viewBox="0 0 16 16"
-                      className="w-[24px] h-[24px] fill-white/60  mt-2 ml-2 hover:fill-primary"
-                      onClick={() => setShowMenu(!showMenu)}
-                    />
-                  </button>
 
-                  {showMenu && (
-                    <div
-                      onClick={() => setShowMenu(false)}
-                    >
-                      <div className="absolute left-0 flex flex-col text-center rounded-md bg-[#2e026d] text-white border border-primary drop-shadow-2xl z-10">
-                        {
-                          /* <button className="p2 hover:bg-white/10 hover:bg-primary px-3 py-1">
-                          Follow
-                        </button> */
-                        }
-                        <button className="hover:bg-white/10 px-3 py-2 whitespace-nowrap">
-                          Invite to group
-                        </button>
-
-                        <button className="hover:bg-white/10 px-3 py-2 whitespace-nowrap">
-                          Suggest to group
-                        </button>
-
-                        <button className="hover:bg-white/10 px-3 py-2 whitespace-nowrap">
-                          Create new group
-                        </button>
-
-                        <button className="hover:bg-white/10 px-3 py-2 whitespace-nowrap">
-                          Report user
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+            {!isCurrentUser && <UserMenu />}
           </div>
 
           <p className="whitespace-normal break-words pl-1">
@@ -96,14 +51,6 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
           </p>
         </div>
       </div>
-      {
-        /* {!isCurrentUser &&
-        (
-          <i className="pl-3 text-xs text-primary flex justify-start items-end pb-2 w-full">
-            {message.sentAt.toLocaleTimeString()}
-          </i>
-        )} */
-      }
     </div>
   );
 }
