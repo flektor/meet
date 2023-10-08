@@ -75,6 +75,9 @@ function CreateGroupDialog(
       if (formRef.current) {
         formRef.current.reset();
       }
+      if (!group) {
+        return;
+      }
       store.setGroup({
         ...group,
         viewersIds: [],
@@ -125,7 +128,6 @@ function CreateGroupDialog(
 
     const groupData: z.infer<typeof addGroupInput> = {
       activityId,
-      activitySlug,
       description: data.description as string,
       title: data.title as string,
       locationTitle: data.locationTitle as string || "Berlin",
