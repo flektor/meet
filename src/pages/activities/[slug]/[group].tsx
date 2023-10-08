@@ -67,8 +67,6 @@ const Group: NextPage = () => {
       slug,
     }, { enabled: !!slug && !!activity });
 
-  console.log(activity);
-
   useEffect(() => {
     if (group) {
       store.setGroup(group);
