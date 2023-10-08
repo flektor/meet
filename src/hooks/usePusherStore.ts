@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { PusherState } from "../utils/pusherStore";
+import { PusherState } from "../utils/pusher/pusherStore";
+import { PusherContext } from "~/utils/pusher/PusherProvider";
 import { useStore } from "zustand";
-import { PusherContext } from "~/utils/PusherProvider";
 
 export default function usePusherStore<T>(
   selector: (state: PusherState) => T,

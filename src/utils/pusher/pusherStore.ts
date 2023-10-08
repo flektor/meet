@@ -1,6 +1,6 @@
 import Pusher, { type Channel, type PresenceChannel } from "pusher-js";
 import { createStore } from "zustand";
-import { env } from "../env.mjs";
+import { env } from "../../env.mjs";
 
 export interface PusherProps {
   slug: string;

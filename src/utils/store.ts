@@ -20,6 +20,7 @@ import type {
   ToastProps,
   User,
 } from "~/types";
+import { SessionContextValue } from "next-auth/react";
 
 export type Store = {
   activities: Activity[];
@@ -29,7 +30,10 @@ export type Store = {
   pusherSubscriptions: string[];
   channels: Channel[];
   users: User[];
+  session: SessionContextValue | null;
   fetchedActivitiesTimestamp: number | false;
+
+  setSession: (session: SessionContextValue) => void;
 
   setChannel: (channel: Channel) => void;
   removeChannel: (channelId: string) => void;
@@ -71,6 +75,9 @@ export const useStore = create<Store>((set) => ({
   pusherSubscriptions: [],
   userIsViewingPage: null,
   fetchedActivitiesTimestamp: false,
+  session: null,
+
+  setSession: (session: SessionContextValue) => set({ session }),
 
   setUsers: (users: User[]) => set((state) => setUsers(state, users)),
 

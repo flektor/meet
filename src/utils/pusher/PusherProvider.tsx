@@ -1,5 +1,5 @@
-import React, { Children, createContext, useEffect, useState } from "react";
-import { createPusherStore, PusherProps, PusherStore } from "./pusherStore";
+import React, { createContext, useEffect, useState } from "react";
+import { createPusherStore, PusherStore } from "./pusherStore";
 import { useSession } from "next-auth/react";
 
 /**
