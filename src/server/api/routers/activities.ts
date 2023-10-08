@@ -106,9 +106,12 @@ export const activitiesRouter = createTRPCRouter({
 
       const channelUsersIds = channel.messages.map(({ user }) => user.id);
 
+      const memberships = groups.map(({ memberships }) => memberships).flat();
+
       const users = [
         ...viewers.map(({ user }) => user),
         ...channel.messages.map(({ user }) => user),
+        ...memberships.map((membership) => membership.user),
       ];
       const userMap = new Map<string, typeof users[number]>();
 
@@ -138,9 +141,13 @@ export const activitiesRouter = createTRPCRouter({
 
         groups: groups.map((group) => {
           const { memberships, _count, ...rest } = group;
-          return { ...rest, activitySlug: activity.slug };
-        }),
 
+          return {
+            ...rest,
+            activitySlug: activity.slug,
+            membersIds: memberships.map(({ user }) => user.id),
+          };
+        }),
         channel: {
           id: activity.channelId,
           usersIds: channelUsersIds,
