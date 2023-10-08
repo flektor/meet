@@ -23,7 +23,7 @@ export const registrationsRouter = createTRPCRouter({
           receivers: user.userId,
           channelId: input.channelId,
           body: {
-            action: "quick_search_found",
+            action: "quick_invite_request",
             sentBy: ctx.session.user.id,
             activitySlug: input.activitySlug,
           },

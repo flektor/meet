@@ -155,7 +155,7 @@ export const groupsRouter = createTRPCRouter({
         channelId: activity.channelId,
         receivers: otherUserId,
         body: {
-          action: "invite_accepted",
+          action: "quick_invite_accepted",
           sentBy: ctx.session.user.id,
           groupSlug: group.slug,
           groupId: group.id,
