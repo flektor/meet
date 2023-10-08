@@ -17,14 +17,14 @@ import type {
   getActivityOutput,
   getGroupOutput,
   Group,
-  Toast,
+  ToastProps,
   User,
 } from "~/types";
 
 export type Store = {
   activities: Activity[];
   groups: Group[];
-  toasts: Toast[];
+  toasts: ToastProps[];
   userIsViewingPage: string | null;
   pusherSubscriptions: string[];
   channels: Channel[];
@@ -46,9 +46,9 @@ export type Store = {
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
 
-  addToast: (toast: Toast) => void;
+  addToast: (toast: ToastProps) => void;
   removeToast: (toastId: string) => void;
-  addToasts: (toast: Toast[]) => void;
+  addToasts: (toast: ToastProps[]) => void;
 
   addToRegistrations: (activityId: string) => void;
   removeFromRegistrations: (activityId: string) => void;
@@ -134,9 +134,9 @@ export const useStore = create<Store>((set) => ({
       toasts: state.toasts.filter(({ id }) => id !== toastId),
     })),
 
-  addToast: (toast: Toast) =>
+  addToast: (toast: ToastProps) =>
     set((state) => ({ toasts: [...state.toasts, { ...toast }] })),
 
-  addToasts: (toasts: Toast[]) =>
+  addToasts: (toasts: ToastProps[]) =>
     set((state) => ({ toasts: [...state.toasts, ...toasts] })),
 }));
