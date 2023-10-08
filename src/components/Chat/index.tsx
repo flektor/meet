@@ -51,7 +51,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
       <div
         ref={messagesListRef}
         aria-label="messages"
-        className="w-full min-h-[calc(100vh-10px)] bg-black/20 p-1 pl-2 mb-20 mx-auto"
+        className="w-full min-h-[calc(100vh-20px)] bg-black/20 p-1 pl-2 mb-20 mx-auto"
       >
         {isLoading && <Spinner />}
 
