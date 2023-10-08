@@ -4,7 +4,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { addActivityInput, User } from "~/types";
+import { addActivityInput } from "~/types";
 import { createSlug } from "~/utils";
 
 const selectUserBaseFields = { select: { id: true, name: true, image: true } };
@@ -136,17 +136,10 @@ export const activitiesRouter = createTRPCRouter({
           ? registrations.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
 
-        groups: groups.map((group) => ({
-          id: group.id,
-          activityId: activity.id,
-          title: group.title,
-          slug: group.slug,
-          activitySlug: activity.slug,
-          channelId: group.channelId,
-          viewersCount: group._count.viewers,
-          isMember: false,
-          membersCount: group._count.memberships,
-        })),
+        groups: groups.map((group) => {
+          const { memberships, _count, ...rest } = group;
+          return { ...rest, activitySlug: activity.slug };
+        }),
 
         channel: {
           id: activity.channelId,
