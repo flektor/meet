@@ -8,10 +8,11 @@ import { useStore } from "~/utils/store";
 export type ChatProps = {
   isLoading: boolean;
   channelId: string;
+  groupId?: string;
   session: SessionContextValue;
 };
 
-function Chat({ isLoading, channelId, session }: ChatProps) {
+function Chat({ isLoading, channelId, groupId, session }: ChatProps) {
   const messagesListRef = useRef<HTMLDivElement>(null);
   const store = useStore();
   const channel = store.channels.find(({ id }) => id === channelId);
@@ -61,6 +62,7 @@ function Chat({ isLoading, channelId, session }: ChatProps) {
             message={message}
             currentUsername={username}
             session={session}
+            groupId={groupId}
           />
         ))}
       </div>

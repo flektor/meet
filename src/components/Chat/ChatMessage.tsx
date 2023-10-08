@@ -8,12 +8,20 @@ export type ChatMessageProps = {
   message: ChannelMessage;
   currentUsername: string;
   session: SessionContextValue;
+  groupId?: string;
 };
 
-function ChatMessage({ message, currentUsername, session }: ChatMessageProps) {
-  const sender = useStore().users.find(({ id }) => id === message.sentBy);
+function ChatMessage(
+  { message, groupId, currentUsername, session }: ChatMessageProps,
+) {
+  const store = useStore();
+  const sender = store.users.find(({ id }) => id === message.sentBy);
   const isCurrentUser = sender?.name === currentUsername;
   const senderName = sender?.name?.split(" ")[0] || "user";
+  const isMember = sender &&
+      store.groups.find(({ id }) => id === groupId)?.membersIds?.includes(
+        sender.id,
+      ) || false;
 
   return (
     <div
@@ -46,7 +54,11 @@ function ChatMessage({ message, currentUsername, session }: ChatMessageProps) {
             <span className="text-white/60">{senderName}</span>
 
             {!isCurrentUser && (
-              <UserMenu session={session} userId={message.sentBy} />
+              <UserMenu
+                session={session}
+                userId={message.sentBy}
+                isMember={isMember}
+              />
             )}
           </div>
 

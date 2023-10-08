@@ -128,6 +128,7 @@ const Group: NextPage = () => {
                   <Chat
                     isLoading={isLoading}
                     channelId={group.channelId}
+                    groupId={group.id}
                     session={session}
                   />
                 )}
