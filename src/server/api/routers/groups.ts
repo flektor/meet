@@ -164,20 +164,51 @@ export const groupsRouter = createTRPCRouter({
       });
       return { ...group, activitySlug: activity.slug };
     }),
-  // getUserGroups: protectedProcedure
-  //   .query(async ({ ctx }) => {
-  //     const groups = await ctx.prisma.group.findMany({
-  //       include: {
-  //         memberships: true,
-  //         viewers: true,
-  //         activity: { select: { slug: true } },
-  //       },
-  //       where: { memberships: { every: { userId: ctx.session.user.id } } },
-  //     });
 
-  //     return groups.map(({ viewers, activity, ...group }) => ({
-  //       ...group,
-  //       viewersCount: viewers.length,
-  //     }));
-  //   }),
+  getUserGroups: protectedProcedure
+    .query(async ({ ctx }) => {
+      //
+      const data = await ctx.prisma.group.findMany({
+        include: {
+          viewers: { include: { user: true } },
+          memberships: { include: { user: true } },
+          activity: { select: { slug: true } },
+        },
+        where: { memberships: { every: { userId: ctx.session.user.id } } },
+      });
+
+      const userMap = new Map();
+
+      const users = [
+        ...data.flatMap((group) => ({
+          ...group.viewers.map(({ user }) => ({
+            id: user.id,
+            name: user.name,
+            image: user.image,
+          })),
+          ...group.memberships.map(({ user }) => ({
+            id: user.id,
+            name: user.name,
+            image: user.image,
+          })),
+        })),
+      ];
+
+      const groups = data.map((
+        { memberships, viewers, activity, ...rest },
+      ) => ({
+        ...rest,
+        activitySlug: activity.slug,
+        viewerIds: viewers.map(({ userId }) => userId),
+        membersIds: memberships.map(({ userId }) => userId),
+      }));
+
+      users.forEach((user) => {
+        if (!userMap.has(user.id)) {
+          userMap.set(user.id, user);
+        }
+      });
+
+      return groups;
+    }),
 });
