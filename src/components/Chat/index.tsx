@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { SessionContextValue } from "next-auth/react";
 import Spinner from "../Spinner";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
@@ -8,10 +8,10 @@ import { useStore } from "~/utils/store";
 export type ChatProps = {
   isLoading: boolean;
   channelId: string;
+  session: SessionContextValue;
 };
 
-function Chat({ isLoading, channelId }: ChatProps) {
-  const { data: session } = useSession();
+function Chat({ isLoading, channelId, session }: ChatProps) {
   const messagesListRef = useRef<HTMLDivElement>(null);
   const store = useStore();
   const channel = store.channels.find(({ id }) => id === channelId);
@@ -39,7 +39,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
   //   return <span className="text-white text-2xl">Sign in to see the chat</span>;
   // }
 
-  const username = session?.user.name || "you";
+  const username = session?.data?.user.name || "you";
 
   return (
     <section
@@ -60,6 +60,7 @@ function Chat({ isLoading, channelId }: ChatProps) {
             key={index}
             message={message}
             currentUsername={username}
+            session={session}
           />
         ))}
       </div>

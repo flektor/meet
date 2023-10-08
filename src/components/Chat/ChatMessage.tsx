@@ -2,13 +2,15 @@ import React from "react";
 import { ChannelMessage } from "../../types";
 import { useStore } from "~/utils/store";
 import UserMenu from "./UserMenu";
+import { SessionContextValue } from "next-auth/react";
 
 export type ChatMessageProps = {
   message: ChannelMessage;
   currentUsername: string;
+  session: SessionContextValue;
 };
 
-function ChatMessage({ message, currentUsername }: ChatMessageProps) {
+function ChatMessage({ message, currentUsername, session }: ChatMessageProps) {
   const sender = useStore().users.find(({ id }) => id === message.sentBy);
   const isCurrentUser = sender?.name === currentUsername;
   const senderName = sender?.name?.split(" ")[0] || "user";
@@ -43,7 +45,9 @@ function ChatMessage({ message, currentUsername }: ChatMessageProps) {
 
             <span className="text-white/60">{senderName}</span>
 
-            {!isCurrentUser && <UserMenu />}
+            {!isCurrentUser && (
+              <UserMenu session={session} userId={message.sentBy} />
+            )}
           </div>
 
           <p className="whitespace-normal break-words pl-1">

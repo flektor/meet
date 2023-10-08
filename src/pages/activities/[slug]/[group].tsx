@@ -16,8 +16,9 @@ import { useSession } from "next-auth/react";
 
 const Group: NextPage = () => {
   const router = useRouter();
-  const session = useSession();
   const store = useStore();
+  const session = useSession();
+
   const slug = router.query.group as string;
   const activitySlug = router.query.slug as string;
   const screenSize = useScreenSize();
@@ -127,6 +128,7 @@ const Group: NextPage = () => {
                   <Chat
                     isLoading={isLoading}
                     channelId={group.channelId}
+                    session={session}
                   />
                 )}
               {displayTab === "about" &&

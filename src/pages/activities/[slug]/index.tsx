@@ -92,6 +92,7 @@ const Activity: NextPage = () => {
                   <Chat
                     isLoading={isLoading}
                     channelId={activity.channelId}
+                    session={session}
                   />
                 )
                 : (
