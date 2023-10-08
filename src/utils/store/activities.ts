@@ -1,14 +1,6 @@
 import type { Store } from "../store";
 import type { getActivitiesOutput, getActivityOutput } from "../../types";
 
-const dummyBaseGroup = {
-  membersIds: [],
-  viewersIds: [],
-  description: "",
-  createdAt: new Date(),
-  createdBy: "",
-};
-
 function getCurrentPusherSubscriptions(
   state: Store,
   activity: getActivityOutput,
@@ -58,7 +50,7 @@ export const setActivity = (state: Store, activity: getActivityOutput) => {
     channels: [...restChannels, channel],
     groups: [
       ...restGroups,
-      ...groups.map((group) => ({ ...group, ...dummyBaseGroup })),
+      ...groups,
     ],
     users: [...restUsers, ...users],
     pusherSubscriptions,
