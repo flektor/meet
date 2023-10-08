@@ -30,7 +30,7 @@ export function groupQuickInviteHandler(
     onDecline: () => onDecline(message, store),
     // onDie: () => redirect(),
   };
-
+  console.log({ toastProps });
   store.addToast(toastProps);
 }
 
@@ -39,7 +39,7 @@ function onAccept(
   store: Store,
   mutate: (data: AddDynamicGroupInput) => void,
 ) {
-  if (message.action !== "quick_invite_accepted") {
+  if (message.action !== "quick_invite_request") {
     return;
   }
 
@@ -50,6 +50,8 @@ function onAccept(
   if (!activity) {
     return;
   }
+
+  store.removeToast(getToastId(message));
 
   const groupData: AddDynamicGroupInput = {
     description: activity.description,
@@ -66,9 +68,8 @@ function onAccept(
   try {
     const data = addDynamicGroupInput.parse(groupData);
     mutate(data);
-  } catch (error) {}
-
-  store.removeToast(getToastId(message));
+  } catch (error) {
+  }
 }
 
 function onDecline(
@@ -76,6 +77,7 @@ function onDecline(
   store: Store,
 ) {
   // TODO send back to the server so it can reach for an other user instead
+
   store.removeToast(getToastId(message));
 }
 
@@ -90,8 +92,8 @@ export function onAddGroupSuccess(
   if (!group) {
     return console.error("ActivityNotFound");
   }
-
   if (!group.slug) return;
+
   router.push(`/activities/${group.activitySlug}/${group.slug}`);
 }
 

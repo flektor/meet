@@ -1,9 +1,9 @@
-import { PusherInviteMessage, PusherQuickSearchMessage } from "../../types";
+import { PusherInviteMessage, PusherQuickInviteMessage } from "../../types";
 
 export default function getToastId(
-  message: PusherInviteMessage | PusherQuickSearchMessage,
+  message: PusherInviteMessage | PusherQuickInviteMessage,
 ) {
-  if (message.action === "quick_search_found") {
+  if (message.action === "quick_invite_request") {
     return `${message.activitySlug}:${message.sentBy}`;
   }
   return `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`;

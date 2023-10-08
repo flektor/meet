@@ -4,30 +4,21 @@ import {
   AddToMembershipsInput,
   addToMembershipsInput,
   PusherInviteMessage,
-  PusherMessage,
   ToastProps,
 } from "../../types";
 
 export function groupInviteHandler(
   sender: string,
-  message: PusherMessage,
+  message: PusherInviteMessage,
   store: Store,
   mutate: (data: AddToMembershipsInput) => void,
 ) {
-  if (message.action !== "invite_accepted") {
-    return;
-  }
-
-  const activity = store.activities.find((activity) =>
-    activity.slug === message.activitySlug
-  );
-
-  if (!activity) {
+  if (message.action !== "invite_request") {
     return;
   }
 
   const toastProps: ToastProps = {
-    id: `${message.activitySlug}:${message.sentBy}`,
+    id: getToastId(message),
     displayMessage: `${sender} invites you to join ${message.groupSlug}`,
     pusherMessage: message,
     duration: 15000,
@@ -36,18 +27,13 @@ export function groupInviteHandler(
   };
 
   store.addToast(toastProps);
-  store.removeToast(getToastId(message));
 }
 
 function onAccept(
-  message: PusherMessage,
+  message: PusherInviteMessage,
   store: Store,
   mutate: (data: AddToMembershipsInput) => void,
 ) {
-  if (message.action !== "invite_request") {
-    return;
-  }
-
   const activity = store.activities.find((activity) =>
     activity.slug === message.activitySlug
   );
@@ -58,7 +44,7 @@ function onAccept(
 
   try {
     const input: AddToMembershipsInput = {
-      groupId: message.groupSlug,
+      groupId: message.groupId,
       activitySlug: activity.slug,
     };
     const data = addToMembershipsInput.parse(input);
