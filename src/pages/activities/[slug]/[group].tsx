@@ -32,11 +32,6 @@ const Group: NextPage = () => {
 
   useEffect(() => {
     if (activitiesData && store.fetchedActivitiesTimestamp === false) {
-      console.log(
-        "set activities",
-        activitiesData,
-        store.fetchedActivitiesTimestamp,
-      );
       store.setActivities(activitiesData);
     }
   }, [activitiesData]);
