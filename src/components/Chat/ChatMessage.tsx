@@ -3,6 +3,7 @@ import { ChannelMessage } from "../../types";
 import { useStore } from "~/utils/store";
 import UserMenu from "./UserMenu";
 import { SessionContextValue } from "next-auth/react";
+import { getTime } from "~/utils";
 
 export type ChatMessageProps = {
   message: ChannelMessage;
@@ -33,7 +34,7 @@ function ChatMessage(
         className={`flex  ${!isCurrentUser && "flex-row-reverse"}`}
       >
         <i className="pl-3 text-xs text-[#cc66ff] flex items-end pr-4 pb-3 whitespace-nowrap ">
-          {message.sentAt.toLocaleTimeString()}
+          {getTime(message.sentAt)}
         </i>
 
         <div
