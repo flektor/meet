@@ -145,6 +145,7 @@ export const activitiesRouter = createTRPCRouter({
           return {
             ...rest,
             activitySlug: activity.slug,
+            viewersIds: [],
             membersIds: memberships.map(({ user }) => user.id),
           };
         }),
