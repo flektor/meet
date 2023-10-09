@@ -96,7 +96,7 @@ const Activity: NextPage = () => {
                   />
                 )
                 : (
-                  <div className="flex flex-col justify-center items-center">
+                  <div className="flex flex-col gap-3 justify-center items-center">
                     <p className="text-white text-2xl flex">
                       <span className="text-gray-400 mr-2">About:</span>
                       {activity.description}
@@ -107,12 +107,14 @@ const Activity: NextPage = () => {
                         Be the first one to create a group!
                       </p>
                     )}
+
                     <button
                       className="rounded-full font-bold transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white text-[#cc66ff] p-1 pl-3 pr-3"
                       onClick={() => setShowCreateGroupDialog(true)}
                     >
                       Create Group
                     </button>
+
                     <Groups activitySlug={slug} />
                   </div>
                 )}
