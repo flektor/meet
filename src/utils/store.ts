@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { removeActivity, setActivities, setActivity } from "./store/activities";
 import { removeUsers, setUsers } from "./store/users";
-import { removeGroup, setGroup } from "./store/groups";
+import { removeGroup, setGroup, updateGroupLocation } from "./store/groups";
 import { addToFavorites, removeFromFavorites } from "./store/favorites";
 import { addViewer, removeViewer } from "./store/viewer";
 import { addMessage, removeChannel, setChannel } from "./store/channels";
@@ -21,6 +21,7 @@ import type {
   User,
 } from "~/types";
 import { SessionContextValue } from "next-auth/react";
+import { LngLat } from "~/components/Map";
 
 export type Store = {
   activities: Activity[];
@@ -46,6 +47,10 @@ export type Store = {
 
   setGroup: (group: getGroupOutput) => void;
   removeGroup: (groupId: string) => void;
+  updateGroupLocation: (
+    groupId: string,
+    lngLat: LngLat,
+  ) => void;
 
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
@@ -88,6 +93,9 @@ export const useStore = create<Store>((set) => ({
 
   setActivity: (activity: getActivityOutput) =>
     set((state) => setActivity(state, activity)),
+
+  updateGroupLocation: (groupId: string, lngLat: LngLat) =>
+    set((state) => updateGroupLocation(state, groupId, lngLat)),
 
   removeActivity: (activityId: string) =>
     set((state) => removeActivity(state, activityId)),

@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/utils/api";
 import quickInviteHandler from "~/utils/pusher/groupQuickInviteHandler";
+import locationHandler from "~/utils/pusher/groupLocationUpdateHandler";
 
 import joinRequestHandler from "~/utils/pusher/groupJoinRequestHandler";
 import { groupInviteHandler } from "~/utils/pusher/groupInviteHandler";
@@ -79,6 +80,9 @@ export default function usePusherEventHandler() {
           acceptJoinRequest.mutate,
           declineJoinRequest.mutate,
         );
+
+      case "location_update":
+        return locationHandler(sender, message, store);
     }
   }
 

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import ReactMapGL, { GeolocateControl, Marker } from "react-map-gl";
+import React, { useCallback, useEffect, useState } from "react";
+import ReactMapGL, { Marker, ViewStateChangeEvent } from "react-map-gl";
 import { env } from "~/env.mjs";
 import MarkerIcon from "~/components/icons/Marker";
 import { MarkerDragEvent } from "react-map-gl/dist/esm/types";
@@ -7,16 +7,21 @@ import { MarkerDragEvent } from "react-map-gl/dist/esm/types";
 export type LngLat = [number, number];
 
 type ViewState = {
-  lng: number;
-  lat: number;
+  longitude: number;
+  latitude: number;
+  width: number;
+  height: number;
+  pitch: number;
   zoom: number;
+  bearing: number;
+  padding: { bottom: number; left: number; top: number; right: number };
 };
 
 type MapProps = {
   onMarkerMoved?: (lngLat: LngLat) => void;
   showMarker?: boolean;
   markerClassName?: string;
-  initMarkerLngLat?: LngLat;
+  markerLngLat?: LngLat;
   initViewLngLat?: LngLat;
   width?: string | number;
   height?: string | number;
@@ -26,24 +31,29 @@ const Map = ({
   onMarkerMoved,
   markerClassName = "",
   showMarker,
-  initMarkerLngLat,
+  markerLngLat,
   initViewLngLat = [13.404954, 52.520008], // Berlin long-lat
   width = "100%",
   height = "50vh",
 }: MapProps) => {
+  //
   const [viewport, setViewport] = useState<ViewState>({
-    lng: initViewLngLat[0],
-    lat: initViewLngLat[1],
+    longitude: markerLngLat && markerLngLat[0] || initViewLngLat[0],
+    latitude: markerLngLat && markerLngLat[1] || initViewLngLat[1],
+    width: 200,
+    height: 200,
     zoom: 12,
+    pitch: 0,
+    bearing: 0,
+    padding: { bottom: 0, left: 0, top: 0, right: 0 },
   });
 
-  const handleViewportChange = (newViewport: ViewState) => {
-    console.log(newViewport);
-    setViewport(newViewport);
+  const handleViewportChange = (event: ViewStateChangeEvent) => {
+    setViewport({ ...event.viewState, width: 100, height: 100 });
   };
 
   const [marker, setMarker] = useState<LngLat>(
-    initMarkerLngLat || initViewLngLat,
+    markerLngLat || initViewLngLat,
   );
 
   const onMarkerDrag = (e: MarkerDragEvent<mapboxgl.Marker>) => {
@@ -56,43 +66,45 @@ const Map = ({
         return;
       }
       onMarkerMoved([event.lngLat.lng, event.lngLat.lat]);
+      setViewport({
+        ...viewport,
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat,
+      });
     },
     [],
   );
 
-  const markerLngLat = marker || initMarkerLngLat || initViewLngLat;
+  useEffect(() => {
+    if (markerLngLat) {
+      setMarker(markerLngLat);
+      setViewport({
+        ...viewport,
+        longitude: markerLngLat[0],
+        latitude: markerLngLat[1],
+      });
+    }
+  }, [markerLngLat]);
 
   return (
     <>
       <div className="border border-[#7f409eb7]">
         <ReactMapGL
-          {...viewport}
-          // width={width}
-          // height={height}
-          // onViewportChange={handleViewportChange}
+          onLoad={(e) => e.target.resize()}
+          onMoveEnd={handleViewportChange}
           interactive
           mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
           style={{ width, height }}
-          viewState={{
-            longitude: initViewLngLat[0],
-            latitude: initViewLngLat[1],
-            zoom: 12,
-            width: 100,
-            height: 100,
-            bearing: 0,
-            padding: { bottom: 0, left: 0, top: 0, right: 0 },
-            pitch: 0,
-          }}
-          mapStyle="mapbox://styles/mapbox/dark-v10" // style={{
-          //   color: "#cc66ff",
-          // }}
+          initialViewState={viewport}
+          scrollZoom
+          mapStyle="mapbox://styles/mapbox/dark-v10"
         >
           {showMarker &&
             (
               <>
                 <Marker
-                  longitude={markerLngLat[0]}
-                  latitude={markerLngLat[1]}
+                  longitude={marker[0]}
+                  latitude={marker[1]}
                   draggable
                   onDrag={onMarkerDrag}
                   onDragEnd={onMarkerDragEnd}
@@ -103,17 +115,19 @@ const Map = ({
                   <input
                     className="invisible"
                     name="marker"
-                    value={JSON.stringify(marker)}
+                    value={marker.toString()}
                     onChange={() => {}}
                   />
                 </Marker>
               </>
             )}
 
-          <GeolocateControl
+          {
+            /* <GeolocateControl
             positionOptions={{ enableHighAccuracy: true }}
             trackUserLocation={true}
-          />
+          /> */
+          }
         </ReactMapGL>
       </div>
     </>

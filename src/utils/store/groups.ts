@@ -1,3 +1,4 @@
+import { LngLat } from "~/components/Map";
 import { getGroupOutput } from "../../types";
 import { Store } from "../store";
 
@@ -12,6 +13,24 @@ export function setGroup(state: Store, group: getGroupOutput) {
     groups: [...restGroups, rest],
     users: [...restUsers, ...users],
   });
+}
+
+export function updateGroupLocation(
+  state: Store,
+  groupId: string,
+  lngLat: LngLat,
+) {
+  const groupToUpdate = state.groups.find(({ id }) => id == groupId);
+
+  if (!groupToUpdate) {
+    return state;
+  }
+  groupToUpdate.locationPin = lngLat.toString();
+  return {
+    groups: state.groups.map((group) =>
+      group.id === groupId ? groupToUpdate : group
+    ),
+  };
 }
 
 export function removeGroup(state: Store, GroupId: string) {

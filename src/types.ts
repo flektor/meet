@@ -1,6 +1,7 @@
 import { type inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 import { type AppRouter } from "./server/api/root";
+import { LngLat } from "./components/Map";
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -70,6 +71,12 @@ export const addGroupInput = z.object({
   maxParticipants: z.number().optional(),
   private: z.boolean(),
 });
+
+export const updateGroupLocationInput = z.object({
+  lngLat: z.tuple([z.number(), z.number()]),
+  groupId: z.string(),
+});
+export type UpdateGroupLocationInput = z.infer<typeof updateGroupLocationInput>;
 
 export const addDynamicGroupInput = addGroupInput.extend({
   otherUserId: z.string(),
@@ -166,11 +173,19 @@ export type PusherQuickInviteMessage = {
   sentBy: string;
 };
 
+export type PusherLocationMessage = {
+  action: "location_update";
+  lngLat: LngLat;
+  groupId: string;
+  sentBy: string;
+};
+
 export type PusherMessage =
   | PusherViewerMessage
   | PusherChatMessage
   | PusherInviteMessage
-  | PusherQuickInviteMessage;
+  | PusherQuickInviteMessage
+  | PusherLocationMessage;
 
 export type PusherSendProps = {
   receivers: string | string[];

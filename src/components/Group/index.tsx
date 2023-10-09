@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import MarkerIcon from "../icons/Marker";
+import React, { useEffect, useState } from "react";
 import { getGroupOutput, Group } from "../../types";
 import { useStore } from "../../utils/store";
 import Map, { LngLat } from "../Map";
 import DateTime from "./DateTime";
 import useScreenSize from "~/hooks/useScreenSize";
+import { api } from "~/utils/api";
 
 export type GroupInfoProps = {
   group: getGroupOutput;
@@ -25,14 +25,34 @@ export default function Group({ group }: GroupInfoProps) {
     group ? group.membersIds.includes(user.id) : []
   );
 
-  const [showMarker, setShowMarker] = useState(false);
+  // const [showMarker, setShowMarker] = useState(false);
 
-  function onMarkerMoved(location: LngLat) {
-    console.log(location);
+  const updateLocation = api.location.updateGroupLocation.useMutation();
+
+  const [locationPin, setLocationPin] = useState<LngLat>(
+    JSON.parse(`[${group.locationPin}]`) ||
+      [13.404954, 52.520008],
+  );
+
+  function onMarkerMoved(lngLat: LngLat) {
+    updateLocation.mutate({
+      groupId: group.id,
+      lngLat,
+    });
+    setLocationPin(lngLat);
   }
 
+  useEffect(() => {
+    const storedGgroup = store.groups.find(({ id }) => id === group.id);
+    if (!storedGgroup) {
+      return;
+    }
+    const lngLat = JSON.parse(`[${storedGgroup.locationPin}]`);
+    setLocationPin(lngLat);
+  }, [store.groups]);
+
   return (
-    <div className="flex flex-col justify-center items-start mt-3 gap-3 text-white text-xl">
+    <div className="flex flex-col justify-center items-start mt-3 mb-4 gap-3 text-white text-xl">
       {group.description &&
         (
           <p className="flex">
@@ -50,7 +70,7 @@ export default function Group({ group }: GroupInfoProps) {
 
       <p className="flex">
         <span className="text-gray-400 mr-2">
-          Members: {" "}
+          Members:
         </span>
         {group.membersIds.length}/{group.maxParticipants}
       </p>
@@ -87,17 +107,22 @@ export default function Group({ group }: GroupInfoProps) {
       </div>
 
       <p className="flex">
-        <span className="text-gray-400 mr-2 mt-5">
+        <span className="text-gray-400 mr-2 mt-3 md:mt-5">
           Schedule
         </span>
       </p>
 
       <DateTime startsAt={group.startsAt} endsAt={group.endsAt} />
 
-      <span className="text-gray-400 mr-2 mt-5">
-        Location {" "}
+      <span className="text-gray-400 mr-2 mt-3 md:mt-5">
+        Location:{" "}
+        <span className="text-white">
+          {group.locationTitle}
+        </span>
       </span>
-      <div className="w-full flex justify-between items-center">
+
+      {
+        /* <div className="w-full flex justify-between items-center">
         {group.locationTitle}
 
         <button
@@ -108,13 +133,14 @@ export default function Group({ group }: GroupInfoProps) {
           Pin
           <MarkerIcon className="fill-primary stroke-primary group-hover:fill-white group-hover:stroke-white" />
         </button>
-      </div>
-
+      </div> */
+      }
       <Map
         width={mapWidth}
         height={mapHeight}
-        initViewLngLat={[13.404954, 52.520008]}
-        showMarker={showMarker}
+        initViewLngLat={locationPin}
+        markerLngLat={locationPin}
+        showMarker={true}
         onMarkerMoved={onMarkerMoved}
       />
     </div>
