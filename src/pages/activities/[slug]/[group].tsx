@@ -4,15 +4,14 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
-import GroupPageNav from "./GroupPageNav";
+import GroupPageNav from "~/components/Nav/GroupPageNav";
 import Chat from "~/components/Chat";
-import Map from "~/components/Map";
-import useScreenSize from "~/hooks/useScreenSize";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
 import { Activity } from "~/types";
 import { useSession } from "next-auth/react";
+import GroupInfo from "~/components/Group";
 
 const Group: NextPage = () => {
   const router = useRouter();
@@ -21,13 +20,6 @@ const Group: NextPage = () => {
 
   const slug = router.query.group as string;
   const activitySlug = router.query.slug as string;
-  const screenSize = useScreenSize();
-  const mapWidth = screenSize === "sm"
-    ? "90vw"
-    : screenSize === "md"
-    ? "60vw"
-    : "40vw";
-  const mapHeight = mapWidth;
 
   const {
     data: activitiesData,
@@ -77,9 +69,7 @@ const Group: NextPage = () => {
 
   usePusherEventHandler();
 
-  const [displayTab, setDisplayTab] = useState<"chat" | "map" | "about">(
-    "about",
-  );
+  const [showChat, setShowChat] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
@@ -91,9 +81,9 @@ const Group: NextPage = () => {
 
       <GroupPageNav
         session={session}
-        onTabChanged={(tab) => setDisplayTab(tab)}
+        toggleChat={() => setShowChat(!showChat)}
         group={group}
-        displayChat={displayTab === "chat"}
+        displayChat={showChat}
       />
 
       <main>
@@ -123,31 +113,16 @@ const Group: NextPage = () => {
               </div> */
               }
 
-              {displayTab === "chat" &&
-                (
+              {showChat
+                ? (
                   <Chat
                     isLoading={isLoading}
                     channelId={group.channelId}
                     groupId={group.id}
                     session={session}
                   />
-                )}
-              {displayTab === "about" &&
-                (
-                  <div className="flex flex-col justify-start items-center mt-32">
-                    <p className="text-white text-2xl flex">
-                      <span className="text-gray-400 mr-2">About:</span>
-                      {group.description}
-                    </p>
-                  </div>
-                )}
-
-              {displayTab === "map" &&
-                (
-                  <div className="flex flex-col justify-center items-center mt-3 gap-3">
-                    <Map width={mapWidth} height={mapHeight} />
-                  </div>
-                )}
+                )
+                : <GroupInfo group={group} />}
             </div>
           </>
         )}
