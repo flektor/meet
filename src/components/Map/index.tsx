@@ -50,10 +50,15 @@ const Map = ({
     setMarker([e.lngLat.lng, e.lngLat.lat]);
   };
 
-  const onMarkerDragEnd = useCallback((event: any) => {
-    if (!onMarkerMoved) return;
-    onMarkerMoved([event.lng, event.lat]);
-  }, []);
+  const onMarkerDragEnd = useCallback(
+    (event: MarkerDragEvent<mapboxgl.Marker>) => {
+      if (!onMarkerMoved) {
+        return;
+      }
+      onMarkerMoved([event.lngLat.lng, event.lngLat.lat]);
+    },
+    [],
+  );
 
   const markerLngLat = marker || initMarkerLngLat || initViewLngLat;
 
@@ -99,6 +104,7 @@ const Map = ({
                     className="invisible"
                     name="marker"
                     value={JSON.stringify(marker)}
+                    onChange={() => {}}
                   />
                 </Marker>
               </>
