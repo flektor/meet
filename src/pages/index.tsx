@@ -3,7 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useEffect } from "react";
 import Activities from "~/components/Activities";
-import IndexPageNav from "./IndexPageNav";
+import IndexPageNav from "~/components/Nav/IndexPageNav";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";

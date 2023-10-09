@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
-import ActivityPageNav from "./ActivityPageNav";
+import ActivityPageNav from "../../../components/Nav/ActivityPageNav";
 import Chat from "~/components/Chat";
 import CreateGroupDialog from "~/components/CreateGroupDialog";
 import LoginMessageDialog from "~/components/LoginMessageDialog";

@@ -1,28 +1,21 @@
-import React from "react";
-import { useRouter } from "next/navigation";
-import Nav, { MenuOption } from "../../../components/Nav";
-import LeaveIcon from "../../../components/icons/Leave";
-import FavoriteButton from "~/components/FavoriteButton";
-import RegisterButton from "~/components/RegisterButton";
+import React, { useState } from "react";
+import Nav, { MenuOption } from "~/components/Nav";
+import { useRouter } from "next/router";
 import { SessionContextValue, signIn, signOut } from "next-auth/react";
-import { getActivityOutput } from "~/types";
+import { GroupOutput } from "~/types";
+import LeaveIcon from "~/components/icons/Leave";
 
-const MenuOptions = ({ session }: { session: SessionContextValue }) => (
+const MenuOptions = (
+  { session }: { session: SessionContextValue },
+) => (
   <>
     {
       /* <MenuOption className="md:hidden">
       Search
     </MenuOption> */
     }
-    <MenuOption href="/activities">
-      Activities
-    </MenuOption>
 
-    <MenuOption href="/favorites">
-      Favorites
-    </MenuOption>
-
-    <MenuOption href="/groups">
+    <MenuOption className="md:hidden" href="/groups">
       Groups
     </MenuOption>
 
@@ -37,17 +30,18 @@ const MenuOptions = ({ session }: { session: SessionContextValue }) => (
   </>
 );
 
-type ActivityPageNavProps = {
+type GroupPageNavProps = {
   session: SessionContextValue;
-  activity: getActivityOutput | undefined;
+  group: GroupOutput | undefined;
   displayChat: boolean;
   toggleChat: () => void;
 };
 
-export default function ActivityPageNav(
-  { session, activity, toggleChat, displayChat }: ActivityPageNavProps,
+export default function GroupPageNav(
+  { session, group, toggleChat, displayChat }: GroupPageNavProps,
 ) {
   const router = useRouter();
+
   return (
     <Nav
       className="flex items-center justify-center"
@@ -63,28 +57,20 @@ export default function ActivityPageNav(
       </button>
 
       <div className="flex items-center justify-center">
-        {activity && (
+        {group && (
           <>
             <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
-              {activity.title}
+              {group.title}
             </span>
-
-            <FavoriteButton activityId={activity.id} />
-
-            <RegisterButton
-              activitySlug={activity.slug}
-              activityId={activity.id}
-            />
           </>
         )}
       </div>
-
       <div className="w-full flex justify-end items-center">
         <button
           className="rounded-md min-w-20 w-20 font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2"
           onClick={toggleChat}
         >
-          {displayChat ? "Groups" : "Chat"}
+          {displayChat ? "About" : "Chat"}
         </button>
       </div>
     </Nav>

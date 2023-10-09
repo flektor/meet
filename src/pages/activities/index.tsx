@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Spinner from "../../components/Spinner";
-import ActivitiesPageNav from "./ActivitiesPageNav";
+import ActivitiesPageNav from "~/components/Nav/ActivitiesPageNav";
 import Activities from "../../components/Activities";
 import { useSession } from "next-auth/react";
 import CreateActivityDialog from "~/components/CreateActivityDialog";
