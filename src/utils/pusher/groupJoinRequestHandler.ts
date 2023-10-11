@@ -31,7 +31,7 @@ export function groupJoinRequestHandler(
   }
 
   const toastProps: ToastProps = {
-    id: `${message.activitySlug}:${message.sentBy}`,
+    id: `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`,
     displayMessage: `${sender} wants to join ${message.groupSlug}`,
     pusherMessage: message,
     duration: 15000,
@@ -51,6 +51,8 @@ function _onAccept(
     return;
   }
 
+  store.removeToast(getToastId(message));
+
   const activity = store.activities.find((activity) =>
     activity.slug === message.activitySlug
   );
@@ -61,15 +63,24 @@ function _onAccept(
 
   try {
     const input: AcceptJoinRequestInput = {
-      groupId: message.groupSlug,
+      groupId: message.groupId,
       activitySlug: activity.slug,
       userId: message.sentBy,
     };
     const data = acceptJoinRequestInput.parse(input);
     mutate(data);
-  } catch (error) {}
 
-  store.removeToast(getToastId(message));
+    const group = store.groups.find((group) => group.id === message.groupId);
+
+    if (!group) {
+      return;
+    }
+
+    store.setGroup({
+      ...group,
+      membersIds: [...group.membersIds, message.sentBy],
+    });
+  } catch (error) {}
 }
 
 function _onDecline(
@@ -81,6 +92,8 @@ function _onDecline(
     return;
   }
 
+  store.removeToast(getToastId(message));
+
   const activity = store.activities.find((activity) =>
     activity.slug === message.activitySlug
   );
@@ -91,14 +104,12 @@ function _onDecline(
 
   try {
     const input: DeclineJoinRequestInput = {
-      groupId: message.groupSlug,
+      groupId: message.groupId,
       userId: message.sentBy,
     };
     const data = declineJoinRequestInput.parse(input);
     mutate(data);
   } catch {}
-
-  store.removeToast(getToastId(message));
 }
 
 export default {
