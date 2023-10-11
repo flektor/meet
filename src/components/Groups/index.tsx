@@ -54,14 +54,22 @@ function Group(
       className="max-w-xs w-fit rounded-xl bg-white/10 px-2 py-1 text-white relative"
     >
       <div className="flex items-center justify-between gap-4">
-        <Link
-          className={`text-2xl hover:underline ${
-            isMember ? "text-[#cc66ff]" : "text-white"
-          }`}
-          href={`/activities/${group.activitySlug}/${group.slug}`}
-        >
-          {name}
-        </Link>
+        {isMember && (
+          <Link
+            className={`text-2xl hover:underline ${
+              isMember ? "text-primary" : "text-white"
+            }`}
+            href={`/activities/${group.activitySlug}/${group.slug}`}
+          >
+            {name}
+          </Link>
+        )}
+
+        {!isMember && (
+          <span className="text-2xl text-white">
+            {name}
+          </span>
+        )}
 
         <span className="text-sm">
           {group.membersIds.length} / {group.maxParticipants}

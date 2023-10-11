@@ -12,7 +12,7 @@ const selectUserBaseFields = { select: { id: true, name: true, image: true } };
 const userBaseFields = { user: selectUserBaseFields };
 
 export const groupsRouter = createTRPCRouter({
-  getGroup: publicProcedure
+  getGroup: protectedProcedure
     .input(
       z.object({
         activitySlug: z.string(),
@@ -22,7 +22,11 @@ export const groupsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const group = await ctx.prisma.group
         .findUnique({
-          where: { slug: input.slug },
+          where: {
+            slug: input.slug,
+            memberships: { some: { userId: ctx.session.user.id } },
+          },
+
           include: {
             channel: {
               include: {

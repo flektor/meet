@@ -65,6 +65,7 @@ const Group: NextPage = () => {
   usePusherEventHandler(session.data?.user.id || "userId");
 
   const [showChat, setShowChat] = useState(false);
+  const showErrorMessage = error?.message.includes("data is undefined");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
@@ -80,6 +81,12 @@ const Group: NextPage = () => {
         group={group}
         displayChat={showChat}
       />
+
+      {showErrorMessage && (
+        <main className="flex justify-center pt-20 text-white">
+          This group is private!
+        </main>
+      )}
 
       {group && (
         <main className="flex flex-col items-center justify-center pt-12">
