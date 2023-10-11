@@ -72,7 +72,6 @@ const Activity: NextPage = () => {
           <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
             {showCreateGroupDialog && (
               <CreateGroupDialog
-                onNewGroup={() => setShowCreateGroupDialog(false)}
                 onClose={() => setShowCreateGroupDialog(false)}
                 activitySlug={slug}
                 activityId={activity.id}

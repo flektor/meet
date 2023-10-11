@@ -12,9 +12,9 @@ import DatePicker from "./DatePicker";
 import TimePicker from "./TimePicker";
 import PublicGroupInput from "./PublicGroupInput";
 import TitleInput, { capitalizeFirstCharacter } from "./TitleInput";
+import { useRouter } from "next/navigation";
 
 type CreateGroupDialogProps = {
-  onNewGroup: () => void;
   onClose: () => void;
   activitySlug: string;
   activityId: string;
@@ -35,9 +35,10 @@ function getDateTime({ date, time }: DateTimeInput): Date {
 }
 
 function CreateGroupDialog(
-  { onNewGroup, onClose, activitySlug, activityId }: CreateGroupDialogProps,
+  { onClose, activitySlug, activityId }: CreateGroupDialogProps,
 ) {
   const store = useStore();
+  const router = useRouter();
   const [isWaitingForServer, setIsWaitingForServer] = useState(false);
   const [isGroupAlreadyExist, setIsGroupAlreadyExist] = useState(false);
   const [showMarker, setShowMarker] = useState(false);
@@ -95,8 +96,7 @@ function CreateGroupDialog(
           usersIds: [],
         },
       });
-
-      onNewGroup();
+      router.push(`/activities/${activitySlug}/${group.slug}`);
     },
 
     onSettled: () => setIsWaitingForServer(false),
