@@ -62,7 +62,7 @@ const Group: NextPage = () => {
     }
   }, [group]);
 
-  usePusherEventHandler();
+  usePusherEventHandler(session.data?.user.id || "userId");
 
   const [showChat, setShowChat] = useState(false);
 

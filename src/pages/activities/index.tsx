@@ -17,7 +17,7 @@ const Activity: NextPage = () => {
   const [showCreateActivity, setShowCreateActivity] = useState(false);
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
-  usePusherEventHandler();
+  usePusherEventHandler(session.data?.user.id || "userId");
 
   const { data, error, isLoading } = api.activities.getActivities
     .useQuery();
