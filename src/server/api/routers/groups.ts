@@ -152,7 +152,7 @@ export const groupsRouter = createTRPCRouter({
       });
 
       pusherSend({
-        channelId: activity.channelId,
+        channelId: "requests",
         receivers: otherUserId,
         body: {
           action: "quick_invite_accepted",
@@ -162,6 +162,7 @@ export const groupsRouter = createTRPCRouter({
           activitySlug: activity.slug,
         },
       });
+
       return { ...group, activitySlug: activity.slug };
     }),
 
