@@ -68,8 +68,8 @@ const Activity: NextPage = () => {
       />
 
       {activity && (
-        <main className="flex flex-col items-center justify-center pt-12">
-          <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
+        <main className="flex flex-col items-center justify-center pt-20">
+          <div className="md:w-2/3 flex flex-col justify-center items-center">
             {showCreateGroupDialog && (
               <CreateGroupDialog
                 onClose={() => setShowCreateGroupDialog(false)}
@@ -94,20 +94,22 @@ const Activity: NextPage = () => {
             )}
 
           {!displayChat && (
-            <div className="flex flex-col gap-3 justify-center items-center">
-              <p className="text-white text-2xl flex">
+            <div className="flex flex-col gap-6 justify-center items-center">
+              {
+                /* <p className="text-white text-2xl flex">
                 <span className="text-gray-400 mr-2">About:</span>
                 {activity.description}
-              </p>
+              </p> */
+              }
 
               {activity.groups.length === 0 && (
-                <p className="text-white m-10">
-                  Be the first one to create a group!
+                <p className="text-gray-400 text-xl">
+                  Create the first group!
                 </p>
               )}
 
               <button
-                className="rounded-full font-bold transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white text-[#cc66ff] p-1 pl-3 pr-3"
+                className="rounded-full px-5 py-2 font-semibold text-white no-underline transition border-2 border-primary bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
                 onClick={() => setShowCreateGroupDialog(true)}
               >
                 Create Group

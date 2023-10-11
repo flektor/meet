@@ -62,7 +62,7 @@ const Favorites: NextPage = () => {
                 return (
                   <li
                     key={slug}
-                    className="max-w-xs min-w-xs rounded-xl bg-white/10 p-4 text-white relative"
+                    className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <Link

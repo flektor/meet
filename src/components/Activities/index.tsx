@@ -30,13 +30,13 @@ const Activities: FunctionComponent = () => {
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       </div> */
       }
-      <ul className="mt-16 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
+      <ul className="mt-6 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2">
         {store.activities.map(
           ({ id, slug, title, isRegistered }) => {
             return (
               <li
                 key={slug}
-                className="max-w-xs min-w-xs rounded-xl bg-white/10 p-4 text-white relative"
+                className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
               >
                 <div className="flex items-center justify-between gap-4">
                   <Link

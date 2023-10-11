@@ -51,7 +51,7 @@ function Group(
   return (
     <li
       key={group.slug}
-      className="max-w-xs w-fit rounded-xl bg-white/10 px-2 py-1 text-white relative"
+      className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-2.5 pr-2.5 text-white"
     >
       <div className="flex items-center justify-between gap-4">
         {isMember && (
@@ -71,7 +71,7 @@ function Group(
           </span>
         )}
 
-        <span className="text-sm">
+        <span className="text-sm mt-1">
           {group.membersIds.length} / {group.maxParticipants}
         </span>
 
@@ -91,7 +91,7 @@ function GroupList(
   { groups, session }: { groups: Group[]; session: SessionContextValue },
 ) {
   return (
-    <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
+    <ul className="flex flex-wrap justify-center gap-2 mx-2 max-h-[30vh] overflow-y-auto">
       {groups.map(
         (group, index) => (
           <Group key={index} group={group} index={index} session={session} />
@@ -113,7 +113,7 @@ const Groups = ({ activitySlug }: GroupsProps) => {
   // }, [store.groups]);
 
   return (
-    <section className="flex flex-col gap-5">
+    <section className="flex flex-col gap-6">
       {
         /* <div className="flex flex-col items-center pb-10">
         <h2 className="p-4 text-white text-2xl font-bold">Groups</h2>
@@ -124,17 +124,20 @@ const Groups = ({ activitySlug }: GroupsProps) => {
       {privateGroups.length > 0 &&
         (
           <>
-            <span className="text-gray-400 text-xl">private groups</span>
+            <span className="w-full flex justify-center text-gray-400 text-xl">
+              Private Groups
+            </span>
             <GroupList session={session} groups={privateGroups} />
           </>
         )}
 
-      <span className="text-gray-400 text-xl mt-3">public groups</span>
-      <GroupList session={session} groups={publicGroups} />
-      {publicGroups.length === 0 && (
-        <span className="text-white textl-lg mt-3">
-          Be the first one to create a public group
-        </span>
+      {publicGroups.length > 0 && (
+        <>
+          <span className="w-full flex justify-center text-gray-400 text-xl mt-3">
+            Public Groups
+          </span>
+          <GroupList session={session} groups={publicGroups} />
+        </>
       )}
     </section>
   );

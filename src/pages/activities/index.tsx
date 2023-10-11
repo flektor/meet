@@ -38,14 +38,14 @@ const Activity: NextPage = () => {
 
       <ActivitiesPageNav session={session} />
 
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] pt-32 ">
+      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] pt-20 ">
         <div className="flex flex-col items-center justify-center">
           <button
             onClick={() =>
               session?.data?.user
                 ? setShowCreateActivity(true)
                 : setShowLoginMessageDialog(true)}
-            className="rounded-full px-8 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
+            className="rounded-full px-5 py-2 font-semibold text-white no-underline transition border-2 border-primary bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
           >
             Create Activity
           </button>
@@ -64,17 +64,18 @@ const Activity: NextPage = () => {
 
           {isLoading
             ? (
-              <div className="mt-48">
+              <div className="mt-24">
                 <Spinner />
               </div>
             )
             : error
-            ? <div className="text-white 2xl mt-48">There was an error.</div>
+            ? <div className="text-white 2xl mt-24">There was an error.</div>
             : store.activities.length === 0 && (
               <div className="text-white 2xl mt-48">
-                There are no activities.
+                Create the first activity!
               </div>
             )}
+
           <Activities />
         </div>
       </main>

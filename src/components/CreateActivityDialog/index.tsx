@@ -177,7 +177,7 @@ const CreateActivityDialog: NextPage<CreateActivityDialogProps> = (
             <button
               disabled={isWaitingForServer}
               type="submit"
-              className={`rounded-full px-10 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 disabled:opacity-50 ${
+              className={`rounded-full px-5 py-2 font-semibold no-underline transition border-2 border-primary bg-black/20 disabled:opacity-50 ${
                 !isWaitingForServer &&
                 "hover:bg-black/5 hover:border-white hover:text-white"
               }`}
