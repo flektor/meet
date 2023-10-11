@@ -89,6 +89,12 @@ export const acceptJoinRequestInput = z.object({
 });
 export type AcceptJoinRequestInput = z.infer<typeof acceptJoinRequestInput>;
 
+export const acceptInviteRequestInput = z.object({
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type AcceptInviteRequestInput = z.infer<typeof acceptInviteRequestInput>;
+
 export const declineJoinRequestInput = z.object({
   userId: z.string(),
   groupId: z.string(),
@@ -156,7 +162,6 @@ type PusherViewerMessage = {
 export type PusherInviteMessage = {
   action:
     | "invite_request"
-    | "invite_accepted"
     | "quick_invite_accepted"
     | "invite_declined"
     | "join_request"
@@ -164,6 +169,12 @@ export type PusherInviteMessage = {
   groupId: string;
   groupSlug: string;
   activitySlug: string;
+  sentBy: string;
+} | PusherInviteAccepterMessage;
+
+export type PusherInviteAccepterMessage = {
+  action: "invite_accepted";
+  groupId: string;
   sentBy: string;
 };
 
