@@ -45,7 +45,7 @@ export type Store = {
   setActivity: (activity: getActivityOutput) => void;
   removeActivity: (activityId: string) => void;
 
-  setGroup: (group: getGroupOutput) => void;
+  setGroup: (group: getGroupOutput | Group) => void;
   removeGroup: (groupId: string) => void;
   updateGroupLocation: (
     groupId: string,
@@ -64,7 +64,7 @@ export type Store = {
   addViewer: (channelId: string) => void;
   removeViewer: (channelId: string) => void;
 
-  pusherSubscribe: (channelId: string) => void;
+  pusherSubscribe: (channelId: string | string[]) => void;
   pusherUnsubscribe: (channelId: string) => void;
 
   setUsers: (users: User[]) => void;
@@ -100,7 +100,8 @@ export const useStore = create<Store>((set) => ({
   removeActivity: (activityId: string) =>
     set((state) => removeActivity(state, activityId)),
 
-  setGroup: (group: getGroupOutput) => set((state) => setGroup(state, group)),
+  setGroup: (group: getGroupOutput | Group) =>
+    set((state) => setGroup(state, group)),
 
   removeGroup: (groupId: string) => set((state) => removeGroup(state, groupId)),
 
@@ -130,12 +131,27 @@ export const useStore = create<Store>((set) => ({
     set((state) => addMessage(state, channelId, message));
   },
 
-  pusherSubscribe: (channelId: string) =>
-    set((state) =>
-      state.pusherSubscriptions.includes(channelId) ? state : ({
-        pusherSubscriptions: [...state.pusherSubscriptions, channelId],
-      })
-    ),
+  pusherSubscribe: (channelIds: string | string[]) =>
+    set((state) => {
+      if (typeof channelIds === "string") {
+        return ({
+          pusherSubscriptions: state.pusherSubscriptions.includes(channelIds)
+            ? state.pusherSubscriptions
+            : [...state.pusherSubscriptions, channelIds],
+        });
+      }
+
+      const newGroupSubs = [];
+      for (const channelId of channelIds) {
+        if (!state.pusherSubscriptions.includes(channelId)) {
+          newGroupSubs.push(channelId);
+        }
+      }
+
+      return newGroupSubs.length === 0 ? state : ({
+        pusherSubscriptions: [...state.pusherSubscriptions, ...newGroupSubs],
+      });
+    }),
 
   pusherUnsubscribe: (channelId: string) =>
     set((state) => ({
