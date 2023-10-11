@@ -1,20 +1,20 @@
 import type { Store } from "../store";
 import type { getActivitiesOutput, getActivityOutput } from "../../types";
 
-function getCurrentPusherSubscriptions(
-  state: Store,
-  activity: getActivityOutput,
-) {
-  if (activity.isRegistered) {
-    return state.pusherSubscriptions.includes(activity.channelId)
-      ? state.pusherSubscriptions
-      : [...state.pusherSubscriptions, activity.channelId];
-  }
+// function getCurrentPusherSubscriptions(
+//   state: Store,
+//   activity: getActivityOutput,
+// ) {
+//   if (activity.isRegistered) {
+//     return state.pusherSubscriptions.includes(activity.channelId)
+//       ? state.pusherSubscriptions
+//       : [...state.pusherSubscriptions, activity.channelId];
+//   }
 
-  return state.pusherSubscriptions.includes(activity.channelId)
-    ? state.pusherSubscriptions.filter((id) => id === activity.channelId)
-    : state.pusherSubscriptions;
-}
+//   return state.pusherSubscriptions.includes(activity.channelId)
+//     ? state.pusherSubscriptions.filter((id) => id !== activity.channelId)
+//     : state.pusherSubscriptions;
+// }
 
 export const setActivities = (activities: getActivitiesOutput) => ({
   activities,
@@ -40,7 +40,7 @@ export const setActivity = (state: Store, activity: getActivityOutput) => {
   const userIds = users.map(({ id }) => id) ?? [];
   const restUsers = state.users.filter(({ id }) => !userIds.includes(id));
 
-  const pusherSubscriptions = getCurrentPusherSubscriptions(state, activity);
+  // const pusherSubscriptions = getCurrentPusherSubscriptions(state, activity);
 
   return ({
     activities: [
@@ -53,7 +53,7 @@ export const setActivity = (state: Store, activity: getActivityOutput) => {
       ...groups,
     ],
     users: [...restUsers, ...users],
-    pusherSubscriptions,
+    // pusherSubscriptions,
   });
 };
 
