@@ -25,7 +25,7 @@ const Message: FunctionComponent<MessageProps> = (
       innerRef={innerRef}
       className={`hover:cursor-pointer transition duration-500 group hover:fill-primary ${
         active ? "fill-primary" : "fill-white"
-      } ${className}`}
+      }  ${className}`}
       viewBox={viewBox}
       onClick={onClick}
     >
