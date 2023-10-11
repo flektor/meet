@@ -6,6 +6,8 @@ import FavoriteButton from "~/components/FavoriteButton";
 import RegisterButton from "~/components/RegisterButton";
 import { SessionContextValue, signIn, signOut } from "next-auth/react";
 import { getActivityOutput } from "~/types";
+import MessageIcon from "../icons/Message";
+import GroupIcon from "../icons/Group";
 
 const MenuOptions = ({ session }: { session: SessionContextValue }) => (
   <>
@@ -65,7 +67,7 @@ export default function ActivityPageNav(
       <div className="flex items-center justify-center">
         {activity && (
           <>
-            <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
+            <span className="text-white text-xl md:text-2xl mr-1 whitespace-nowrap">
               {activity.title}
             </span>
 
@@ -81,10 +83,26 @@ export default function ActivityPageNav(
 
       <div className="w-full flex justify-end items-center">
         <button
-          className="rounded-md min-w-20 w-20 font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2"
+          className="group flex items-center text-sm text-white font-semibold transition gap-1 hover:text-primary transition duration-500 ml-2"
           onClick={toggleChat}
         >
-          {displayChat ? "Groups" : "Chat"}
+          <span className="hidden md:block">
+            {displayChat ? "Groups" : "Chat"}
+          </span>
+
+          {displayChat
+            ? (
+              <GroupIcon
+                className="fill-white/75 group-hover:fill-primary "
+                onClick={toggleChat}
+              />
+            )
+            : (
+              <MessageIcon
+                className="fill-primary "
+                onClick={toggleChat}
+              />
+            )}
         </button>
       </div>
     </Nav>
