@@ -10,7 +10,7 @@ import locationHandler from "~/utils/pusher/groupLocationUpdateHandler";
 import joinRequestHandler from "~/utils/pusher/groupJoinRequestHandler";
 import { groupInviteHandler } from "~/utils/pusher/groupInviteHandler";
 
-export default function usePusherEventHandler() {
+export default function usePusherEventHandler(userId: string) {
   const store = useStore();
   const router = useRouter();
 
@@ -19,9 +19,9 @@ export default function usePusherEventHandler() {
     onSuccess: (data) => quickInviteHandler.onAddGroupSuccess(data, router),
   });
 
+  const acceptInviteRequest = api.memberships.acceptInviteRequest.useMutation();
   const acceptJoinRequest = api.memberships.acceptJoinRequest.useMutation();
   const declineJoinRequest = api.memberships.declineJoinRequest.useMutation();
-  const addToMemberships = api.memberships.add.useMutation();
 
   function handleChatUpdate(eventName: string, message: PusherMessage) {
     console.log(eventName, message);
@@ -47,17 +47,39 @@ export default function usePusherEventHandler() {
           sender,
           message,
           store,
-          addToMemberships.mutate,
+          acceptInviteRequest.mutate,
         );
 
       case "invite_declined":
         return store.addToast({
-          id: `${message.activitySlug}-${message.groupSlug}:${message.sentBy}`,
+          id: `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`,
           displayMessage: `${sender} is not interested on ${
             message.groupSlug || message.activitySlug
           }`,
           pusherMessage: message,
         });
+
+      case "invite_accepted":
+      case "join_accepted":
+        const group = store.groups.find((group) =>
+          group.id === message.groupId
+        );
+
+        if (!group) {
+          return;
+        }
+
+        store.setGroup({
+          ...group,
+          membersIds: [...group.membersIds, userId],
+        });
+
+        // return store.addToast({
+        //   id: `${message.activitySlug}.${message.groupSlug}:${message.sentBy}`,
+        //   displayMessage: `${sender} joined ${message.groupSlug}`,
+        //   pusherMessage: message,
+        //   duration: 3000,
+        // });
 
       case "quick_invite_request":
         return quickInviteHandler.groupQuickInviteHandler(
@@ -111,7 +133,7 @@ export default function usePusherEventHandler() {
       key.substring(1)
     );
 
-    for (const eventName of store.pusherSubscriptions) {
+    for (const eventName of [...store.pusherSubscriptions, "requests"]) {
       if (!subscriptions.includes(eventName)) {
         channel.bind(
           eventName,
