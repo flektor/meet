@@ -4,5 +4,7 @@ export function createSlug(title: string): string {
 
 export function getTime(date: Date) {
   const str = date.toLocaleTimeString();
-  return str.substring(0, 5) + " " + str.substring(9, 11);
+  const [time, period] = str.split(" ") as [string, string];
+  const [hours, minutes] = time.split(":");
+  return `${hours}:${minutes} ${period?.toLowerCase()}`;
 }
