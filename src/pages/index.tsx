@@ -15,7 +15,7 @@ const Home: NextPage = () => {
   const session = useSession();
   const { data, error, isLoading } = api.activities.getActivities.useQuery();
 
-  usePusherEventHandler();
+  usePusherEventHandler(session.data?.user.id || "userId");
 
   useEffect(() => {
     if (data) {
