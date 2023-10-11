@@ -81,7 +81,7 @@ function CreateGroupDialog(
       store.setGroup({
         ...group,
         viewersIds: [],
-        membersIds: [],
+        membersIds: [group.createdBy],
         users: [],
         activitySlug: activitySlug,
         title: group.title,
