@@ -24,18 +24,30 @@ const Activity: NextPage = () => {
 
   const { data: activity, isLoading, error } = api.activities
     .getActivity
-    .useQuery({
-      slug,
-    }, { enabled: !!slug });
+    .useQuery({ slug }, { enabled: !!slug });
+
+  const { data: membershipsIds, isLoading: isLoadingM, error: errorM } = api
+    .memberships
+    .getAll
+    .useQuery();
 
   useEffect(() => {
     if (activity) {
       store.pusherSubscribe(activity.channelId);
+
       store.setActivity(activity);
     }
   }, [activity]);
 
-  usePusherEventHandler();
+  useEffect(() => {
+    console.log({ membershipsIds });
+    if (membershipsIds) {
+      store.pusherSubscribe(membershipsIds);
+      // store.setActivity(activity);
+    }
+  }, [membershipsIds]);
+
+  usePusherEventHandler(session.data?.user.id || "userId");
 
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
