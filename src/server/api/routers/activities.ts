@@ -57,7 +57,6 @@ export const activitiesRouter = createTRPCRouter({
                 memberships: {
                   select: userBaseFields,
                   where: {
-                    userId: ctx.session?.user.id,
                     group: { activity: { slug: input.slug } },
                   },
                 },
