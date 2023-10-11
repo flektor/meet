@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { pusherSend } from "~/server/utils";
 import {
+  acceptInviteRequestInput,
   acceptJoinRequestInput,
   addToMembershipsInput,
   declineJoinRequestInput,
@@ -33,9 +34,9 @@ export const membershipsRouter = createTRPCRouter({
         if (!invite) {
           return;
         }
-      }
 
-      await ctx.prisma.pendingInvite.delete({ where: { userId_groupId } });
+        await ctx.prisma.pendingInvite.delete({ where: { userId_groupId } });
+      }
 
       return await ctx.prisma.membership.create({ data: userId_groupId });
     }),
@@ -55,11 +56,12 @@ export const membershipsRouter = createTRPCRouter({
 
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
-      return await ctx.prisma.membership.findMany({
+      return (await ctx.prisma.membership.findMany({
+        select: { group: { select: { channelId: true } } },
         where: {
           userId: ctx.session.user.id,
         },
-      });
+      })).map(({ group }) => group.channelId);
     }),
 
   acceptJoinRequest: protectedProcedure
@@ -85,7 +87,7 @@ export const membershipsRouter = createTRPCRouter({
       });
 
       pusherSend({
-        channelId: group.channelId,
+        channelId: "requests",
         receivers: input.userId,
         body: {
           action: "join_accepted",
@@ -144,7 +146,7 @@ export const membershipsRouter = createTRPCRouter({
       });
 
       pusherSend({
-        channelId: group.channelId,
+        channelId: "requests",
         receivers: group.createdBy,
         body: {
           action: "join_request",
@@ -180,7 +182,7 @@ export const membershipsRouter = createTRPCRouter({
       });
 
       pusherSend({
-        channelId: input.channelId,
+        channelId: "requests",
         receivers: input.userId,
         body: {
           action: "invite_request",
@@ -192,5 +194,46 @@ export const membershipsRouter = createTRPCRouter({
       });
 
       return invite;
+    }),
+
+  acceptInviteRequest: protectedProcedure
+    .input(acceptInviteRequestInput)
+    .mutation(async ({ input, ctx }) => {
+      const group = await ctx.prisma.group.findUnique({
+        where: { id: input.groupId },
+      });
+
+      if (!group) {
+        return;
+      }
+
+      const userId_groupId = {
+        userId: ctx.session.user.id,
+        groupId: input.groupId,
+      };
+
+      const deleted = await ctx.prisma.pendingInvite.delete({
+        where: { userId_groupId },
+      });
+
+      if (!deleted) {
+        return;
+      }
+
+      const membership = await ctx.prisma.membership.create({
+        data: userId_groupId,
+      });
+
+      pusherSend({
+        channelId: "requests",
+        receivers: input.userId,
+        body: {
+          action: "invite_accepted",
+          sentBy: ctx.session.user.id,
+          groupId: group.id,
+        },
+      });
+
+      return membership;
     }),
 });
