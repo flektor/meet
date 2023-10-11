@@ -26,7 +26,7 @@ export default function UserMenu({ userId, isMember, session }: UserMenuProps) {
     <div className="relative group">
       <button className="text-white group-hover:text-gray-400 focus:outline-none">
         <PersonPlus
-          viewBox="0 0 16 16"
+          viewBox="0 0 24 24"
           className="w-[24px] h-[24px] fill-white/60  mt-2 ml-2 hover:fill-primary"
           onClick={() =>
             setShowMenu((prev) => prev === "none" ? "menu" : "none")}
