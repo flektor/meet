@@ -74,7 +74,9 @@ export default function UserMenu({ userId, isMember, session }: UserMenuProps) {
           </span>
 
           <div className="overflow-y-auto max-h-48">
-            {currentUserGroups && currentUserGroups.map((group) => (
+            {currentUserGroups && currentUserGroups.filter(({ membersIds }) =>
+              !membersIds.includes(userId)
+            ).map((group) => (
               <button
                 className="hover:bg-white/10 px-2 py-2 whitespace-nowrap w-full"
                 key={group.slug}
