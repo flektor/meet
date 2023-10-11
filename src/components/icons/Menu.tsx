@@ -11,7 +11,7 @@ type MenuProps = {
 
 const Menu: FunctionComponent<MenuProps> = (
   {
-    className = "fill-white bg-red-100",
+    className = "fill-white",
     viewBox = "0 0 30 30",
     onClick,
     active,

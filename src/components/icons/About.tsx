@@ -12,8 +12,8 @@ type AboutProps = {
 
 const About: FunctionComponent<AboutProps> = (
   {
-    className = "fill-white bg-red-100",
-    viewBox = "0 0 30 30",
+    className = "fill-white",
+    viewBox = "0 0 24 24",
     onClick,
     active,
     newNotification,
@@ -23,9 +23,9 @@ const About: FunctionComponent<AboutProps> = (
   return (
     <Svg
       innerRef={innerRef}
-      className={`hover:cursor-pointer transition duration-1000 group hover:fill-[#cc66ff] ${className} ${
-        active ? "fill-[#cc66ff]" : "fill-white"
-      }`}
+      className={`hover:cursor-pointer transition duration-500 group hover:fill-primary ${
+        active ? "fill-primary" : "fill-white"
+      } ${className}`}
       viewBox={viewBox}
       onClick={onClick}
     >
@@ -40,7 +40,6 @@ const About: FunctionComponent<AboutProps> = (
           >
             <g
               id="about-white"
-              fill="#000000"
               transform="translate(42.666667, 42.666667)"
             >
               <path
@@ -61,7 +60,6 @@ const About: FunctionComponent<AboutProps> = (
           >
             <g
               id="about-white"
-              fill="#000000"
               transform="translate(42.666667, 42.666667)"
             >
               <path

@@ -12,8 +12,8 @@ type BellProps = {
 
 const Bell: FunctionComponent<BellProps> = (
   {
-    className = "fill-white bg-red-100",
-    viewBox = "0 0 30 30",
+    className = "fill-white",
+    viewBox = "0 0 24 24",
     onClick,
     active,
     newNotification,
@@ -23,9 +23,9 @@ const Bell: FunctionComponent<BellProps> = (
   return (
     <Svg
       innerRef={innerRef}
-      className={`hover:cursor-pointer transition duration-1000 group hover:fill-[#cc66ff] ${className} ${
-        active ? "fill-[#cc66ff]" : "fill-white"
-      }`}
+      className={`hover:cursor-pointer transition duration-500 group hover:fill-primary ${
+        active ? "fill-primary" : "fill-white"
+      } ${className}`}
       viewBox={viewBox}
       onClick={onClick}
     >
