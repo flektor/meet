@@ -1,8 +1,8 @@
 import { Store } from "../store";
 import getToastId from "./getToastId";
 import {
-  AddToMembershipsInput,
-  addToMembershipsInput,
+  AcceptInviteRequestInput,
+  acceptInviteRequestInput,
   PusherInviteMessage,
   ToastProps,
 } from "../../types";
@@ -11,7 +11,7 @@ export function groupInviteHandler(
   sender: string,
   message: PusherInviteMessage,
   store: Store,
-  mutate: (data: AddToMembershipsInput) => void,
+  mutate: (data: AcceptInviteRequestInput) => void,
 ) {
   if (message.action !== "invite_request") {
     return;
@@ -32,22 +32,14 @@ export function groupInviteHandler(
 function onAccept(
   message: PusherInviteMessage,
   store: Store,
-  mutate: (data: AddToMembershipsInput) => void,
+  mutate: (data: AcceptInviteRequestInput) => void,
 ) {
-  const activity = store.activities.find((activity) =>
-    activity.slug === message.activitySlug
-  );
-
-  if (!activity) {
-    return;
-  }
-
   try {
-    const input: AddToMembershipsInput = {
+    const input: AcceptInviteRequestInput = {
       groupId: message.groupId,
-      activitySlug: activity.slug,
+      userId: message.sentBy,
     };
-    const data = addToMembershipsInput.parse(input);
+    const data = acceptInviteRequestInput.parse(input);
     mutate(data);
   } catch (error) {}
 
