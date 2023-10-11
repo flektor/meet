@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import { SessionContextValue, signIn, signOut } from "next-auth/react";
 import { GroupOutput } from "~/types";
 import LeaveIcon from "~/components/icons/Leave";
+import AboutIcon from "~/components/icons/About";
+import MessageIcon from "~/components/icons/Message";
 
 const MenuOptions = (
   { session }: { session: SessionContextValue },
@@ -67,10 +69,24 @@ export default function GroupPageNav(
       </div>
       <div className="w-full flex justify-end items-center">
         <button
-          className="rounded-md min-w-20 w-20 font-semibold transition bg-black/20 hover:bg-black/5 border border-white hover:border-[#cc66ff] text-sm text-white hover:text-[#cc66ff] ml-2"
+          className="group flex items-center text-sm text-white font-semibold transition gap-1 hover:text-primary transition duration-500 ml-2"
           onClick={toggleChat}
         >
           {displayChat ? "About" : "Chat"}
+
+          {displayChat
+            ? (
+              <AboutIcon
+                className="fill-white/75 group-hover:fill-primary "
+                onClick={toggleChat}
+              />
+            )
+            : (
+              <MessageIcon
+                className="fill-primary "
+                onClick={toggleChat}
+              />
+            )}
         </button>
       </div>
     </Nav>
