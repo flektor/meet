@@ -67,73 +67,72 @@ const Activity: NextPage = () => {
         toggleChat={() => setDisplayChat(!displayChat)}
       />
 
-      <main>
-        {activity && (
-          <>
-            <Toasts />
+      {activity && (
+        <main className="flex flex-col items-center justify-center pt-12">
+          <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
+            {showCreateGroupDialog && (
+              <CreateGroupDialog
+                onNewGroup={() => setShowCreateGroupDialog(false)}
+                onClose={() => setShowCreateGroupDialog(false)}
+                activitySlug={slug}
+                activityId={activity.id}
+              />
+            )}
+            {showLoginMessageDialog && (
+              <LoginMessageDialog
+                onCancel={() => setShowLoginMessageDialog(false)}
+              />
+            )}
+          </div>
 
-            {isLoading
-              ? (
-                <div className="mt-48">
-                  <Spinner />
-                </div>
-              )
-              : error && (
-                <div className="text-white 2xl mt-48">There was an error.</div>
+          {displayChat &&
+            (
+              <Chat
+                isLoading={isLoading}
+                channelId={activity.channelId}
+                session={session}
+              />
+            )}
+
+          {!displayChat && (
+            <div className="flex flex-col gap-3 justify-center items-center">
+              <p className="text-white text-2xl flex">
+                <span className="text-gray-400 mr-2">About:</span>
+                {activity.description}
+              </p>
+
+              {activity.groups.length === 0 && (
+                <p className="text-white m-10">
+                  Be the first one to create a group!
+                </p>
               )}
 
-            <div className="flex flex-col items-center justify-center pt-12">
-              <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
-                {showCreateGroupDialog && (
-                  <CreateGroupDialog
-                    onNewGroup={() => setShowCreateGroupDialog(false)}
-                    onClose={() => setShowCreateGroupDialog(false)}
-                    activitySlug={slug}
-                    activityId={activity.id}
-                  />
-                )}
-                {showLoginMessageDialog && (
-                  <LoginMessageDialog
-                    onCancel={() => setShowLoginMessageDialog(false)}
-                  />
-                )}
-              </div>
+              <button
+                className="rounded-full font-bold transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white text-[#cc66ff] p-1 pl-3 pr-3"
+                onClick={() => setShowCreateGroupDialog(true)}
+              >
+                Create Group
+              </button>
 
-              {displayChat
-                ? (
-                  <Chat
-                    isLoading={isLoading}
-                    channelId={activity.channelId}
-                    session={session}
-                  />
-                )
-                : (
-                  <div className="flex flex-col gap-3 justify-center items-center">
-                    <p className="text-white text-2xl flex">
-                      <span className="text-gray-400 mr-2">About:</span>
-                      {activity.description}
-                    </p>
-
-                    {activity.groups.length === 0 && (
-                      <p className="text-white m-10">
-                        Be the first one to create a group!
-                      </p>
-                    )}
-
-                    <button
-                      className="rounded-full font-bold transition border-2 border-[#cc66ff] bg-black/20 hover:bg-black/5 hover:border-white hover:text-white text-[#cc66ff] p-1 pl-3 pr-3"
-                      onClick={() => setShowCreateGroupDialog(true)}
-                    >
-                      Create Group
-                    </button>
-
-                    <Groups activitySlug={slug} />
-                  </div>
-                )}
+              <Groups activitySlug={slug} />
             </div>
-          </>
-        )}
-      </main>
+          )}
+
+          <Toasts />
+
+          {isLoading
+            ? (
+              <div className="mt-10">
+                <Spinner />
+              </div>
+            )
+            : error && (
+              <div className="text-white 2xl mt-10">
+                There was an error.
+              </div>
+            )}
+        </main>
+      )}
     </div>
   );
 };

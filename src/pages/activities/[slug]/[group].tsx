@@ -81,24 +81,10 @@ const Group: NextPage = () => {
         displayChat={showChat}
       />
 
-      <main>
-        {group && (
-          <>
-            <Toasts />
-
-            {isLoading
-              ? (
-                <div className="mt-48">
-                  <Spinner />
-                </div>
-              )
-              : error && (
-                <div className="text-white 2xl mt-48">There was an error.</div>
-              )}
-
-            <div className="flex flex-col items-center justify-center pt-12">
-              {
-                /* <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
+      {group && (
+        <main className="flex flex-col items-center justify-center pt-12">
+          {
+            /* <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
 
                 {showLoginMessageDialog && (
                   <LoginMessageDialog
@@ -106,22 +92,34 @@ const Group: NextPage = () => {
                   />
                 )}
               </div> */
-              }
+          }
 
-              {showChat
-                ? (
-                  <Chat
-                    isLoading={isLoading}
-                    channelId={group.channelId}
-                    groupId={group.id}
-                    session={session}
-                  />
-                )
-                : <GroupInfo group={group} />}
-            </div>
-          </>
-        )}
-      </main>
+          {showChat
+            ? (
+              <Chat
+                isLoading={isLoading}
+                channelId={group.channelId}
+                groupId={group.id}
+                session={session}
+              />
+            )
+            : <GroupInfo group={group} />}
+
+          <Toasts />
+
+          {isLoading
+            ? (
+              <div className="mt-10">
+                <Spinner />
+              </div>
+            )
+            : error && (
+              <div className="text-white 2xl mt-10">
+                There was an error.
+              </div>
+            )}
+        </main>
+      )}
     </div>
   );
 };
