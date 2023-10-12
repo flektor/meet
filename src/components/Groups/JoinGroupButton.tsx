@@ -13,13 +13,29 @@ type JoinGroupButtonProps = {
 export default function JoinGroupButton(
   { group, session }: JoinGroupButtonProps,
 ) {
-  const setShowLoginMessageDialog = useStore((state) =>
-    state.setShowLoginMessageDialog
-  );
+  const { setShowLoginDialog, setGroup } = useStore((state) => ({
+    setShowLoginDialog: state.setShowLoginMessageDialog,
+    setGroup: state.setGroup,
+  }));
   const [showMenu, setShowMenu] = useState<"none" | "join">("none");
 
   const joinRequest = api.memberships.joinRequest.useMutation();
-  const join = api.memberships.add.useMutation();
+  const join = api.memberships.add.useMutation({
+    onSuccess: () => {
+      if (!session.data) {
+        return;
+      }
+
+      if (group.private) {
+        return;
+      }
+
+      setGroup({
+        ...group,
+        membersIds: [...group.membersIds, session.data?.user.id],
+      });
+    },
+  });
 
   const isMember = session.data &&
     group.membersIds.includes(session.data?.user.id);
@@ -30,7 +46,7 @@ export default function JoinGroupButton(
 
   function onClick() {
     if (!session.data) {
-      return setShowLoginMessageDialog(true);
+      return setShowLoginDialog(true);
     }
 
     setShowMenu("none");
