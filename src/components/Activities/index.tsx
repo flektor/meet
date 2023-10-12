@@ -30,15 +30,15 @@ const Activities: FunctionComponent = () => {
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       </div> */
       }
-      <ul className="mt-6 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2">
+      <ul className="mt-6 grid grid-stretch grid-cols-1 gap-3 lg:grid-cols-3 sm:grid-cols-2">
         {store.activities.map(
           ({ id, slug, title, isRegistered }) => {
             return (
               <li
                 key={slug}
-                className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
+                className="relative flex items center w-full max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
               >
-                <div className="flex items-center justify-between gap-4">
+                <div className="w-full flex items-center justify-between ">
                   <Link
                     className={`text-2xl hover:underline ${
                       isRegistered ? "text-[#33BBFF]" : "text-white"
@@ -48,15 +48,15 @@ const Activities: FunctionComponent = () => {
                     {title}
                   </Link>
 
-                  <div className="flex items-center">
+                  <div className="flex justify-end  items-center">
                     <FavoriteButton
                       activityId={id}
                       className="mt-1"
                     />
                     <RegisterButton
                       activityId={id}
-                      activitySlug={slug}
                       className="mt-1"
+                      activitySlug={slug}
                     />
                   </div>
                 </div>

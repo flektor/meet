@@ -56,15 +56,15 @@ const Favorites: NextPage = () => {
               </div>
             )}
 
-          <ul className="mt-32 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
+          <ul className="mt-32 grid grid-stretch grid-cols-1 gap-3 lg:grid-cols-3 sm:grid-cols-2 md:gap-4">
             {favorites.map(
               ({ id, slug, title, isRegistered }) => {
                 return (
                   <li
                     key={slug}
-                    className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
+                    className="relative flex items center w-full max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="w-full flex items-center justify-between ">
                       <Link
                         className={`text-2xl hover:underline ${
                           isRegistered ? "text-[#33BBFF]" : "text-white"
@@ -74,7 +74,7 @@ const Favorites: NextPage = () => {
                         {title}
                       </Link>
 
-                      <div className="flex items-center">
+                      <div className="flex justify-end  items-center">
                         <FavoriteButton
                           activityId={id}
                           className="mt-1"
