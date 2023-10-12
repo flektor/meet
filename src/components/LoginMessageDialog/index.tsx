@@ -26,7 +26,7 @@ export default function LoginMessageDialog() {
     <dialog
       open
       ref={dialogRef}
-      className="fixed left-0 top-0 h-full w-full  outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-10"
+      className="fixed left-0 top-0 h-full w-full  outline-none flex items-center justify-center bg-black/20 backdrop-blur-sm z-20"
       onMouseDown={onClose}
     >
       <div className="z-50 flex-col justfy-center m-5 p-4 rounded-lg bg-gradient-to-br from-[#2b1747] to-[#232338] text-white border-2 border-[#cc66ff]">
