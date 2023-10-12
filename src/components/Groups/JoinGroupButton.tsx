@@ -59,7 +59,7 @@ export default function JoinGroupButton(
       </button>
 
       {showMenu === "join" && (
-        <div className="absolute right-0 flex flex-col text-center rounded-md bg-[#2e026d] text-white border border-primary drop-shadow-2xl">
+        <div className="absolute right-0 flex flex-col text-center rounded-md bg-[#2e026d] text-white border border-primary drop-shadow-2xl z-10">
           <button
             className="hover:bg-white/10 px-3 py-2 whitespace-nowrap"
             onClick={onClick}
