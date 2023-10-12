@@ -121,17 +121,12 @@ function CreateGroupDialog(
       ? new Date(data.endingDate as string)
       : undefined;
 
-    const locationPin = (data.marker as string)?.substring(
-      1,
-      data.marker!.length - 2,
-    );
-
     const groupData: z.infer<typeof addGroupInput> = {
       activityId,
       description: data.description as string,
       title: data.title as string,
       locationTitle: data.locationTitle as string || "Berlin",
-      locationPin,
+      locationPin: data.marker as string,
       minParticipants: 2,
       maxParticipants: Number(data.participants) || 2,
       private: data.isPublic !== "on",
