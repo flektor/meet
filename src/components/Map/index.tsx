@@ -55,7 +55,7 @@ const Map = ({
   };
 
   const [marker, setMarker] = useState<LngLat>(
-    markerLngLat || initViewLngLat,
+    initViewLngLat,
   );
 
   const onMarkerDrag = (e: MarkerDragEvent<mapboxgl.Marker>) => {
@@ -88,6 +88,11 @@ const Map = ({
     }
   }, [markerLngLat]);
 
+  useEffect(() => {
+    if (showMarker) {
+      setMarker([viewport.longitude, viewport.latitude]);
+    }
+  }, [showMarker]);
   return (
     <>
       <div className="border border-[#7f409eb7]">
