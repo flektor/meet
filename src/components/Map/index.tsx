@@ -18,6 +18,7 @@ type ViewState = {
 };
 
 type MapProps = {
+  draggableMarker?: boolean;
   onMarkerMoved?: (lngLat: LngLat) => void;
   showMarker?: boolean;
   markerClassName?: string;
@@ -29,6 +30,7 @@ type MapProps = {
 
 const Map = ({
   onMarkerMoved,
+  draggableMarker,
   markerClassName = "",
   showMarker,
   markerLngLat,
@@ -105,7 +107,7 @@ const Map = ({
                 <Marker
                   longitude={marker[0]}
                   latitude={marker[1]}
-                  draggable
+                  draggable={draggableMarker}
                   onDrag={onMarkerDrag}
                   onDragEnd={onMarkerDragEnd}
                 >

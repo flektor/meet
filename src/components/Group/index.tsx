@@ -5,12 +5,14 @@ import Map, { LngLat } from "../Map";
 import DateTime from "./DateTime";
 import useScreenSize from "~/hooks/useScreenSize";
 import { api } from "~/utils/api";
+import { SessionContextValue } from "next-auth/react";
 
 export type GroupInfoProps = {
   group: getGroupOutput;
+  session: SessionContextValue;
 };
 
-export default function Group({ group }: GroupInfoProps) {
+export default function Group({ group, session }: GroupInfoProps) {
   const store = useStore();
 
   const screenSize = useScreenSize();
@@ -50,6 +52,9 @@ export default function Group({ group }: GroupInfoProps) {
     const lngLat = JSON.parse(`[${storedGgroup.locationPin}]`);
     setLocationPin(lngLat);
   }, [store.groups]);
+
+  const isMarkerDraggable = group.private ||
+    group.createdBy === session.data?.user.id;
 
   return (
     <div className="flex flex-col justify-center items-start mt-3 mb-4 gap-3 text-white text-xl">
@@ -142,6 +147,7 @@ export default function Group({ group }: GroupInfoProps) {
         markerLngLat={locationPin}
         showMarker={true}
         onMarkerMoved={onMarkerMoved}
+        draggableMarker={isMarkerDraggable}
       />
     </div>
   );
