@@ -43,7 +43,7 @@ export default function TitleInput(
 
     const character = text.charAt(text.length - 1).toLowerCase();
 
-    if (!character.match(/^[A-Za-z ]+$/)) {
+    if (!character.match(/^[a-zA-Z0-9_ ]*$/)) {
       return;
     }
     if (isGroupAlreadyExist) {
