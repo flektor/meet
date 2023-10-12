@@ -68,26 +68,28 @@ export default function GroupPageNav(
         )}
       </div>
       <div className="w-full flex justify-end items-center">
-        <button
-          className="group flex items-center text-sm text-white font-semibold transition gap-1 hover:text-primary transition duration-500 ml-2 mt-1"
-          onClick={toggleChat}
-        >
-          {displayChat ? "About" : "Chat"}
+        {session.data && (
+          <button
+            className="group flex items-center text-sm text-white font-semibold transition gap-1 hover:text-primary transition duration-500 ml-2 mt-1"
+            onClick={toggleChat}
+          >
+            {displayChat ? "About" : "Chat"}
 
-          {displayChat
-            ? (
-              <AboutIcon
-                className="fill-white/75 group-hover:fill-primary "
-                onClick={toggleChat}
-              />
-            )
-            : (
-              <MessageIcon
-                className="fill-primary "
-                onClick={toggleChat}
-              />
-            )}
-        </button>
+            {displayChat
+              ? (
+                <AboutIcon
+                  className="fill-white/75 group-hover:fill-primary "
+                  onClick={toggleChat}
+                />
+              )
+              : (
+                <MessageIcon
+                  className="fill-primary "
+                  onClick={toggleChat}
+                />
+              )}
+          </button>
+        )}
       </div>
     </Nav>
   );
