@@ -29,7 +29,7 @@ const Activity: NextPage = () => {
   const { data: membershipsIds, isLoading: isLoadingM, error: errorM } = api
     .memberships
     .getAll
-    .useQuery();
+    .useQuery(undefined, { enabled: !!session.data });
 
   useEffect(() => {
     if (activity) {
