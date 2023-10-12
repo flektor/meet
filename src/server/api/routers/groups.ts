@@ -12,7 +12,7 @@ const selectUserBaseFields = { select: { id: true, name: true, image: true } };
 const userBaseFields = { user: selectUserBaseFields };
 
 export const groupsRouter = createTRPCRouter({
-  getGroup: protectedProcedure
+  getGroup: publicProcedure
     .input(
       z.object({
         activitySlug: z.string(),
@@ -24,7 +24,13 @@ export const groupsRouter = createTRPCRouter({
         .findUnique({
           where: {
             slug: input.slug,
-            memberships: { some: { userId: ctx.session.user.id } },
+            OR: [
+              { private: false },
+              {
+                private: true,
+                memberships: { some: { userId: ctx.session?.user.id } },
+              },
+            ],
           },
 
           include: {

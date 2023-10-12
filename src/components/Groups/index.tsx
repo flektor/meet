@@ -54,25 +54,33 @@ function Group(
       className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-2.5 pr-2.5 text-white"
     >
       <div className="flex items-center justify-between gap-4">
-        {isMember && (
-          <Link
-            className={`text-2xl hover:underline ${
-              isMember ? "text-primary" : "text-white"
-            }`}
-            href={`/activities/${group.activitySlug}/${group.slug}`}
-          >
-            {name}
-          </Link>
-        )}
+        {(group.private && isMember) || !group.private
+          ? (
+            <Link
+              className={`text-2xl hover:underline ${
+                isMember ? "text-primary" : "text-white"
+              }`}
+              href={`/activities/${group.activitySlug}/${group.slug}`}
+            >
+              {name}
+            </Link>
+          )
+          : (
+            <span className="text-2xl text-white">
+              {name}
+            </span>
+          )}
 
-        {!isMember && (
+        {
+          /* {!group.private && (
           <span className="text-2xl text-white">
             {name}
           </span>
-        )}
+        )} */
+        }
 
         <span className="text-sm mt-1">
-          {group.membersIds.length} / {group.maxParticipants}
+          {group.membersIds.length}/{group.maxParticipants}
         </span>
 
         {!isMember && !isAuthor &&
