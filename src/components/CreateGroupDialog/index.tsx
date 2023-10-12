@@ -134,7 +134,7 @@ function CreateGroupDialog(
       locationPin,
       minParticipants: 2,
       maxParticipants: Number(data.participants) || 2,
-      private: Boolean(data.isPrivate) || false,
+      private: data.isPublic !== "on",
       startsAt,
       endsAt,
     };
