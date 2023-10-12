@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PersonPlus from "../icons/PersonPlus";
+import PersonArrow from "../icons/PersonArrow";
 import { useStore } from "~/utils/store";
 import { SessionContextValue } from "next-auth/react";
 import { api } from "~/utils/api";
@@ -50,7 +50,7 @@ export default function JoinGroupButton(
   return (
     <div className="relative group">
       <button className="text-white group-hover:text-gray-400 focus:outline-none">
-        <PersonPlus
+        <PersonArrow
           viewBox="0 0 24 24"
           className="w-[24px] h-[24px] fill-white/60  mt-2 -ml-3 hover:fill-primary"
           onClick={() =>
