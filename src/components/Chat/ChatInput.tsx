@@ -1,9 +1,16 @@
-import React, { type FormEvent, KeyboardEvent, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  type FormEvent,
+  KeyboardEvent,
+  useRef,
+  useState,
+} from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
 import { Channel, sendMessageInput } from "../../types";
 import { useStore } from "~/utils/store";
 import Send from "~/components/icons/Send";
+import Like from "~/components/icons/Like";
 import Emojis from "~/components/Emojis";
 
 type ChatInputProps = {
@@ -67,9 +74,30 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     if (showEmojis) {
       setShowEmojis(false);
     }
+    setShowSendButton(false);
+  }
+
+  function sendLike() {
+    if (!formRef.current || !textareaRef.current) {
+      return;
+    }
+    if (showSendButton || textareaRef.current.value.trim() !== "") {
+      return;
+    }
+    textareaRef.current.value = ":like:";
+    formRef.current.requestSubmit();
   }
 
   const [showEmojis, setShowEmojis] = useState(false);
+
+  const [showSendButton, setShowSendButton] = useState(false);
+
+  function onChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    if (event.target.value.trim() === "") {
+      return setShowSendButton(false);
+    }
+    return setShowSendButton(true);
+  }
 
   function onSelectEmojiHandler(emoji: string) {
     if (!textareaRef.current) {
@@ -110,13 +138,23 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
         className="w-full resize-none p-2 rounded-lg text-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e]"
         rows={1}
         required
+        onChange={onChange}
         onKeyDown={onKeyDownHandler}
       />
       <div className=" max-h-96 flex justify-center items-center -m-2 -ml-3">
-        <Send
-          className="cursor-pointer fill-[#cc66ff] hover:fill-white"
-          onClick={submitMessage}
-        />
+        {showSendButton
+          ? (
+            <Send
+              className="cursor-pointer fill-[#cc66ff] hover:fill-white"
+              onClick={submitMessage}
+            />
+          )
+          : (
+            <Like
+              className="cursor-pointer fill-[#cc66ff] hover:fill-white"
+              onClick={sendLike}
+            />
+          )}
       </div>
     </form>
   );

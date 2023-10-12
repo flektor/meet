@@ -4,6 +4,7 @@ import { useStore } from "~/utils/store";
 import UserMenu from "./UserMenu";
 import { SessionContextValue } from "next-auth/react";
 import { getTime } from "~/utils";
+import Like from "../icons/Like";
 
 export type ChatMessageProps = {
   message: ChannelMessage;
@@ -63,9 +64,13 @@ function ChatMessage(
             )}
           </div>
 
-          <p className="whitespace-normal break-words pl-1">
-            {message.content}
-          </p>
+          {message.content === ":like:"
+            ? <Like onClick={() => {}} />
+            : (
+              <p className="whitespace-normal break-words pl-1">
+                {message.content}
+              </p>
+            )}
         </div>
       </div>
     </div>
