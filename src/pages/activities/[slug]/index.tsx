@@ -34,22 +34,26 @@ const Activity: NextPage = () => {
   useEffect(() => {
     if (activity) {
       store.pusherSubscribe(activity.channelId);
-
       store.setActivity(activity);
     }
   }, [activity]);
 
   useEffect(() => {
-    console.log({ membershipsIds });
     if (membershipsIds) {
       store.pusherSubscribe(membershipsIds);
-      // store.setActivity(activity);
     }
   }, [membershipsIds]);
 
   usePusherEventHandler(session.data?.user.id || "userId");
 
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
+
+  function onCreateGroupHandler() {
+    if (!session.data) {
+      return store.setShowLoginMessageDialog(true);
+    }
+    setShowCreateGroupDialog(true);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
@@ -106,7 +110,7 @@ const Activity: NextPage = () => {
 
               <button
                 className="rounded-full px-5 py-2 font-semibold text-white no-underline transition border-2 border-primary bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
-                onClick={() => setShowCreateGroupDialog(true)}
+                onClick={onCreateGroupHandler}
               >
                 Create Group
               </button>
