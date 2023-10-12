@@ -24,6 +24,7 @@ import { SessionContextValue } from "next-auth/react";
 import { LngLat } from "~/components/Map";
 
 export type Store = {
+  showLoginMessageDialog: boolean;
   activities: Activity[];
   groups: Group[];
   toasts: ToastProps[];
@@ -33,6 +34,8 @@ export type Store = {
   users: User[];
   session: SessionContextValue | null;
   fetchedActivitiesTimestamp: number | false;
+
+  setShowLoginMessageDialog: (isTrue: boolean) => void;
 
   setSession: (session: SessionContextValue) => void;
 
@@ -81,6 +84,10 @@ export const useStore = create<Store>((set) => ({
   userIsViewingPage: null,
   fetchedActivitiesTimestamp: false,
   session: null,
+  showLoginMessageDialog: false,
+
+  setShowLoginMessageDialog: (isTrue: boolean) =>
+    set({ showLoginMessageDialog: isTrue }),
 
   setSession: (session: SessionContextValue) => set({ session }),
 

@@ -50,7 +50,6 @@ const Activity: NextPage = () => {
   usePusherEventHandler(session.data?.user.id || "userId");
 
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
-  const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
@@ -77,12 +76,9 @@ const Activity: NextPage = () => {
                 activityId={activity.id}
               />
             )}
-            {showLoginMessageDialog && (
-              <LoginMessageDialog
-                onCancel={() => setShowLoginMessageDialog(false)}
-              />
-            )}
           </div>
+
+          <LoginMessageDialog />
 
           {displayChat &&
             (

@@ -69,7 +69,7 @@ function Chat({ isLoading, channelId, groupId, session }: ChatProps) {
       {channel &&
         (
           <div className="fixed bottom-0 w-full md:w-3/6 lg:w-2/3 max-w-5xl">
-            <ChatInput channel={channel} />
+            <ChatInput channel={channel} isLoggedIn={!!session.data} />
           </div>
         )}
     </section>

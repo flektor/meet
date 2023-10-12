@@ -1,16 +1,26 @@
 import React, { MouseEvent, useRef } from "react";
 import { signIn } from "next-auth/react";
 import CloseIcon from "~/components/icons/Close";
+import { useStore } from "~/utils/store";
 
-export default function LoginMessageDialog(
-  { onCancel }: { onCancel: () => void },
-) {
+export default function LoginMessageDialog() {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const { showDialog, setShowDialog } = useStore((state) => (
+    {
+      showDialog: state.showLoginMessageDialog,
+      setShowDialog: state.setShowLoginMessageDialog,
+    }
+  ));
+
   function onClose(event?: MouseEvent<HTMLDialogElement>) {
     if (!event || event.target === dialogRef.current) {
-      onCancel();
+      setShowDialog(false);
     }
   }
-  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  if (!showDialog) {
+    return null;
+  }
 
   return (
     <dialog

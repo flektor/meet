@@ -13,6 +13,9 @@ type JoinGroupButtonProps = {
 export default function JoinGroupButton(
   { group, session }: JoinGroupButtonProps,
 ) {
+  const setShowLoginMessageDialog = useStore((state) =>
+    state.setShowLoginMessageDialog
+  );
   const [showMenu, setShowMenu] = useState<"none" | "join">("none");
 
   const joinRequest = api.memberships.joinRequest.useMutation();
@@ -26,6 +29,10 @@ export default function JoinGroupButton(
   }
 
   function onClick() {
+    if (!session.data) {
+      return setShowLoginMessageDialog(true);
+    }
+
     setShowMenu("none");
 
     if (group.private) {
@@ -52,7 +59,7 @@ export default function JoinGroupButton(
       </button>
 
       {showMenu === "join" && (
-        <div className="absolute right-0 flex flex-col text-center rounded-md bg-[#2e026d] text-white border border-primary drop-shadow-2xl z-10">
+        <div className="absolute right-0 flex flex-col text-center rounded-md bg-[#2e026d] text-white border border-primary drop-shadow-2xl">
           <button
             className="hover:bg-white/10 px-3 py-2 whitespace-nowrap"
             onClick={onClick}

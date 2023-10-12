@@ -3,6 +3,9 @@ import PersonPlus from "../icons/PersonPlus";
 import { useStore } from "~/utils/store";
 import { SessionContextValue } from "next-auth/react";
 import { api } from "~/utils/api";
+import { group } from "console";
+import groups from "~/utils/store/groups";
+import { Group } from "~/types";
 
 type UserMenuProps = {
   userId: string;
@@ -12,7 +15,10 @@ type UserMenuProps = {
 
 export default function UserMenu({ userId, isMember, session }: UserMenuProps) {
   const [showMenu, setShowMenu] = useState<"none" | "menu" | "invite">("none");
-  const store = useStore();
+  const store = useStore((state) => ({
+    groups: state.groups,
+    setShowLoginMessageDialog: state.setShowLoginMessageDialog,
+  }));
 
   const invite = api.memberships.inviteRequest.useMutation();
 
@@ -21,6 +27,20 @@ export default function UserMenu({ userId, isMember, session }: UserMenuProps) {
 
   const showInviteButton = !isMember && currentUserGroups &&
     currentUserGroups?.length > 0;
+
+  function sendInviteRequest(group: Group) {
+    if (!session.data) {
+      return store.setShowLoginMessageDialog(true);
+    }
+
+    invite.mutate({
+      groupId: group.id,
+      activitySlug: group.activitySlug,
+      channelId: group.channelId,
+      userId,
+    });
+    setShowMenu("none");
+  }
 
   return (
     <div className="relative group">
@@ -80,15 +100,8 @@ export default function UserMenu({ userId, isMember, session }: UserMenuProps) {
               <button
                 className="hover:bg-white/10 px-2 py-2 whitespace-nowrap w-full"
                 key={group.slug}
-                onClick={() => {
-                  invite.mutate({
-                    groupId: group.id,
-                    activitySlug: group.activitySlug,
-                    channelId: group.channelId,
-                    userId,
-                  });
-                  setShowMenu("none");
-                }}
+                onClick={() =>
+                  sendInviteRequest(group)}
               >
                 {group.title}
               </button>

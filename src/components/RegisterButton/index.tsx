@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import Svg from "../Svg";
 import { useStore } from "~/utils/store";
 import { useSession } from "next-auth/react";
 import { api } from "../../utils/api";
-import LoginMessageDialog from "~/components/LoginMessageDialog";
 import DotsLoader from "~/components/DotsLoader";
 
 export type RegisterButtonProps = {
@@ -56,8 +55,6 @@ const RegisterButton = (
   const { mutate: register } = api.registrations.add.useMutation();
   const { mutate: unregister } = api.registrations.remove.useMutation();
 
-  const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
-
   const activity = store.activities.find(({ id }) => id === activityId);
   const isRegistered = activity?.isRegistered ?? false;
 
@@ -72,7 +69,7 @@ const RegisterButton = (
 
   function toggleRegister() {
     if (session.status !== "authenticated") {
-      setShowLoginMessageDialog(true);
+      store.setShowLoginMessageDialog(true);
       return;
     }
     if (!activity) {
@@ -90,11 +87,6 @@ const RegisterButton = (
 
   return (
     <div className={`flex ${className}`}>
-      {showLoginMessageDialog && (
-        <LoginMessageDialog
-          onCancel={() => setShowLoginMessageDialog(false)}
-        />
-      )}
       <div className="flex flex-coll">
         <Button
           isRegistered={isRegistered}

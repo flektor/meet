@@ -8,9 +8,10 @@ import Emojis from "~/components/Emojis";
 
 type ChatInputProps = {
   channel: Channel;
+  isLoggedIn: boolean;
 };
 
-function ChatInput({ channel }: ChatInputProps) {
+function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const store = useStore();
@@ -49,6 +50,11 @@ function ChatInput({ channel }: ChatInputProps) {
     ) {
       return;
     }
+
+    if (!isLoggedIn) {
+      return store.setShowLoginMessageDialog(true);
+    }
+
     submitMessage();
   }
 

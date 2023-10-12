@@ -15,8 +15,6 @@ const Activity: NextPage = () => {
   const session = useSession();
   const store = useStore();
   const [showCreateActivity, setShowCreateActivity] = useState(false);
-  const [showLoginMessageDialog, setShowLoginMessageDialog] = useState(false);
-
   usePusherEventHandler(session.data?.user.id || "userId");
 
   const { data, error, isLoading } = api.activities.getActivities
@@ -44,7 +42,7 @@ const Activity: NextPage = () => {
             onClick={() =>
               session?.data?.user
                 ? setShowCreateActivity(true)
-                : setShowLoginMessageDialog(true)}
+                : store.setShowLoginMessageDialog(true)}
             className="rounded-full px-5 py-2 font-semibold text-white no-underline transition border-2 border-primary bg-black/20 hover:bg-black/5 hover:border-white hover:text-white"
           >
             Create Activity
@@ -56,11 +54,8 @@ const Activity: NextPage = () => {
               onClose={() => setShowCreateActivity(false)}
             />
           )}
-          {showLoginMessageDialog && (
-            <LoginMessageDialog
-              onCancel={() => setShowLoginMessageDialog(false)}
-            />
-          )}
+
+          <LoginMessageDialog />
 
           {isLoading
             ? (
