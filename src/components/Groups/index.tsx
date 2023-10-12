@@ -91,7 +91,7 @@ function GroupList(
   { groups, session }: { groups: Group[]; session: SessionContextValue },
 ) {
   return (
-    <ul className="flex flex-wrap justify-center gap-2 mx-2 max-h-[30vh] overflow-y-auto">
+    <ul className="flex flex-wrap justify-center gap-2 mx-2">
       {groups.map(
         (group, index) => (
           <Group key={index} group={group} index={index} session={session} />
