@@ -252,6 +252,7 @@ function CreateGroupDialog(
                 width={mapWidth}
                 height={mapHeight}
                 showMarker={showMarker}
+                draggableMarker
               />
             </div>
           </div>

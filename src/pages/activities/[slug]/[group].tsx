@@ -110,7 +110,7 @@ const Group: NextPage = () => {
                 session={session}
               />
             )
-            : <GroupInfo group={group} />}
+            : <GroupInfo group={group} session={session} />}
 
           <Toasts />
 
