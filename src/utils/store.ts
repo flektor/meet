@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { removeActivity, setActivities, setActivity } from "./store/activities";
 import { removeUsers, setUsers } from "./store/users";
-import { removeGroup, setGroup, updateGroupLocation } from "./store/groups";
+import {
+  removeGroup,
+  setGroup,
+  setGroups,
+  updateGroupLocation,
+} from "./store/groups";
 import { addToFavorites, removeFromFavorites } from "./store/favorites";
 import { addViewer, removeViewer } from "./store/viewer";
 import { addMessage, removeChannel, setChannel } from "./store/channels";
@@ -16,6 +21,7 @@ import type {
   getActivitiesOutput,
   getActivityOutput,
   getGroupOutput,
+  getUserGroupsOutput,
   Group,
   ToastProps,
   User,
@@ -49,6 +55,7 @@ export type Store = {
   removeActivity: (activityId: string) => void;
 
   setGroup: (group: getGroupOutput | Group) => void;
+  setGroups: (groups: getUserGroupsOutput) => void;
   removeGroup: (groupId: string) => void;
   updateGroupLocation: (
     groupId: string,
@@ -109,6 +116,9 @@ export const useStore = create<Store>((set) => ({
 
   setGroup: (group: getGroupOutput | Group) =>
     set((state) => setGroup(state, group)),
+
+  setGroups: (groups: getUserGroupsOutput) =>
+    set((state) => setGroups(state, groups)),
 
   removeGroup: (groupId: string) => set((state) => removeGroup(state, groupId)),
 

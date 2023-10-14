@@ -1,6 +1,31 @@
 import { LngLat } from "~/components/Map";
-import { getGroupOutput, Group } from "../../types";
+import { getGroupOutput, getUserGroupsOutput, Group } from "../../types";
 import { Store } from "../store";
+
+export function setGroups(state: Store, groups: getUserGroupsOutput) {
+  const groupIdsToAdd = groups.map(({ id }) => id);
+  const restGroups = state.groups.filter(({ id }) =>
+    !groupIdsToAdd.includes(id)
+  );
+
+  const channelIdsToAdd = groups.filter(({ id }) =>
+    !state.pusherSubscriptions.includes(id)
+  ).map(({ id }) => id);
+
+  for (const group of groups) {
+    if (!state.pusherSubscriptions.includes(group.channelId)) {
+      channelIdsToAdd.push(group.channelId);
+    }
+  }
+  const pusherSubscriptions = channelIdsToAdd
+    ? [...state.pusherSubscriptions, ...channelIdsToAdd]
+    : state.pusherSubscriptions;
+
+  return ({
+    groups: [...restGroups, ...groups],
+    pusherSubscriptions,
+  });
+}
 
 export function setGroup(state: Store, group: getGroupOutput | Group) {
   const { channel, users, ...rest } = group as getGroupOutput;
