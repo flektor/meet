@@ -1,20 +1,15 @@
 import { SessionContextValue, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Group } from "~/types";
 import { useStore } from "~/utils/store";
 import JoinGroupButton from "./JoinGroupButton";
 
-export type GroupsProps = {
-  activitySlug: string;
-};
-
-function getGroups(groups: Group[], activitySlug: string) {
+function getGroups(groups: Group[], activitySlug?: string) {
   const privateGroups = [];
   const publicGroups = [];
 
   for (const group of groups) {
-    if (group.activitySlug !== activitySlug) {
+    if (activitySlug && group.activitySlug !== activitySlug) {
       continue;
     }
 
@@ -109,11 +104,14 @@ function GroupList(
   );
 }
 
-const Groups = ({ activitySlug }: GroupsProps) => {
-  const groups = useStore((state) => state.groups);
+const Groups = (props: GroupsProps) => {
+  const _groups = useStore((state) => state.groups);
   const session = useSession();
 
-  const { privateGroups, publicGroups } = getGroups(groups, activitySlug);
+  const { privateGroups, publicGroups } = getGroups(
+    props.groups || _groups,
+    props.activitySlug,
+  );
 
   // const [_groups, setGroups] = useState(getGroups(store.groups, activitySlug));
   // useEffect(() => {
@@ -152,3 +150,13 @@ const Groups = ({ activitySlug }: GroupsProps) => {
 };
 
 export default Groups;
+
+export type GroupsProps =
+  & {
+    activitySlug?: string;
+    groups?: Group[];
+  }
+  & (
+    | { activitySlug: string }
+    | { groups: Group[] }
+  );
