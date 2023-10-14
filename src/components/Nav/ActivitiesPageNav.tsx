@@ -18,10 +18,12 @@ const MenuOptions = (
       Groups
     </MenuOption>
 
-    <MenuOption href="/settings">Settings</MenuOption>
+    {
+      /* <MenuOption href="/settings">Settings</MenuOption>
 
     {session.data &&
-      <MenuOption href="/profile">Profile</MenuOption>}
+      <MenuOption href="/profile">Profile</MenuOption>} */
+    }
 
     <MenuOption onClick={() => session.data ? signOut() : signIn()}>
       {session.data ? "Sign Out" : "Sign In"}

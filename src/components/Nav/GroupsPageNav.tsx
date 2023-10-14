@@ -14,14 +14,16 @@ const MenuOptions = (
     </MenuOption> */
     }
 
-    <MenuOption className="md:hidden" href="/groups">
-      Groups
+    <MenuOption className="md:hidden" href="/favorites">
+      Favorites
     </MenuOption>
 
-    <MenuOption href="/settings">Settings</MenuOption>
+    {
+      /* <MenuOption href="/settings">Settings</MenuOption>
 
     {session.data &&
-      <MenuOption href="/profile">Profile</MenuOption>}
+      <MenuOption href="/profile">Profile</MenuOption>} */
+    }
 
     <MenuOption onClick={() => session.data ? signOut() : signIn()}>
       {session.data ? "Sign Out" : "Sign In"}

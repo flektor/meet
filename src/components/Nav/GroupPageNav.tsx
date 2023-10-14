@@ -21,10 +21,12 @@ const MenuOptions = (
       Groups
     </MenuOption>
 
-    <MenuOption href="/settings">Settings</MenuOption>
+    {
+      /* <MenuOption href="/settings">Settings</MenuOption>
 
     {session.data &&
-      <MenuOption href="/profile">Profile</MenuOption>}
+      <MenuOption href="/profile">Profile</MenuOption>} */
+    }
 
     <MenuOption onClick={() => session.data ? signOut() : signIn()}>
       {session.data ? "Sign Out" : "Sign In"}
@@ -60,11 +62,9 @@ export default function GroupPageNav(
 
       <div className="flex items-center justify-center">
         {group && (
-          <>
-            <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
-              {group.title}
-            </span>
-          </>
+          <span className="text-white text-xl md:text-2xl mr2 whitespace-nowrap">
+            {group.title}
+          </span>
         )}
       </div>
       <div className="w-full flex justify-end items-center">
