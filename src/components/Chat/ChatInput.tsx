@@ -58,9 +58,6 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
       return;
     }
 
-    if (!isLoggedIn) {
-      return store.setShowLoginMessageDialog(true);
-    }
     submitMessage();
   }
 
@@ -68,6 +65,11 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     if (!textareaRef.current || textareaRef.current.value.trim() === "") {
       return;
     }
+
+    if (!isLoggedIn) {
+      return store.setShowLoginMessageDialog(true);
+    }
+
     formRef.current?.requestSubmit();
     textareaRef.current.value = "";
     setShowSendButton(false);
