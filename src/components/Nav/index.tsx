@@ -11,6 +11,7 @@ export type NavProps = {
   menuChildren?: ReactNode;
   searchBar?: boolean;
   className?: string;
+  showSignInButton?: boolean;
 };
 
 export default function Nav(
@@ -20,6 +21,7 @@ export default function Nav(
     menuChildren,
     searchBar = true,
     session,
+    showSignInButton,
   }: NavProps,
 ) {
   const [showMenu, setShowMenu] = useState(false);
@@ -46,7 +48,7 @@ export default function Nav(
           }
 
           {
-            !session.data &&
+            !session.data && showSignInButton &&
             (
               <div className="flex justify-end items-center gap-2">
                 <button
