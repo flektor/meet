@@ -39,8 +39,9 @@ export default function ActivitiesPageNav(
       session={session}
       searchBar={false}
       menuChildren={<MenuOptions session={session} router={router} />}
+      showSignInButton
     >
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-start w-full">
         <NavLogo />
 
         <Link

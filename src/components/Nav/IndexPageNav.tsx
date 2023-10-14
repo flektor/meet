@@ -38,6 +38,7 @@ export default function HomePageNav(
       className="flex"
       session={session}
       menuChildren={<MenuOptions session={session} router={router} />}
+      showSignInButton
     >
       <div className="flex items-center justify-start w-full">
         <NavLogo />
