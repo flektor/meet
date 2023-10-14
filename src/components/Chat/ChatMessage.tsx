@@ -55,15 +55,15 @@ function ChatMessage(
       {message.content === ":like:"
         ? (
           <Like
-            className="fill-primary w-[38px] h-[38px] mt-1 -mb-1 -ml-1.5"
+            className={`fill-primary w-[38px] h-[38px] mt-1 -ml-1.5 ${
+              showImage && "-mb-1 "
+            }`}
             onClick={() => {}}
           />
         )
         : (
           <div className={contentClassName}>
-            <p className="whitespace-normal break-words pl-1">
-              {message.content}
-            </p>
+            {message.content}
           </div>
         )}
     </div>
@@ -113,16 +113,14 @@ function ChatMessage(
           </>
         )}
 
-      <div
-        className={`${flexFloat} scroll-mb-32} ${
-          showTime && "mb-3"
-        } scroll-m-24`}
-      >
-        <div className={`flex ${!isCurrentUser && "flex-row-reverse"}`}>
+      <div className={`${flexFloat} ${showTime && "mb-3"} scroll-m-24`}>
+        <div
+          className={`flex ${!isCurrentUser && "flex-row-reverse"}`}
+        >
           {lastItem &&
             (
               <div
-                className={`flex w-48 items-end mx-2 gap-2 ${
+                className={`flex items-end mx-2 gap-2 ${
                   isCurrentUser && "flex-row-reverse"
                 }`}
               >
@@ -151,7 +149,7 @@ function getContentClassName(
   lastItem?: boolean,
 ) {
   let className =
-    "mt-0.5 px-1 pr-2 py-1 text-white break-words border border-white/20 rounded-xl ";
+    "mt-0.5 px-2 py-1 text-white break-normal border border-white/20 rounded-xl ";
 
   className += isCurrentUser ? "bg-white/10 " : "bg-white/5 ";
 
