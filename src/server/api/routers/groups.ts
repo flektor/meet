@@ -188,37 +188,37 @@ export const groupsRouter = createTRPCRouter({
         where: { memberships: { every: { userId: ctx.session.user.id } } },
       });
 
-      const userMap = new Map();
+      // const userMap = new Map();
 
-      const users = [
-        ...data.flatMap((group) => ({
-          ...group.viewers.map(({ user }) => ({
-            id: user.id,
-            name: user.name,
-            image: user.image,
-          })),
-          ...group.memberships.map(({ user }) => ({
-            id: user.id,
-            name: user.name,
-            image: user.image,
-          })),
-        })),
-      ];
+      // const users = [
+      //   ...data.flatMap((group) => ({
+      //     ...group.viewers.map(({ user }) => ({
+      //       id: user.id,
+      //       name: user.name,
+      //       image: user.image,
+      //     })),
+      //     ...group.memberships.map(({ user }) => ({
+      //       id: user.id,
+      //       name: user.name,
+      //       image: user.image,
+      //     })),
+      //   })),
+      // ];
 
       const groups = data.map((
         { memberships, viewers, activity, ...rest },
       ) => ({
         ...rest,
         activitySlug: activity.slug,
-        viewerIds: viewers.map(({ userId }) => userId),
+        viewersIds: viewers.map(({ userId }) => userId),
         membersIds: memberships.map(({ userId }) => userId),
       }));
 
-      users.forEach((user) => {
-        if (!userMap.has(user.id)) {
-          userMap.set(user.id, user);
-        }
-      });
+      // users.forEach((user) => {
+      //   if (!userMap.has(user.id)) {
+      //     userMap.set(user.id, user);
+      //   }
+      // });
 
       return groups;
     }),
