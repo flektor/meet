@@ -173,9 +173,9 @@ export type PusherInviteMessage = {
   groupSlug: string;
   activitySlug: string;
   sentBy: string;
-} | PusherInviteAccepterMessage;
+} | PusherInviteAcceptMessage;
 
-export type PusherInviteAccepterMessage = {
+export type PusherInviteAcceptMessage = {
   action: "invite_accepted";
   groupId: string;
   sentBy: string;
