@@ -44,6 +44,9 @@ export type Activity = Omit<
 >;
 
 export type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
+export type getUserGroupsOutput = NonNullable<
+  RouterOutput["groups"]["getUserGroups"]
+>;
 export type addDynamicGroupOutput = NonNullable<
   RouterOutput["groups"]["addDynamicGroup"]
 >;
