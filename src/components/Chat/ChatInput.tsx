@@ -94,6 +94,7 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
 
   function onChange(event: ChangeEvent<HTMLTextAreaElement>) {
     if (event.target.value.trim() === "") {
+      event.target.value = "";
       return setShowSendButton(false);
     }
     return setShowSendButton(true);
