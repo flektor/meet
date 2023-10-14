@@ -11,12 +11,27 @@ export type ChatMessageProps = {
   currentUsername: string;
   session: SessionContextValue;
   groupId?: string;
+  firstItem?: boolean;
+  lastItem?: boolean;
+  showName?: boolean;
+  showTime?: boolean;
+  showImage?: boolean;
 };
 
 function ChatMessage(
-  { message, groupId, currentUsername, session }: ChatMessageProps,
+  {
+    message,
+    groupId,
+    currentUsername,
+    session,
+    showName,
+    showTime,
+    showImage,
+    firstItem,
+    lastItem,
+  }: ChatMessageProps,
 ) {
-  const store = useStore();
+  const store = useStore(({ users, groups }) => ({ users, groups }));
   const sender = store.users.find(({ id }) => id === message.sentBy);
   const isCurrentUser = sender?.name === currentUsername;
   const senderName = sender?.name?.split(" ")[0] || "user";
@@ -25,56 +40,118 @@ function ChatMessage(
         sender.id,
       ) || false;
 
+  const contentClassName = getContentClassName(
+    isCurrentUser,
+    firstItem,
+    lastItem,
+  );
+
+  const flexFloat = `flex ${isCurrentUser ? "justify-end" : "justify-start"}`;
+
+  const ContentElement = (
+    <div className={flexFloat}>
+      {message.content === ":like:"
+        ? (
+          <Like
+            className="fill-primary w-[38px] h-[38px] mt-1 -mb-1 -ml-1.5"
+            onClick={() => {}}
+          />
+        )
+        : (
+          <div className={contentClassName}>
+            <p className="whitespace-normal break-words pl-1">
+              {message.content}
+            </p>
+          </div>
+        )}
+    </div>
+  ) || null;
+
+  const ImageElement = sender?.image && (
+        <img
+          src={sender?.image}
+          width={32}
+          height={32}
+          className="rounded-full"
+        />
+      ) || null;
+
+  const TimeElement = (
+    <i className="text-xs text-primary whitespace-nowrap pb-1">
+      {getTime(message.sentAt)}
+    </i>
+  ) || null;
+
+  const NameElement = (
+    <div
+      className={`absolute -top-[32px] flex items-center mr-1  ${
+        isCurrentUser && "right-0"
+      }`}
+    >
+      {!isCurrentUser && (
+        <UserMenu
+          session={session}
+          userId={message.sentBy}
+          isMember={isMember}
+        />
+      )}
+      <span className="text-white/60">{senderName}</span>
+    </div>
+  );
+
   return (
     <div
-      className={`flex ${
-        isCurrentUser ? "justify-end" : "justify-start"
-      } scroll-mb-32`}
+      className={`${flexFloat} scroll-mb-32} ${showTime && "mb-3"} scroll-m-24`}
     >
-      <div
-        className={`flex  ${!isCurrentUser && "flex-row-reverse"}`}
-      >
-        <i className="pl-3 text-xs text-[#cc66ff] flex items-end pr-4 pb-3 whitespace-nowrap ">
-          {getTime(message.sentAt)}
-        </i>
+      <div className={`flex ${!isCurrentUser && "flex-row-reverse"}`}>
+        {lastItem &&
+          (
+            <div
+              className={`flex w-48 items-end mx-2 gap-2 ${
+                isCurrentUser && "flex-row-reverse"
+              }`}
+            >
+              {showImage && ImageElement}
+              {showTime && TimeElement}
+            </div>
+          )}
 
         <div
-          className={`w-fit mt-2 mb-1 mr-1 rounded-lg p-1 pl-2 pr-3 text-white break-words border border-white/20 ${
-            isCurrentUser ? "bg-white/10" : "bg-white/5"
+          className={`relative flex flex-col justify-end ${
+            showName && "mt-10"
           }`}
         >
-          <div className="flex items-center">
-            {sender && sender.image && (
-              <img
-                src={sender?.image}
-                width={32}
-                height={32}
-                className="rounded-full m-1 mr-2"
-              />
-            )}
-
-            <span className="text-white/60">{senderName}</span>
-
-            {!isCurrentUser && (
-              <UserMenu
-                session={session}
-                userId={message.sentBy}
-                isMember={isMember}
-              />
-            )}
-          </div>
-
-          {message.content === ":like:"
-            ? <Like onClick={() => {}} />
-            : (
-              <p className="whitespace-normal break-words pl-1">
-                {message.content}
-              </p>
-            )}
+          {showName && NameElement}
+          {ContentElement}
         </div>
       </div>
     </div>
   );
+}
+
+function getContentClassName(
+  isCurrentUser: boolean,
+  firstItem?: boolean,
+  lastItem?: boolean,
+) {
+  let className =
+    "mt-0.5 px-1 pr-2 py-1 text-white break-words border border-white/20 rounded-xl ";
+
+  className += isCurrentUser ? "bg-white/10 " : "bg-white/5 ";
+
+  if (firstItem && lastItem) {
+    return className;
+  }
+
+  if (firstItem) {
+    return className += isCurrentUser ? "rounded-br" : "rounded-bl";
+  }
+
+  if (lastItem) {
+    return className += isCurrentUser ? "rounded-tr" : "rounded-tl";
+  }
+  // middle
+  return className += isCurrentUser ? "rounded-r" : "rounded-l";
 }
 
 export default ChatMessage;
