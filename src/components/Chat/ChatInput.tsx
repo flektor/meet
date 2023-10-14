@@ -61,7 +61,6 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     if (!isLoggedIn) {
       return store.setShowLoginMessageDialog(true);
     }
-
     submitMessage();
   }
 
@@ -74,7 +73,6 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     if (showEmojis) {
       setShowEmojis(false);
     }
-    setShowSendButton(false);
   }
 
   function sendLike() {
@@ -126,7 +124,7 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
 
       <dialog
         open={showEmojis}
-        className="w-2/3 max-h-48 h-48 overflow-y-auto -mt-56 scroll-auto rounded-md border-[#cc66ff] border p-1 bg-gradient-to-b from-[#25213C] to-[#1b1b2e] shadow-lg shadow-white"
+        className="w-2/3 max-h-48 h-48 overflow-y-auto -mt-56 scroll-auto rounded-md border-[#cc66ff] border p-1 bg-gradient-to-b from-[#25213C] to-[#1b1b2e] shadow shadow-primary"
         onKeyDown={onKeyDownHandler}
       >
         <Emojis onSelect={onSelectEmojiHandler} />
