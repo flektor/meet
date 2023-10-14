@@ -40,12 +40,12 @@ export default function ActivitiesPageNav(
       searchBar={false}
       menuChildren={<MenuOptions session={session} router={router} />}
     >
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center gap-3">
         <NavLogo />
 
         <Link
           href="/activities"
-          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
+          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
         >
           Activities
         </Link>
@@ -55,14 +55,14 @@ export default function ActivitiesPageNav(
             <>
               <Link
                 href="/favorites"
-                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4 underline"
+                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] underline"
               >
                 Favorites
               </Link>
 
               <Link
-                href="/activities"
-                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
+                href="/groups"
+                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
               >
                 Groups
               </Link>

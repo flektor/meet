@@ -2,19 +2,16 @@ import React, { useEffect } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Spinner from "~/components/Spinner";
-import FavoritesPageNav from "./FavoritesPageNav";
-import LeaveIcon from "~/components/icons/Leave";
+import FavoritesPageNav from "../../components/Nav/FavoritesPageNav";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 
 const Favorites: NextPage = () => {
-  const router = useRouter();
   const store = useStore();
   const favorites = store.activities.filter((activity) => activity.isFavorite);
 
@@ -25,7 +22,6 @@ const Favorites: NextPage = () => {
 
   useEffect(() => {
     if (data && store.fetchedActivitiesTimestamp === false) {
-      console.log("set activities", data, store.fetchedActivitiesTimestamp);
       store.setActivities(data);
     }
   }, [data]);

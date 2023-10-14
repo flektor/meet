@@ -41,12 +41,12 @@ export default function ActivitiesPageNav(
       menuChildren={<MenuOptions session={session} router={router} />}
       showSignInButton
     >
-      <div className="flex items-center justify-start w-full">
+      <div className="flex items-center justify-start w-full gap-3">
         <NavLogo />
 
         <Link
           href="/activities"
-          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4 underline"
+          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] underline"
         >
           Activities
         </Link>
@@ -56,14 +56,14 @@ export default function ActivitiesPageNav(
             <>
               <Link
                 href="/favorites"
-                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
+                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
               >
                 Favorites
               </Link>
 
               <Link
-                href="/activities"
-                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff] pt-1 mr-4"
+                href="/groups"
+                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
               >
                 Groups
               </Link>

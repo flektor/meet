@@ -29,7 +29,7 @@ const MenuOptions = (
   </>
 );
 
-export default function HomePageNav(
+export default function ActivitiesPageNav(
   { session }: { session: SessionContextValue },
 ) {
   const router = useRouter();
@@ -37,15 +37,15 @@ export default function HomePageNav(
     <Nav
       className="flex"
       session={session}
+      searchBar={false}
       menuChildren={<MenuOptions session={session} router={router} />}
-      showSignInButton
     >
-      <div className="flex items-center justify-start w-full gap-3">
+      <div className="flex items-center justify-center gap-3">
         <NavLogo />
 
         <Link
           href="/activities"
-          className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
+          className="text-white hover:underline hover:decoration-primary hover:text-primary"
         >
           Activities
         </Link>
@@ -55,14 +55,14 @@ export default function HomePageNav(
             <>
               <Link
                 href="/favorites"
-                className="text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
+                className="hidden md:block text-white hover:underline hover:decoration-primary hover:text-primary"
               >
                 Favorites
               </Link>
 
               <Link
                 href="/groups"
-                className="hidden md:block text-white hover:underline hover:decoration-[#cc66ff] hover:text-[#cc66ff]"
+                className="text-white hover:underline hover:decoration-primary hover:text-primary underline"
               >
                 Groups
               </Link>

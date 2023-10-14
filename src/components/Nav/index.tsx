@@ -68,10 +68,8 @@ export default function Nav(
           }
 
           <div className="relative group">
-            <button
-              onBlur={() => setShowMenu(false)}
-              className="text-white group-hover:text-gray-400 focus:outline-none"
-            >
+            <button // onBlur={() => setShowMenu(false)}
+            className="text-white group-hover:text-gray-400 focus:outline-none">
               <MenuSvg
                 active={showMenu}
                 className="pt-2 ml-2 mr-2 lg:mr-0"
