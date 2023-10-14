@@ -90,6 +90,7 @@ function groupMessages(messages: ChannelMessage[]) {
     prevMessage = messages[i - 1];
     nextMessage = messages[i + 1];
     currTime = getTime(currMessage.sentAt);
+
     timeNotAsBefore = !(prevMessage &&
         prevMessage.sentBy === currMessage.sentBy &&
         getTime(prevMessage.sentAt) === currTime || false);
@@ -105,6 +106,8 @@ function groupMessages(messages: ChannelMessage[]) {
       showName: currMessage.sentBy !== prevMessage?.sentBy,
       showImage: !nextMessage || currMessage.sentBy !== nextMessage.sentBy,
       showTime: timeNotAsNext,
+      showDate: !prevMessage ||
+        currMessage.sentAt.toDateString() !== prevMessage.sentAt.toDateString(),
     });
   }
   return groupedMessages;
@@ -114,6 +117,7 @@ type ChatGroupedMessage = {
   message: ChannelMessage;
   firstItem?: boolean;
   lastItem?: boolean;
+  showDate?: boolean;
   showName?: boolean;
   showImage?: boolean;
   showTime?: boolean;

@@ -15,6 +15,7 @@ export type ChatMessageProps = {
   lastItem?: boolean;
   showName?: boolean;
   showTime?: boolean;
+  showDate?: boolean;
   showImage?: boolean;
 };
 
@@ -27,6 +28,7 @@ function ChatMessage(
     showName,
     showTime,
     showImage,
+    showDate,
     firstItem,
     lastItem,
   }: ChatMessageProps,
@@ -100,32 +102,46 @@ function ChatMessage(
   );
 
   return (
-    <div
-      className={`${flexFloat} scroll-mb-32} ${showTime && "mb-3"} scroll-m-24`}
-    >
-      <div className={`flex ${!isCurrentUser && "flex-row-reverse"}`}>
-        {lastItem &&
-          (
-            <div
-              className={`flex w-48 items-end mx-2 gap-2 ${
-                isCurrentUser && "flex-row-reverse"
-              }`}
-            >
-              {showImage && ImageElement}
-              {showTime && TimeElement}
-            </div>
-          )}
+    <>
+      {showDate &&
+        (
+          <>
+            <span className="w-full flex justify-center text-primary text-sm mt-5">
+              {message.sentAt.toDateString()}
+            </span>
+            <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-primary to-#0000000 mb-8" />
+          </>
+        )}
 
-        <div
-          className={`relative flex flex-col justify-end ${
-            showName && "mt-10"
-          }`}
-        >
-          {showName && NameElement}
-          {ContentElement}
+      <div
+        className={`${flexFloat} scroll-mb-32} ${
+          showTime && "mb-3"
+        } scroll-m-24`}
+      >
+        <div className={`flex ${!isCurrentUser && "flex-row-reverse"}`}>
+          {lastItem &&
+            (
+              <div
+                className={`flex w-48 items-end mx-2 gap-2 ${
+                  isCurrentUser && "flex-row-reverse"
+                }`}
+              >
+                {showImage && ImageElement}
+                {showTime && TimeElement}
+              </div>
+            )}
+
+          <div
+            className={`relative flex flex-col justify-end ${
+              showName && "mt-10"
+            }`}
+          >
+            {showName && NameElement}
+            {ContentElement}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
