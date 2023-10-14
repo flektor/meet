@@ -68,8 +68,10 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     if (!textareaRef.current || textareaRef.current.value.trim() === "") {
       return;
     }
-
     formRef.current?.requestSubmit();
+    textareaRef.current.value = "";
+    setShowSendButton(false);
+
     if (showEmojis) {
       setShowEmojis(false);
     }
@@ -107,6 +109,7 @@ function ChatInput({ channel, isLoggedIn }: ChatInputProps) {
     textareaRef.current.value = text.substring(0, index) + emoji +
       text.substring(index + 1);
     textareaRef.current.focus();
+    setShowSendButton(true);
   }
 
   return (
