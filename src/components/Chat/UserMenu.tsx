@@ -3,8 +3,6 @@ import PersonPlus from "../icons/PersonPlus";
 import { useStore } from "~/utils/store";
 import { SessionContextValue } from "next-auth/react";
 import { api } from "~/utils/api";
-import { group } from "console";
-import groups from "~/utils/store/groups";
 import { Group } from "~/types";
 
 type UserMenuProps = {

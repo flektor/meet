@@ -11,8 +11,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  const userId = session?.user?.id || "";
-
   return (
     <SessionProvider session={session}>
       <PusherProvider>
