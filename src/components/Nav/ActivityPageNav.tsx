@@ -20,18 +20,25 @@ const MenuOptions = ({ session }: { session: SessionContextValue }) => (
       Activities
     </MenuOption>
 
-    <MenuOption href="/favorites">
-      Favorites
-    </MenuOption>
+    {session.data &&
+      (
+        <>
+          <MenuOption href="/favorites">
+            Favorites
+          </MenuOption>
 
-    <MenuOption href="/groups">
-      Groups
-    </MenuOption>
+          <MenuOption href="/groups">
+            Groups
+          </MenuOption>
+        </>
+      )}
 
-    <MenuOption href="/settings">Settings</MenuOption>
+    {
+      /* <MenuOption href="/settings">Settings</MenuOption>
 
     {session.data &&
-      <MenuOption href="/profile">Profile</MenuOption>}
+      <MenuOption href="/profile">Profile</MenuOption>} */
+    }
 
     <MenuOption onClick={() => session.data ? signOut() : signIn()}>
       {session.data ? "Sign Out" : "Sign In"}
