@@ -75,8 +75,10 @@ export const addGroupInput = z.object({
   private: z.boolean(),
 });
 
+export const lngLatInput = z.tuple([z.number(), z.number()]);
+
 export const updateGroupLocationInput = z.object({
-  lngLat: z.tuple([z.number(), z.number()]),
+  lngLat: lngLatInput,
   groupId: z.string(),
 });
 export type UpdateGroupLocationInput = z.infer<typeof updateGroupLocationInput>;
@@ -190,6 +192,7 @@ export type PusherQuickInviteMessage = {
 export type PusherLocationMessage = {
   action: "location_update";
   lngLat: LngLat;
+  locationName: string;
   groupId: string;
   sentBy: string;
 };
