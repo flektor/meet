@@ -13,12 +13,11 @@ const MenuOptions = (
       Search
     </MenuOption> */
     }
-    {session.data &&
-      (
-        <MenuOption className="md:hidden" href="/favorites">
-          Favorites
-        </MenuOption>
-      )}
+
+    <MenuOption className="md:hidden" href="/favorites">
+      Favorites
+    </MenuOption>
+
     {
       /* <MenuOption href="/settings">Settings</MenuOption>
 
