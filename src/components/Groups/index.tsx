@@ -130,7 +130,7 @@ const Groups = (props: GroupsProps) => {
       {privateGroups.length > 0 &&
         (
           <>
-            <span className="w-full flex justify-center text-gray-400 text-xl">
+            <span className="w-full flex justify-center text-primary text-xl">
               Private Groups
             </span>
             <GroupList session={session} groups={privateGroups} />
@@ -139,7 +139,7 @@ const Groups = (props: GroupsProps) => {
 
       {publicGroups.length > 0 && (
         <>
-          <span className="w-full flex justify-center text-gray-400 text-xl mt-3">
+          <span className="w-full flex justify-center text-primary text-xl mt-3">
             Public Groups
           </span>
           <GroupList session={session} groups={publicGroups} />
