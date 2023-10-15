@@ -1,4 +1,4 @@
-import { type FormEvent, MouseEvent, useRef, useState } from "react";
+import { type FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { api } from "../../utils/api";
 import Spinner from "../Spinner";
@@ -47,6 +47,7 @@ function CreateGroupDialog(
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const screenSize = useScreenSize();
+
   const mapWidth = screenSize === "sm"
     ? "86vw"
     : screenSize === "md"
@@ -62,6 +63,16 @@ function CreateGroupDialog(
       onClose();
     }
   }
+  const [locationName, setLocationName] = useState("Berlin");
+
+  const { mutate: getLocationName } = api.location.getLocationName
+    .useMutation({
+      onSuccess: (data) => {
+        if (typeof data === "string") {
+          setLocationName(data);
+        }
+      },
+    });
 
   const { mutate: addGroup } = api.groups.addGroup.useMutation({
     onError: (error) => {
@@ -125,7 +136,7 @@ function CreateGroupDialog(
       activityId,
       description: data.description as string,
       title: data.title as string,
-      locationTitle: data.locationTitle as string || "Berlin",
+      locationTitle: data.locationName as string,
       locationPin: data.marker as string,
       minParticipants: 2,
       maxParticipants: Number(data.participants) || 2,
@@ -143,6 +154,15 @@ function CreateGroupDialog(
         console.log(error);
       }
     }
+  }
+
+  function onShowMarkerHandler() {
+    // getLocationName( );
+    setShowMarker(!showMarker);
+  }
+
+  function onMarkerMoved(lngLat: LngLat) {
+    getLocationName(lngLat);
   }
 
   return (
@@ -218,22 +238,13 @@ function CreateGroupDialog(
                 In which place?
               </label>
 
-              <div className="w-full flex justify-center items-center -mt-1 md:mt-0 md:mb-4">
+              <div className="w-full flex justify-between items-center -mt-1 md:mt-0 md:mb-4">
                 <label className="text-xl">
                   Location
                 </label>
-                <input
-                  name="locationTitle"
-                  type="text"
-                  placeholder="City"
-                  className="w-full mx-4 p-2 rounded-lg bg-gradient-to-br from-[#25213C] to-[#1b1b2e] w-4/5 text-gray-300"
-                  required
-                  value="Berlin"
-                  disabled
-                />
 
                 <button
-                  onClick={() => setShowMarker(!showMarker)}
+                  onClick={onShowMarkerHandler}
                   type="button"
                   className="group flex justify-between transition items-center hover:text-primary font-semibold gap-2 rounded-lg bg-gradient-to-b from-[#25213C] to-[#1b1b2e] hver:bg-gradient-to-b hover:from-[#2c2747] hover:to-[#1b1b2e] p-1 px-2"
                 >
@@ -242,11 +253,22 @@ function CreateGroupDialog(
                 </button>
               </div>
 
+              <input
+                name="locationName"
+                type="text"
+                placeholder="City"
+                className="w-full p-2 rounded-lg bg-gradient-to-br from-[#25213C] to-[#1b1b2e] w-4/5 text-gray-300"
+                required
+                value={locationName}
+                disabled
+              />
+
               <Map
                 initViewLngLat={berlinLngLat}
                 width={mapWidth}
                 height={mapHeight}
                 showMarker={showMarker}
+                onMarkerMoved={onMarkerMoved}
                 draggableMarker
               />
             </div>

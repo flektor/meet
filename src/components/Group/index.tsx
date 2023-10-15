@@ -6,15 +6,18 @@ import DateTime from "./DateTime";
 import useScreenSize from "~/hooks/useScreenSize";
 import { api } from "~/utils/api";
 import { SessionContextValue } from "next-auth/react";
+import Spinner from "../Spinner";
 
 export type GroupInfoProps = {
-  group: getGroupOutput;
+  groupId: string;
   session: SessionContextValue;
 };
 
-export default function Group({ group, session }: GroupInfoProps) {
-  const store = useStore();
-
+export default function Group({ groupId, session }: GroupInfoProps) {
+  const users = useStore((state) => state.users);
+  const setGroup = useStore((state) => state.setGroup);
+  const groups = useStore((state) => state.groups);
+  const group = groups.find((group) => group.id === groupId);
   const screenSize = useScreenSize();
   const mapWidth = screenSize === "sm"
     ? "90vw"
@@ -23,39 +26,57 @@ export default function Group({ group, session }: GroupInfoProps) {
     : "40vw";
   const mapHeight = mapWidth;
 
-  const members = store.users.filter((user) =>
+  const members = users.filter((user) =>
     group ? group.membersIds.includes(user.id) : []
   );
 
   // const [showMarker, setShowMarker] = useState(false);
 
-  const updateLocation = api.location.updateGroupLocation.useMutation();
-
   const [locationPin, setLocationPin] = useState<LngLat>(
-    JSON.parse(`[${group.locationPin}]`) ||
+    group && JSON.parse(`[${group.locationPin}]`) ||
       [13.404954, 52.520008],
   );
 
+  const [isLocationNameLoading, setIsLocationNameLoading] = useState(false);
+
+  const updateLocation = api.location.updateGroupLocation.useMutation({
+    onSuccess(data) {
+      if (!group) {
+        return;
+      }
+      setGroup({
+        ...group,
+        locationTitle: data.locationName,
+        locationPin: locationPin.toString(),
+      });
+      setIsLocationNameLoading(false);
+    },
+  });
+
   function onMarkerMoved(lngLat: LngLat) {
-    updateLocation.mutate({
-      groupId: group.id,
-      lngLat,
-    });
+    if (!group) {
+      return;
+    }
+    updateLocation.mutate({ groupId: group.id, lngLat });
     setLocationPin(lngLat);
+    setIsLocationNameLoading(true);
   }
 
   useEffect(() => {
-    const storedGgroup = store.groups.find(({ id }) => id === group.id);
-    if (!storedGgroup) {
-      return;
+    if (group) {
+      const location = JSON.parse(`[${group.locationPin}]`);
+      setLocationPin(location);
     }
-    const lngLat = JSON.parse(`[${storedGgroup.locationPin}]`);
-    setLocationPin(lngLat);
-  }, [store.groups]);
+  }, [group]);
+
+  if (!group) {
+    return null;
+  }
 
   const isMarkerDraggable = group.private ||
     group.createdBy === session.data?.user.id;
 
+  const [address, postCity, coutry] = group.locationTitle.split(",");
   return (
     <div className="flex flex-col justify-center items-start mt-3 mb-4 gap-3 text-white text-xl">
       {group.description &&
@@ -119,12 +140,13 @@ export default function Group({ group, session }: GroupInfoProps) {
 
       <DateTime startsAt={group.startsAt} endsAt={group.endsAt} />
 
-      <span className="text-gray-400 mr-2 mt-3 md:mt-5">
-        Location:{" "}
+      <span className="text-gray-400 mt-3 md:mt-5 flex gap-3">
+        Location:
         <span className="text-white">
-          {group.locationTitle}
+          {isLocationNameLoading ? <Spinner /> : address}
         </span>
       </span>
+      {isLocationNameLoading ? <br /> : <>{postCity}, {coutry}</>}
 
       {
         /* <div className="w-full flex justify-between items-center">

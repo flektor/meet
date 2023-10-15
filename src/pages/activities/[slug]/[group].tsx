@@ -104,7 +104,7 @@ const Group: NextPage = () => {
                 session={session}
               />
             )
-            : <GroupInfo group={group} session={session} />}
+            : <GroupInfo groupId={group.id} session={session} />}
 
           {isLoading
             ? (
