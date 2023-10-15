@@ -8,10 +8,11 @@ import GroupsList from "~/components/Groups";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Groups: NextPage = () => {
   const session = useSession();
-
+  const router = useRouter();
   const store = useStore((state) => ({
     activities: state.activities,
     setActivities: state.setActivities,
@@ -32,6 +33,12 @@ const Groups: NextPage = () => {
 
     store.setGroups(data);
   }, [data]);
+
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/");
+    }
+  }, [session]);
 
   return (
     <>

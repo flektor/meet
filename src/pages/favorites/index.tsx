@@ -10,14 +10,17 @@ import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Favorites: NextPage = () => {
   const store = useStore();
   const favorites = store.activities.filter((activity) => activity.isFavorite);
+  const session = useSession();
+  const router = useRouter();
 
   const { data, error, isLoading } = api.activities.getActivities
     .useQuery(undefined, {
-      enabled: store.fetchedActivitiesTimestamp === false,
+      enabled: !!session.data && store.fetchedActivitiesTimestamp === false,
     });
 
   useEffect(() => {
@@ -25,7 +28,13 @@ const Favorites: NextPage = () => {
       store.setActivities(data);
     }
   }, [data]);
-  const session = useSession();
+
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/");
+    }
+  }, [session]);
+
   return (
     <>
       <Head>
