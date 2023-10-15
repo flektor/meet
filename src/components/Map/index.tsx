@@ -94,50 +94,46 @@ const Map = ({
     }
   }, [showMarker]);
   return (
-    <>
-      <div className="border border-[#7f409eb7]">
-        <ReactMapGL
-          onLoad={(e) => e.target.resize()}
-          onMoveEnd={handleViewportChange}
-          interactive
-          mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
-          style={{ width, height }}
-          initialViewState={viewport}
-          scrollZoom
-          mapStyle="mapbox://styles/mapbox/dark-v10"
-        >
-          {showMarker &&
-            (
-              <>
-                <Marker
-                  longitude={marker[0]}
-                  latitude={marker[1]}
-                  draggable={draggableMarker}
-                  onDrag={onMarkerDrag}
-                  onDragEnd={onMarkerDragEnd}
-                >
-                  <MarkerIcon
-                    className={`fill-primary stroke-primary ${markerClassName}`}
-                  />
-                  <input
-                    className="invisible"
-                    name="marker"
-                    value={marker.toString()}
-                    onChange={() => {}}
-                  />
-                </Marker>
-              </>
-            )}
+    <div className="border border-[#7f409eb7]">
+      <ReactMapGL
+        onLoad={(e) => e.target.resize()}
+        onMoveEnd={handleViewportChange}
+        interactive
+        mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
+        style={{ width, height }}
+        initialViewState={viewport}
+        scrollZoom
+        mapStyle="mapbox://styles/mapbox/dark-v10"
+      >
+        {showMarker &&
+          (
+            <Marker
+              longitude={marker[0]}
+              latitude={marker[1]}
+              draggable={draggableMarker}
+              onDrag={onMarkerDrag}
+              onDragEnd={onMarkerDragEnd}
+            >
+              <MarkerIcon
+                className={`fill-primary stroke-primary ${markerClassName}`}
+              />
+              <input
+                className="invisible"
+                name="marker"
+                value={marker.toString()}
+                onChange={() => {}}
+              />
+            </Marker>
+          )}
 
-          {
-            /* <GeolocateControl
+        {
+          /* <GeolocateControl
             positionOptions={{ enableHighAccuracy: true }}
             trackUserLocation={true}
-          /> */
-          }
-        </ReactMapGL>
-      </div>
-    </>
+          />   */
+        }
+      </ReactMapGL>
+    </div>
   );
 };
 
