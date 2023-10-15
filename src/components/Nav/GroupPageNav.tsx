@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Nav, { MenuOption } from "~/components/Nav";
 import { useRouter } from "next/router";
 import { SessionContextValue, signIn, signOut } from "next-auth/react";
