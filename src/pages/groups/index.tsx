@@ -48,7 +48,7 @@ const Groups: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <GroupsPageNav session={session} />
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] pt-20">
         <Toasts />
 
         <div className="flex flex-col items-center justify-center">
