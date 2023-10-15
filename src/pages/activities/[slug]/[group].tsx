@@ -12,6 +12,7 @@ import { api } from "~/utils/api";
 import { Activity } from "~/types";
 import { useSession } from "next-auth/react";
 import GroupInfo from "~/components/Group";
+import LoginMessageDialog from "~/components/LoginMessageDialog";
 
 const Group: NextPage = () => {
   const router = useRouter();
@@ -90,16 +91,9 @@ const Group: NextPage = () => {
 
       {group && (
         <main className="flex flex-col items-center justify-center pt-12">
-          {
-            /* <div className="md:w-2/3 flex flex-col justify-center items-center mt-3 ">
+          <LoginMessageDialog />
 
-                {showLoginMessageDialog && (
-                  <LoginMessageDialog
-                    onCancel={() => setShowLoginMessageDialog(false)}
-                  />
-                )}
-              </div> */
-          }
+          <Toasts />
 
           {showChat
             ? (
@@ -111,8 +105,6 @@ const Group: NextPage = () => {
               />
             )
             : <GroupInfo group={group} session={session} />}
-
-          <Toasts />
 
           {isLoading
             ? (
