@@ -136,7 +136,7 @@ function CreateGroupDialog(
       activityId,
       description: data.description as string,
       title: data.title as string,
-      locationTitle: data.locationName as string,
+      locationTitle: data.locationName as string || locationName,
       locationPin: data.marker as string,
       minParticipants: 2,
       maxParticipants: Number(data.participants) || 2,
