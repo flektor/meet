@@ -114,9 +114,7 @@ function ChatMessage(
         )}
 
       <div className={`${flexFloat} ${showTime && "mb-3"} scroll-m-24`}>
-        <div
-          className={`flex ${!isCurrentUser && "flex-row-reverse"}`}
-        >
+        <div className={`flex ${!isCurrentUser && "flex-row-reverse"}`}>
           {lastItem &&
             (
               <div
@@ -149,7 +147,7 @@ function getContentClassName(
   lastItem?: boolean,
 ) {
   let className =
-    "mt-0.5 px-2 py-1 text-white break-normal border border-white/20 rounded-xl ";
+    "mt-0.5 px-2 py-1 text-white break-normal border border-white/20 rounded-xl w-fit max-w-[80vw] ";
 
   className += isCurrentUser ? "bg-white/10 " : "bg-white/5 ";
 
