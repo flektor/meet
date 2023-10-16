@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Svg from "../Svg";
 import { useStore } from "~/utils/store";
 import { useSession } from "next-auth/react";
@@ -7,10 +7,11 @@ import { api } from "../../utils/api";
 export type FavoriteButtonProps = {
   activityId: string;
   className?: string;
+  showNumber?: boolean;
 };
 
 const FavoriteButton = (
-  { activityId, className = "" }: FavoriteButtonProps,
+  { activityId, className = "", showNumber = true }: FavoriteButtonProps,
 ) => {
   const store = useStore();
   const session = useSession();
@@ -19,9 +20,9 @@ const FavoriteButton = (
   const { mutate: removeFromFavorites } = api.favorites.removeFromFavorites
     .useMutation();
 
-  const activityOverview = store.activities.find(({ id }) => id === activityId);
-  const isFavorite = activityOverview?.isFavorite ?? false;
-  const favoritesCount = activityOverview?.favoritesCount ?? 0;
+  const activity = store.activities.find(({ id }) => id === activityId);
+  const isFavorite = activity?.isFavorite ?? false;
+  const favoritesCount = showNumber && activity?.favoritesCount || 0;
 
   function toggleFavorite() {
     if (session.status !== "authenticated") {
