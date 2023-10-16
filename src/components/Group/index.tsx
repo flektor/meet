@@ -101,10 +101,10 @@ export default function Group({ groupId, session }: GroupInfoProps) {
         {group.membersIds.length}/{group.maxParticipants}
       </p>
 
-      <div className="max-h-48 rounded-md flex flex-wrap gap-2 overflow-y-auto">
+      <div className="max-h-48 max-w-[90vw] rounded-md flex flex-wrap gap-2 overflow-y-auto">
         {members.map((member) => (
           <div key={member.name} className="text-white">
-            <div className="flex items-center bg-black/10 p-2 pl-1 rounded-md">
+            <div className="flex items-center bg-black/10 p-2 pl-1 rounded-md]">
               {member.image && (
                 <img
                   src={member.image}
