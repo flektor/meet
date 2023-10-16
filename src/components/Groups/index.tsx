@@ -46,7 +46,7 @@ function Group(
   return (
     <li
       key={group.slug}
-      className="relative flex items center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-2.5 pr-2.5 text-white"
+      className="relative flex items-center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-2.5 pr-2.5 text-white"
     >
       <div className="flex items-center justify-between gap-4">
         {(group.private && isMember) || !group.private
