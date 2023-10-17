@@ -1,8 +1,10 @@
 <svg width="400" height="60" xmlns="http://www.w3.org/2000/svg">
+<a xlink:href="https://meet-demo.vercel.app/">
  <text x="0" y="50" font-size="5rem" fill="#cc66ff" style="font-weight: 800; letter-spacing: -0.05em">
       meet
-    </text>
-    <text x="190" y="50" font-size="24" fill="#fff">A social activity app</text>
+</text>
+</a>
+<text x="190" y="50" font-size="24" fill="#fff">A social activity app</text>
 </svg>
 
 #
@@ -15,13 +17,11 @@ Meet is a social app designed for connecting with others and participating in ac
 2. [Installation and Setup](#installation-and-setup)
 3. [Project Description](#project-description)
 4. [Usage](#usage)
-5. [Code Structure and Architecture](#code-structure-and-architecture)
-6. [Features](#features)
-7. [Demo and Screenshots](#demo-and-screenshots)
-8. [Contributing](#contributing)
-9. [License](#license)
-10. [Contact Information](#contact-information)
-11. [Acknowledgments](#acknowledgments)
+5. [Features](#features)
+6. [Demo and Screenshots](#demo-and-screenshots)
+7. [Contributing](#contributing)
+8. [Contact Information](#contact-information)
+9. [Acknowledgments](#acknowledgments)
 
 ## Tech Stack
 
