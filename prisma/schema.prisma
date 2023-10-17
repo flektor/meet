@@ -2,12 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
+    provider = "prisma-client-js"
 }
 
 datasource db {
-    provider     = "mysql"
+    // provider     = "mysql"
+    provider     = "postgresql"
     url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
@@ -17,52 +17,65 @@ model Channel {
     title       String?
     description String?
     createdAt   DateTime  @default(now())
-    Users       User[]
-    Message     Message[]
     activity    Activity?
-    Group       Group?
+    group       Group?
+    messages    Message[]
 }
 
 model Activity {
-    id             String           @id @default(cuid())
-    slug           String           @unique
-    title          String           @unique
-    description    String
-    createdAt      DateTime         @default(now())
-    Favorites      Favorites[]
-    Registrations  Registrations[]
-    channelId      String           @unique
-    channel        Channel          @relation(fields: [channelId], references: [id])
-    ActivityViewer ActivityViewer[]
-    groups         Group[]
+    id            String           @id @default(cuid())
+    slug          String           @unique
+    createdBy     String
+    title         String           @unique
+    description   String
+    createdAt     DateTime         @default(now())
+    channelId     String           @unique
+    channel       Channel          @relation(fields: [channelId], references: [id])
+    user          User             @relation(fields: [createdBy], references: [id])
+    viewers       ActivityViewer[]
+    groups        Group[]
+    favorites     Favorite[]
+    registrations Registration[]
+
+    @@index([createdBy])
 }
 
-model Favorites {
+model Favorite {
     userId     String
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
     user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, activityId])
+    @@index([activityId])
 }
 
 model Group {
-    id            String          @id @default(cuid())
-    slug          String          @unique
-    title         String          @unique
-    description   String
-    createdAt     DateTime        @default(now())
-    userId        String
-    user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-    channelId     String          @unique
-    channel       Channel         @relation(fields: [channelId], references: [id])
-    GroupViewer   GroupViewer[]
-    PendingInvite PendingInvite[]
-    activityId    String
-    activity      Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-    Membership    Membership[]
+    id              String          @id @default(cuid())
+    slug            String          @unique
+    activityId      String
+    title           String          @unique
+    createdBy       String
+    description     String
+    createdAt       DateTime        @default(now())
+    locationTitle   String          @default("Berlin")
+    locationPin     String          @default("13.404954, 52.520008")
+    startsAt        DateTime        @default(now())
+    endsAt          DateTime?
+    minParticipants Int             @default(2)
+    maxParticipants Int?
+    private         Boolean         @default(false)
+    channelId       String          @unique
+    channel         Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
+    activity        Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    user            User            @relation(fields: [createdBy], references: [id])
+    viewers         GroupViewer[]
+    pendingInvites  PendingInvite[]
+    memberships     Membership[]
 
-    @@unique([id, userId, activityId])
+    @@unique([id, activityId])
+    @@index([activityId])
+    @@index([createdBy])
 }
 
 model Membership {
@@ -72,6 +85,8 @@ model Membership {
     group   Group  @relation(fields: [groupId], references: [id])
 
     @@id([userId, groupId])
+    @@index([groupId])
+    @@index([userId])
 }
 
 model PendingInvite {
@@ -82,6 +97,7 @@ model PendingInvite {
     createdAt DateTime @default(now())
 
     @@unique([userId, groupId])
+    @@index([groupId])
 }
 
 model GroupViewer {
@@ -91,24 +107,27 @@ model GroupViewer {
     user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, groupId])
+    @@index([groupId])
 }
 
 model ActivityViewer {
-    userId     String
+    userId     String   @unique
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
     user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, activityId])
+    @@index([activityId])
 }
 
-model Registrations {
+model Registration {
     userId     String
     activityId String
     activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
     user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([userId, activityId])
+    @@index([activityId])
 }
 
 model Message {
@@ -117,10 +136,12 @@ model Message {
     sentAt    DateTime @default(now())
     sentBy    String
     channelId String
-    User      User     @relation(fields: [sentBy], references: [id], onDelete: Cascade)
-    Channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [sentBy], references: [id], onDelete: Cascade)
+    channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
     @@unique([id, channelId, sentBy])
+    @@index([sentBy])
+    @@index([channelId])
 }
 
 // Necessary for Next auth
@@ -140,6 +161,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -148,26 +170,27 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
-    id             String           @id @default(cuid())
+    id             String          @id @default(cuid())
     name           String?
-    email          String?          @unique
+    email          String?         @unique
     emailVerified  DateTime?
     image          String?
+    activityViewer ActivityViewer?
+    groupViewer    GroupViewer?
     accounts       Account[]
     sessions       Session[]
-    Favorites      Favorites[]
-    Registrations  Registrations[]
-    channelId      String?
-    Message        Message[]
-    Channel        Channel?         @relation(fields: [channelId], references: [id])
-    ActivityViewer ActivityViewer[]
-    PendingInvite  PendingInvite[]
-    Group          Group[]
-    GroupViewer    GroupViewer?
-    Membership     Membership[]
+    favorites      Favorite[]
+    registrations  Registration[]
+    messages       Message[]
+    pendingInvites PendingInvite[]
+    memberships    Membership[]
+    activities     Activity[]
+    groups         Group[]
 }
 
 model VerificationToken {

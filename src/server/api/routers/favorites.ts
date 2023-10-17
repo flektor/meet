@@ -9,13 +9,13 @@ export const favoritesRouter = createTRPCRouter({
         userId: ctx.session.user.id,
         activityId: input.activityId,
       };
-      return ctx.prisma.favorites.create({ data });
+      return ctx.prisma.favorite.create({ data });
     }),
 
   removeFromFavorites: protectedProcedure
     .input(z.object({ activityId: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await ctx.prisma.favorites.delete({
+      return await ctx.prisma.favorite.delete({
         where: {
           userId_activityId: {
             activityId: input.activityId,

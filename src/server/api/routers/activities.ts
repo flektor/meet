@@ -7,46 +7,36 @@ import {
 import { addActivityInput } from "~/types";
 import { createSlug } from "~/utils";
 
+const selectUserBaseFields = { select: { id: true, name: true, image: true } };
+const userBaseFields = { user: selectUserBaseFields };
+
 export const activitiesRouter = createTRPCRouter({
   getActivities: publicProcedure
     .query(async ({ ctx }) => {
       const activities = await ctx.prisma.activity.findMany({
         include: {
-          Favorites: true,
-          Registrations: true,
-          ActivityViewer: {
-            include: {
-              user: { select: { id: true, name: true, image: true } },
-            },
-          },
+          favorites: true,
+          registrations: true,
+          _count: { select: { viewers: true } },
         },
       });
 
       return activities.map((
-        { Favorites, Registrations, ActivityViewer, ...activity },
-      ) => {
-        const activityViewers = ActivityViewer.map(({ user }) => ({
-          userId: user.id,
-          image: user.image,
-          name: user.name,
-        }));
+        { favorites, registrations, _count, ...activity },
+      ) => ({
+        ...activity,
+        viewersIds: [],
+        viewersCount: _count.viewers,
+        registrationsCount: registrations.length,
+        favoritesCount: favorites.length,
+        isFavorite: ctx.session?.user.id
+          ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
 
-        return ({
-          ...activity,
-          viewersCount: activityViewers.length,
-          registrationsCount: Registrations.length,
-          favoritesCount: Favorites.length,
-          isFavorite: ctx.session?.user.id
-            ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
-            : false,
-
-          isRegistered: ctx.session?.user.id
-            ? Registrations.some(({ userId }) =>
-              ctx.session?.user.id === userId
-            )
-            : false,
-        });
-      });
+        isRegistered: ctx.session?.user.id
+          ? registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          : false,
+      }));
     }),
 
   getActivity: publicProcedure
@@ -56,28 +46,33 @@ export const activitiesRouter = createTRPCRouter({
         .findUnique({
           where: { slug: input.slug },
           include: {
-            Favorites: true,
-            Registrations: true,
-            ActivityViewer: {
-              include: {
-                user: { select: { id: true, name: true, image: true } },
-              },
+            favorites: true,
+            registrations: true,
+            viewers: {
+              include: userBaseFields,
             },
             groups: {
               include: {
-                _count: { select: { GroupViewer: true, Membership: true } },
-                Membership: {
-                  select: { user: { select: { id: true } } },
+                _count: { select: { viewers: true, memberships: true } },
+                memberships: {
+                  select: userBaseFields,
                   where: {
-                    userId: ctx.session?.user.id,
-                    group: {
-                      activity: { slug: input.slug },
-                    },
+                    group: { activity: { slug: input.slug } },
                   },
                 },
               },
             },
-            channel: { include: { Message: true } },
+            channel: {
+              include: {
+                messages: {
+                  include: userBaseFields,
+                  orderBy: {
+                    sentAt: "desc",
+                  },
+                  take: 30,
+                },
+              },
+            },
           },
         });
 
@@ -85,52 +80,78 @@ export const activitiesRouter = createTRPCRouter({
         return;
       }
 
-      const activityViewers = activity.ActivityViewer.map(({ user }) => ({
-        userId: user.id,
-        image: user.image,
-        name: user.name,
-      }));
-
       const {
-        Favorites,
-        Registrations,
+        favorites,
+        registrations,
         channel,
         groups,
-        ActivityViewer,
+        viewers,
         ...rest
       } = activity;
 
+      const viewersIds = viewers.map(({ user }) => user.id);
+
+      if (ctx.session && !viewersIds.includes(ctx.session.user.id as string)) {
+        const data = { userId: ctx.session.user.id, activityId: activity.id };
+        await ctx.prisma.activityViewer.upsert({
+          create: data,
+          update: data,
+          where: { userId: ctx.session.user.id },
+        });
+        await ctx.prisma.groupViewer.deleteMany({
+          where: { userId: ctx.session.user.id },
+        });
+      }
+
+      const channelUsersIds = channel.messages.map(({ user }) => user.id);
+
+      const memberships = groups.map(({ memberships }) => memberships).flat();
+
+      const users = [
+        ...viewers.map(({ user }) => user),
+        ...channel.messages.map(({ user }) => user),
+        ...memberships.map((membership) => membership.user),
+      ];
+      const userMap = new Map<string, typeof users[number]>();
+
+      users.forEach((user) => {
+        if (!userMap.has(user.id)) {
+          userMap.set(user.id, user);
+        }
+      });
+
+      const messages = channel.messages.map(({ user, ...msg }) => ({ ...msg }))
+        .reverse();
+
       return {
         ...rest,
-        viewersCount: activityViewers.length,
-        registrationsCount: Registrations.length,
-        favoritesCount: Favorites.length,
+        users: [...userMap.values()] as typeof users,
+        viewersIds,
+        viewersCount: activity.viewers.length,
+        registrationsCount: registrations.length,
+        favoritesCount: favorites.length,
         isFavorite: ctx.session?.user.id
-          ? Favorites.some(({ userId }) => ctx.session?.user.id === userId)
+          ? favorites.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
 
         isRegistered: ctx.session?.user.id
-          ? Registrations.some(({ userId }) => ctx.session?.user.id === userId)
+          ? registrations.some(({ userId }) => ctx.session?.user.id === userId)
           : false,
 
-        groups: groups.map((group) => ({
-          id: group.id,
-          activityId: activity.id,
-          title: group.title,
-          slug: group.slug,
-          activitySlug: activity.slug,
-          channelId: group.channelId,
-          viewersCount: group._count.GroupViewer,
-          isMember: group.Membership.length === 1,
-          membersCount: group.Membership.length,
-          favoritesCount: 0, // not implemented yet
-          isFavorite: false, // not implemented yet
-        })),
+        groups: groups.map((group) => {
+          const { memberships, _count, ...rest } = group;
 
+          return {
+            ...rest,
+            activitySlug: activity.slug,
+            viewersIds: [],
+            membersIds: memberships.map(({ user }) => user.id),
+          };
+        }),
         channel: {
           id: activity.channelId,
-          users: activityViewers,
-          messages: channel.Message,
+          usersIds: channelUsersIds,
+          messages: messages,
           title: channel.title,
           description: channel.description,
           createdAt: channel.createdAt,
@@ -149,6 +170,7 @@ export const activitiesRouter = createTRPCRouter({
       return ctx.prisma.activity.create({
         data: {
           ...input,
+          createdBy: ctx.session.user.id,
           slug: createSlug(input.title),
           channelId: channel.id,
         },

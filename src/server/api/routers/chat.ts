@@ -17,7 +17,7 @@ export const chatRouter = createTRPCRouter({
       return ctx.prisma.channel
         .findUnique({
           where: { id: input.channelId },
-          include: { Message: true },
+          include: { messages: true },
         });
     }),
 
@@ -27,14 +27,14 @@ export const chatRouter = createTRPCRouter({
       const activity = await ctx.prisma.activity
         .findUnique({
           where: { channelId: input.channelId },
-          include: { Registrations: true },
+          include: { registrations: true },
         });
 
       if (!activity) {
         return;
       }
 
-      return activity.Registrations.map(({ userId }) => userId);
+      return activity.registrations.map(({ userId }) => userId);
     }),
 
   getAllMessages: protectedProcedure
@@ -43,9 +43,9 @@ export const chatRouter = createTRPCRouter({
       const channel = await ctx.prisma.channel
         .findUnique({
           where: { id: input.channelId },
-          include: { Message: true },
+          include: { messages: true },
         });
-      return channel?.Message;
+      return channel?.messages;
     }),
 
   sendMessage: protectedProcedure
@@ -69,29 +69,27 @@ export const chatRouter = createTRPCRouter({
       const channel = await ctx.prisma.channel
         .findUnique({
           select: {
-            Group: { select: { GroupViewer: { select: { userId: true } } } },
+            group: { select: { viewers: { select: { userId: true } } } },
             activity: {
-              select: { ActivityViewer: { select: { userId: true } } },
+              select: { viewers: { select: { userId: true } } },
             },
           },
           where: { id: input.channelId },
         });
 
-      console.log({ channelID: input.channelId, channel });
-
       if (!channel) {
         return message;
       }
 
-      let receivers =
-        (channel.Group?.GroupViewer || channel.activity?.ActivityViewer || [])
-          .map(({ userId }) => userId);
+      const receivers =
+        (channel.group?.viewers || channel.activity?.viewers || [])
+          .map(({ userId }) => userId).filter((id) =>
+            id !== ctx.session.user.id
+          );
 
       if (receivers.length === 0) {
         return message;
       }
-
-      console.log({ receivers });
 
       pusherSend({
         receivers,

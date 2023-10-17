@@ -1,92 +1,125 @@
 import { type NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Spinner from "~/components/Spinner";
 import Toasts from "~/components/Toasts";
-import LeaveIcon from "~/components/icons/Leave";
-import Nav from "~/components/Nav";
+import GroupPageNav from "~/components/Nav/GroupPageNav";
 import Chat from "~/components/Chat";
-import useGroup from "~/hooks/useGroup";
-import Map from "~/components/Map";
-import useScreenSize from "~/hooks/useScreenSize";
 import usePusherEventHandler from "~/hooks/usePusherEventHandler";
 import { useStore } from "~/utils/store";
+import { api } from "~/utils/api";
+import { Activity } from "~/types";
+import { useSession } from "next-auth/react";
+import GroupInfo from "~/components/Group";
+import LoginMessageDialog from "~/components/LoginMessageDialog";
 
 const Group: NextPage = () => {
   const router = useRouter();
   const store = useStore();
+  const session = useSession();
+
   const slug = router.query.group as string;
   const activitySlug = router.query.slug as string;
-  const screenSize = useScreenSize();
-  const mapWidth = screenSize === "sm"
-    ? "90vw"
-    : screenSize === "md"
-    ? "80vw"
-    : "50vw";
-  const mapHeight = mapWidth;
 
-  const { group, isLoading, error } = useGroup(activitySlug, slug);
+  const {
+    data: activitiesData,
+    error: getActivitiesError,
+    isLoading: isLoadingActivities,
+  } = api.activities.getActivities
+    .useQuery(undefined, {
+      enabled: store.fetchedActivitiesTimestamp === false,
+    });
+
+  useEffect(() => {
+    if (activitiesData && store.fetchedActivitiesTimestamp === false) {
+      store.setActivities(activitiesData);
+    }
+  }, [activitiesData]);
+
+  const [activity, setActivity] = useState<Activity | null>(null);
+
+  useEffect(() => {
+    const act = store.activities.find((activity) =>
+      activity.slug === activitySlug
+    );
+
+    if (act) {
+      setActivity(act);
+    }
+  }, [store.activities]);
+
+  const { data: group, isLoading, error } = api.groups
+    .getGroup
+    .useQuery({
+      activitySlug,
+      slug,
+    }, { enabled: !!slug && !!activity });
 
   useEffect(() => {
     if (group) {
+      store.setGroup(group);
       store.pusherSubscribe(group.channelId);
     }
   }, [group]);
 
-  usePusherEventHandler();
+  usePusherEventHandler(session.data?.user.id || "userId");
 
-  const name = group?.title.includes("-")
-    ? group.title?.split("-")[0]
-    : group?.title;
+  const [showChat, setShowChat] = useState(false);
+  const showErrorMessage = error?.message.includes("data is undefined");
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] ">
       <Head>
         <title>Meet</title>
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Nav />
 
-        {isLoading && <Spinner />}
+      <GroupPageNav
+        session={session}
+        toggleChat={() => setShowChat(!showChat)}
+        group={group}
+        displayChat={showChat}
+      />
 
-        {error && <div className="text-white 2xl">There was an error.</div>}
+      {showErrorMessage && (
+        <main className="flex justify-center pt-20 text-white">
+          This group is private!
+        </main>
+      )}
 
-        <Toasts />
+      {group && (
+        <main className="flex flex-col items-center justify-center pt-12">
+          <LoginMessageDialog />
 
-        {group && (
-          <div className="flex flex-col items-center justify-center pt-20 ">
-            <header className="w-full flex items-center justify-center">
-              <button
-                className="inline-block"
-                onClick={() => router.back()}
-              >
-                <LeaveIcon />
-              </button>
-              <span className=" mr-2 ml-2 text-white text-3xl">
-                {name! || group.title}
-              </span>
-            </header>
+          <Toasts />
 
-            <div className="container flex flex-col items-center justify-center gap-4 py-4 w-full">
-              <div className="text-white/50 flex justify-center items-center w-full ">
-                Description:
-                <p className="pl-3 text-white text-2xl">{group.description}</p>
-              </div>
-
+          {showChat
+            ? (
               <Chat
                 isLoading={isLoading}
                 channelId={group.channelId}
+                groupId={group.id}
+                session={session}
               />
+            )
+            : <GroupInfo groupId={group.id} session={session} />}
 
-              <Map width={mapWidth} height={mapHeight} draggable />
-            </div>
-          </div>
-        )}
-      </main>
-    </>
+          {isLoading
+            ? (
+              <div className="mt-10">
+                <Spinner />
+              </div>
+            )
+            : error && (
+              <div className="text-white 2xl mt-10">
+                There was an error.
+              </div>
+            )}
+        </main>
+      )}
+    </div>
   );
 };
 

@@ -1,17 +1,19 @@
-import React, { type FunctionComponent, type MouseEventHandler } from "react";
+import React, { type FunctionComponent } from "react";
 
 const Svg: FunctionComponent<
   {
     children: any;
     className: string;
     viewBox?: string;
-    onClick?: MouseEventHandler<SVGSVGElement>;
+    innerRef?: React.ForwardedRef<SVGSVGElement>;
+    onClick?: React.MouseEventHandler<SVGSVGElement>;
   }
 > = (
-  { children, className, onClick, viewBox = "0 0 24 24" },
+  { innerRef, children, className, onClick, viewBox = "0 0 24 24" },
 ) => {
   return (
     <svg
+      ref={innerRef}
       className={`w-8 h-8 transition ${className}`}
       viewBox={viewBox}
       fill="none"

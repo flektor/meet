@@ -1,23 +1,50 @@
 import { create } from "zustand";
+import { removeActivity, setActivities, setActivity } from "./store/activities";
+import { removeUsers, setUsers } from "./store/users";
+import {
+  removeGroup,
+  setGroup,
+  setGroups,
+  updateGroupLocation,
+} from "./store/groups";
+import { addToFavorites, removeFromFavorites } from "./store/favorites";
+import { addViewer, removeViewer } from "./store/viewer";
+import { addMessage, removeChannel, setChannel } from "./store/channels";
+import {
+  addToRegistrations,
+  removeFromRegistrations,
+} from "./store/registrations";
 import type {
   Activity,
   Channel,
   ChannelMessage,
   getActivitiesOutput,
   getActivityOutput,
+  getGroupOutput,
+  getUserGroupsOutput,
   Group,
-  GroupOutput,
-  Toast,
+  ToastProps,
+  User,
 } from "~/types";
-import { renameChannelUsers, renameMessageUser } from ".";
+import { SessionContextValue } from "next-auth/react";
+import { LngLat } from "~/components/Map";
 
-type Store = {
+export type Store = {
+  showLoginMessageDialog: boolean;
   activities: Activity[];
   groups: Group[];
-  toasts: Toast[];
+  toasts: ToastProps[];
   userIsViewingPage: string | null;
   pusherSubscriptions: string[];
   channels: Channel[];
+  users: User[];
+  session: SessionContextValue | null;
+  fetchedActivitiesTimestamp: number | false;
+
+  setShowLoginMessageDialog: (isTrue: boolean) => void;
+
+  setSession: (session: SessionContextValue) => void;
+
   setChannel: (channel: Channel) => void;
   removeChannel: (channelId: string) => void;
 
@@ -27,204 +54,121 @@ type Store = {
   setActivity: (activity: getActivityOutput) => void;
   removeActivity: (activityId: string) => void;
 
-  setGroup: (group: GroupOutput) => void;
+  setGroup: (group: getGroupOutput | Group) => void;
+  setGroups: (groups: getUserGroupsOutput) => void;
   removeGroup: (groupId: string) => void;
+  updateGroupLocation: (
+    groupId: string,
+    lngLat: LngLat,
+  ) => void;
 
   addToFavorites: (activityId: string) => void;
   removeFromFavorites: (activityId: string) => void;
 
-  addToast: (toast: Toast) => void;
+  addToast: (toast: ToastProps) => void;
   removeToast: (toastId: string) => void;
-  addToasts: (toast: Toast[]) => void;
+  addToasts: (toast: ToastProps[]) => void;
 
   addToRegistrations: (activityId: string) => void;
   removeFromRegistrations: (activityId: string) => void;
   addViewer: (channelId: string) => void;
   removeViewer: (channelId: string) => void;
 
-  pusherSubscribe: (channelId: string) => void;
+  pusherSubscribe: (channelId: string | string[]) => void;
   pusherUnsubscribe: (channelId: string) => void;
+
+  setUsers: (users: User[]) => void;
+  removeUsers: (users: User[]) => void;
 };
 
 export const useStore = create<Store>((set) => ({
   activities: [],
   groups: [],
   channels: [],
+  users: [],
   toasts: [],
   pusherSubscriptions: [],
   userIsViewingPage: null,
+  fetchedActivitiesTimestamp: false,
+  session: null,
+  showLoginMessageDialog: false,
 
-  setActivities: (activities: getActivitiesOutput) => set({ activities }),
+  setShowLoginMessageDialog: (isTrue: boolean) =>
+    set({ showLoginMessageDialog: isTrue }),
+
+  setSession: (session: SessionContextValue) => set({ session }),
+
+  setUsers: (users: User[]) => set((state) => setUsers(state, users)),
+
+  removeUsers: (users: User[]) => set((state) => removeUsers(state, users)),
+
+  setActivities: (activities: getActivitiesOutput) =>
+    set(() => setActivities(activities)),
 
   setActivity: (activity: getActivityOutput) =>
-    set((state) => {
-      const { channel, groups, ...rest } = activity;
-      const groupIdsToAdd = activity.groups.map(({ id }) => id);
-      const restGroups = state.groups.filter(({ id }) =>
-        !groupIdsToAdd.includes(id)
-      );
+    set((state) => setActivity(state, activity)),
 
-      const channelIdsToAdd = activity.groups.map(({ id }) => id).concat(
-        activity.channelId,
-      );
-      const restChannels = state.channels.filter(({ id }) =>
-        !channelIdsToAdd.includes(id)
-      );
-
-      return ({
-        activities: [
-          ...state.activities.filter(({ id }) => id !== activity.id),
-          rest,
-        ],
-        channels: [...restChannels, renameChannelUsers(channel)],
-        groups: [
-          ...restGroups,
-          ...groups.map(
-            (group) => ({ ...group, description: "" } as GroupOutput),
-          ),
-        ],
-      });
-    }),
+  updateGroupLocation: (groupId: string, lngLat: LngLat) =>
+    set((state) => updateGroupLocation(state, groupId, lngLat)),
 
   removeActivity: (activityId: string) =>
-    set((state) => {
-      const activity = state.activities.find(({ id }) => id === activityId);
-      if (!activity) {
-        return state;
-      }
-      const groupsToRemove = state.groups.filter(({ activityId: id }) =>
-        id === activityId
-      );
-      const groupIdToRemove = groupsToRemove.map(({ id }) => id);
-      const channelsIdsToRemove = [
-        activity.channelId,
-        ...groupsToRemove.map(({ channelId }) => channelId),
-      ];
+    set((state) => removeActivity(state, activityId)),
 
-      return ({
-        activities: state.activities.filter(({ id }) => id !== activityId),
-        groups: state.groups.filter(({ id }) => !groupIdToRemove.includes(id)),
-        channels: state.channels.filter(({ id }) =>
-          !channelsIdsToRemove.includes(id)
-        ),
-      });
-    }),
+  setGroup: (group: getGroupOutput | Group) =>
+    set((state) => setGroup(state, group)),
 
-  setGroup: (group: GroupOutput) =>
-    set((state) => {
-      const { channel, ...rest } = group;
-      return ({
-        groups: !state.groups.some(({ id }) => id === group.id)
-          ? [...state.groups, group]
-          : state.groups.map((prev) =>
-            prev.id === group.id ? ({ ...rest }) : prev
-          ),
-        channels: !state.channels.some(({ id }) => id === channel.id)
-          ? [...state.channels, renameChannelUsers(channel)]
-          : state.channels.map((prev) =>
-            prev.id === group.id ? ({ ...renameChannelUsers(channel) }) : prev
-          ),
-      });
-    }),
+  setGroups: (groups: getUserGroupsOutput) =>
+    set((state) => setGroups(state, groups)),
 
-  removeGroup: (GroupId: string) =>
-    set((state) => ({
-      groups: state.groups.filter(({ id }) => id !== GroupId),
-    })),
+  removeGroup: (groupId: string) => set((state) => removeGroup(state, groupId)),
 
   addToFavorites: (activityId: string) =>
-    set((state) => ({
-      activities: state.activities.map((activity) =>
-        activity.id !== activityId ? activity : ({
-          ...activity,
-          isFavorite: true,
-          favoritesCount: activity.favoritesCount + 1,
-        })
-      ),
-    })),
+    set((state) => addToFavorites(state, activityId)),
 
   removeFromFavorites: (activityId: string) =>
-    set((state) => ({
-      activities: state.activities.map((activity) =>
-        activity.id !== activityId ? activity : ({
-          ...activity,
-          isFavorite: false,
-          favoritesCount: activity.favoritesCount - 1,
-        })
-      ),
-    })),
+    set((state) => removeFromFavorites(state, activityId)),
 
   addToRegistrations: (activityId: string) =>
-    set((state) => ({
-      activities: state.activities.map((activity) =>
-        activity.id !== activityId ? activity : ({
-          ...activity,
-          isRegistered: true,
-          registrationsCount: activity.registrationsCount + 1,
-        })
-      ),
-    })),
+    set((state) => addToRegistrations(state, activityId)),
 
   removeFromRegistrations: (activityId: string) =>
-    set((state) => ({
-      activities: state.activities.map((
-        activity,
-      ) => (activity.id !== activityId ? activity : ({
-        ...activity,
-        isRegistered: false,
-        registrationsCount: activity.registrationsCount - 1,
-      }))),
-    })),
+    set((state) => removeFromRegistrations(state, activityId)),
 
-  removeToast: (toastId: string) =>
-    set((state) => ({
-      toasts: state.toasts.filter(({ id }) => id !== toastId),
-    })),
-
-  addToast: (toast: Toast) =>
-    set((state) => ({ toasts: [...state.toasts, { ...toast }] })),
-
-  addToasts: (toasts: Toast[]) =>
-    set((state) => ({ toasts: [...state.toasts, ...toasts] })),
-
-  addViewer: (channelId: string) =>
-    set((state) => ({
-      groups: state.groups.map((group) =>
-        group.channelId !== channelId ? group : ({
-          ...group,
-          viewersCount: group.viewersCount + 1,
-        })
-      ),
-      activities: state.activities.map((activity) =>
-        activity.channelId !== channelId ? activity : ({
-          ...activity,
-          viewersCount: activity.viewersCount + 1,
-        })
-      ),
-    })),
+  addViewer: (channelId: string) => set((state) => addViewer(state, channelId)),
 
   removeViewer: (channelId: string) =>
-    set((state) => ({
-      groups: state.groups.map((group) =>
-        group.channelId !== channelId ? group : ({
-          ...group,
-          viewersCount: group.viewersCount - 1,
-        })
-      ),
-      activities: state.activities.map((activity) =>
-        activity.channelId !== channelId ? activity : ({
-          ...activity,
-          viewersCount: activity.viewersCount - 1,
-        })
-      ),
-    })),
+    set((state) => removeViewer(state, channelId)),
 
-  pusherSubscribe: (channelId: string) =>
-    set((state) =>
-      state.pusherSubscriptions.includes(channelId) ? state : ({
-        pusherSubscriptions: [...state.pusherSubscriptions, channelId],
-      })
-    ),
+  setChannel: (channel: Channel) => set((state) => setChannel(state, channel)),
+
+  removeChannel: (channelId: string) =>
+    set((state) => removeChannel(state, channelId)),
+
+  addMessage: (channelId: string, message: ChannelMessage) => {
+    set((state) => addMessage(state, channelId, message));
+  },
+
+  pusherSubscribe: (channelIds: string | string[]) =>
+    set((state) => {
+      if (typeof channelIds === "string") {
+        return ({
+          pusherSubscriptions: state.pusherSubscriptions.includes(channelIds)
+            ? state.pusherSubscriptions
+            : [...state.pusherSubscriptions, channelIds],
+        });
+      }
+
+      const newGroupSubs = [];
+      for (const channelId of channelIds) {
+        if (!state.pusherSubscriptions.includes(channelId)) {
+          newGroupSubs.push(channelId);
+        }
+      }
+
+      return newGroupSubs.length === 0 ? state : ({
+        pusherSubscriptions: [...state.pusherSubscriptions, ...newGroupSubs],
+      });
+    }),
 
   pusherUnsubscribe: (channelId: string) =>
     set((state) => ({
@@ -233,33 +177,14 @@ export const useStore = create<Store>((set) => ({
         : state.pusherSubscriptions.filter((id) => id !== channelId),
     })),
 
-  setChannel: (channel: Channel) =>
+  removeToast: (toastId: string) =>
     set((state) => ({
-      channels: [
-        ...state.channels.filter(({ id }) => id !== channel.id),
-        renameChannelUsers(channel),
-      ],
+      toasts: state.toasts.filter(({ id }) => id !== toastId),
     })),
 
-  removeChannel: (channelId: string) =>
-    set((state) => ({
-      channels: state.channels.filter(({ id }) => id !== channelId),
-      pusherSubscriptions: state.pusherSubscriptions.includes(channelId)
-        ? state.pusherSubscriptions
-        : state.pusherSubscriptions.filter((id) => id !== channelId),
-    })),
+  addToast: (toast: ToastProps) =>
+    set((state) => ({ toasts: [...state.toasts, { ...toast }] })),
 
-  addMessage: (channelId: string, message: ChannelMessage) => {
-    set((state) => ({
-      channels: state.channels.map((channel) =>
-        channel.id !== channelId ? channel : {
-          ...channel,
-          messages: [
-            ...channel.messages,
-            renameMessageUser(channel, message),
-          ],
-        }
-      ),
-    }));
-  },
+  addToasts: (toasts: ToastProps[]) =>
+    set((state) => ({ toasts: [...state.toasts, ...toasts] })),
 }));

@@ -1,24 +1,16 @@
 import { type FunctionComponent, useState } from "react";
 import FavoriteButton from "../FavoriteButton";
-import Toast from "../InvitationToast";
 import Link from "next/link";
-import useActivities from "~/hooks/useActivities";
-import Spinner from "../Spinner";
-import { env } from "process";
 import RegisterButton from "../RegisterButton";
-import DotsLoader from "../DotsLoader";
+import { useStore } from "~/utils/store";
 
 const Activities: FunctionComponent = () => {
-  const { activities, isLoading, error } = useActivities();
-
-  if (error && env.NODE_ENV === "development") {
-    console.error(error);
-  }
-
   // function getUserNameById(userId: string) {
   //   return activity?.channel.users.find((user) => user.userId === userId)
   //     ?.name || "user";
   // }
+
+  const store = useStore();
 
   const [toasts, setToasts] = useState<
     { message: string; icon?: string }[]
@@ -38,27 +30,15 @@ const Activities: FunctionComponent = () => {
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       </div> */
       }
-      <ul className="mt-16 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
-        {isLoading
-          ? (
-            <div className="mt-48">
-              <Spinner />
-            </div>
-          )
-          : error
-          ? <div className="text-white 2xl mt-48">There was an error.</div>
-          : activities.length === 0 && (
-            <div className="text-white 2xl mt-48">There are no activities.</div>
-          )}
-
-        {activities.map(
+      <ul className="mt-6 grid grid-stretch grid-cols-1 gap-3 lg:grid-cols-3 sm:grid-cols-2">
+        {store.activities.map(
           ({ id, slug, title, isRegistered }) => {
             return (
               <li
                 key={slug}
-                className="max-w-xs min-w-xs rounded-xl bg-white/10 p-4 text-white relative"
+                className="relative flex items center w-full max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
               >
-                <div className="flex items-center justify-between gap-4">
+                <div className="w-full flex items-center justify-between ">
                   <Link
                     className={`text-2xl hover:underline ${
                       isRegistered ? "text-[#33BBFF]" : "text-white"
@@ -68,23 +48,17 @@ const Activities: FunctionComponent = () => {
                     {title}
                   </Link>
 
-                  <div className="flex items-center">
+                  <div className="flex justify-end  items-center">
                     <FavoriteButton
                       activityId={id}
                       className="mt-1"
                     />
                     <RegisterButton
                       activityId={id}
-                      activitySlug={slug}
                       className="mt-1"
+                      activitySlug={slug}
                     />
                   </div>
-
-                  <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
-                    {isRegistered && (
-                      <DotsLoader className="fill-[#33BBFF] max-h-3" />
-                    )}
-                  </footer>
                 </div>
               </li>
             );

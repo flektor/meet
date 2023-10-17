@@ -1,143 +1,140 @@
-import React, { useCallback, useState } from "react";
-import ReactMapGL, { GeolocateControl, Marker } from "react-map-gl";
+import React, { useCallback, useEffect, useState } from "react";
+import ReactMapGL, { Marker, ViewStateChangeEvent } from "react-map-gl";
 import { env } from "~/env.mjs";
+import MarkerIcon from "~/components/icons/Marker";
+import { MarkerDragEvent } from "react-map-gl/dist/esm/types";
+
+export type LngLat = [number, number];
 
 type ViewState = {
   longitude: number;
   latitude: number;
+  width: number;
+  height: number;
+  pitch: number;
   zoom: number;
+  bearing: number;
+  padding: { bottom: number; left: number; top: number; right: number };
 };
 
 type MapProps = {
-  onPinMoved?: (latitude: number, longitude: number) => void;
-  draggable?: boolean;
-  initPinPosition?: { latitude: number; longitude: number };
+  draggableMarker?: boolean;
+  onMarkerMoved?: (lngLat: LngLat) => void;
+  showMarker?: boolean;
+  markerClassName?: string;
+  markerLngLat?: LngLat;
+  initViewLngLat?: LngLat;
   width?: string | number;
   height?: string | number;
 };
 
-const Map = (
-  { onPinMoved, draggable, initPinPosition, width = "100%", height = "50vh" }:
-    MapProps,
-) => {
-  const initLngLat = {
-    longitude: 13.4050, // Berlin longitude
-    latitude: 52.5200, // Berlin latitude
-  };
-
+const Map = ({
+  onMarkerMoved,
+  draggableMarker,
+  markerClassName = "",
+  showMarker,
+  markerLngLat,
+  initViewLngLat = [13.404954, 52.520008], // Berlin long-lat
+  width = "100%",
+  height = "50vh",
+}: MapProps) => {
+  //
   const [viewport, setViewport] = useState<ViewState>({
-    ...initLngLat,
+    longitude: markerLngLat && markerLngLat[0] || initViewLngLat[0],
+    latitude: markerLngLat && markerLngLat[1] || initViewLngLat[1],
+    width: 200,
+    height: 200,
     zoom: 12,
+    pitch: 0,
+    bearing: 0,
+    padding: { bottom: 0, left: 0, top: 0, right: 0 },
   });
-  const handleViewportChange = (newViewport: ViewState) => {
-    setViewport(newViewport);
+
+  const handleViewportChange = (event: ViewStateChangeEvent) => {
+    setViewport({ ...event.viewState, width: 100, height: 100 });
   };
 
-  const [marker, setMarker] = useState(initLngLat);
-  const [showMarker, setShowMarker] = useState(!!initPinPosition || false);
+  const [marker, setMarker] = useState<LngLat>(
+    initViewLngLat,
+  );
 
-  const onMarkerDrag = useCallback((event: any) => {
-    setMarker({
-      longitude: event.lngLat[0],
-      latitude: event.lngLat[1],
-    });
-  }, []);
+  const onMarkerDrag = (e: MarkerDragEvent<mapboxgl.Marker>) => {
+    setMarker([e.lngLat.lng, e.lngLat.lat]);
+  };
 
-  const onMarkerDragEnd = useCallback((event: any) => {
-    if (!onPinMoved) return;
-    //@ts-ignore
-    onPinMoved(event.lngLat[0], event.lngLat[1]);
-  }, []);
+  const onMarkerDragEnd = useCallback(
+    (event: MarkerDragEvent<mapboxgl.Marker>) => {
+      if (!onMarkerMoved) {
+        return;
+      }
+      onMarkerMoved([event.lngLat.lng, event.lngLat.lat]);
+      setViewport({
+        ...viewport,
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat,
+      });
+    },
+    [],
+  );
 
-  function toggleMarker() {
-    setMarker({ longitude: viewport.longitude, latitude: viewport.latitude });
-    setShowMarker((prevhowMarker) => !prevhowMarker);
-  }
+  useEffect(() => {
+    if (markerLngLat) {
+      setMarker(markerLngLat);
+      setViewport({
+        ...viewport,
+        longitude: markerLngLat[0],
+        latitude: markerLngLat[1],
+      });
+    }
+  }, [markerLngLat]);
 
+  useEffect(() => {
+    if (showMarker) {
+      setMarker([viewport.longitude, viewport.latitude]);
+    }
+  }, [showMarker]);
   return (
-    <>
-      <div className="border border-[#cc66ff]">
-        <ReactMapGL
-          {...viewport}
-          width={width}
-          height={height}
-          mapboxApiAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
-          //   onViewportChange={(newViewport: ViewState) => setViewport(newViewport)}
-          onViewportChange={handleViewportChange}
-          mapStyle="mapbox://styles/mapbox/dark-v10" // Set the map style to dark theme
-          // You can customize the map's theme by specifying additional style properties below
-          style={{
-            color: "#cc66ff",
-            // Add more style customizations as needed
-          }}
-        >
-          {showMarker &&
-            (
-              <Marker
-                longitude={marker.longitude}
-                latitude={marker.latitude}
-                draggable
-                onDrag={onMarkerDrag}
-                onDragEnd={onMarkerDragEnd}
-              >
-                <MarkerIcon />
-              </Marker>
-            )}
+    <div className="border border-[#7f409eb7]">
+      <ReactMapGL
+        onLoad={(e) => e.target.resize()}
+        onMoveEnd={handleViewportChange}
+        interactive
+        mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_KEY}
+        style={{ width, height }}
+        initialViewState={viewport}
+        scrollZoom
+        mapStyle="mapbox://styles/mapbox/dark-v10"
+      >
+        {showMarker &&
+          (
+            <Marker
+              longitude={marker[0]}
+              latitude={marker[1]}
+              draggable={draggableMarker}
+              onDrag={onMarkerDrag}
+              onDragEnd={onMarkerDragEnd}
+            >
+              <MarkerIcon
+                className={`fill-primary stroke-primary ${markerClassName}`}
+              />
+              <input
+                className="invisible"
+                name="marker"
+                value={marker.toString()}
+                onChange={() => {}}
+              />
+            </Marker>
+          )}
 
-          <GeolocateControl
+        {
+          /* <GeolocateControl
             positionOptions={{ enableHighAccuracy: true }}
             trackUserLocation={true}
-          />
-        </ReactMapGL>
-      </div>
-      {draggable &&
-        (
-          <button
-            onClick={toggleMarker}
-            type="button"
-            className="flex justify-between items-center gap-2 rounded-full pl-6 pr-4 py-3 font-semibold text-white no-underline transition border-2 border-[#cc66ff] bg-black/20 hover:bg-white/10 hover:border-white [&>svg]:hover:fill-white [&>svg]:hover:stroke-white"
-          >
-            Pin location <MarkerIcon />
-          </button>
-        )}
-    </>
+          />   */
+        }
+      </ReactMapGL>
+    </div>
   );
 };
 
 export default Map;
-
-const MarkerIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-8 h-8"
-    viewBox="0 0 24 24"
-    fill="#cc66ff"
-    stroke="#cc66ff"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-    />
-    <path
-      d="M12 5V3"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M19 12L21 12"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M12 21L12 19"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M3 12H5"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);

@@ -1,80 +1,162 @@
+import { SessionContextValue, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Group } from "~/types";
 import { useStore } from "~/utils/store";
+import JoinGroupButton from "./JoinGroupButton";
 
-export type GroupsProps = {
-  activitySlug: string;
-};
+function getGroups(groups: Group[], activitySlug?: string) {
+  const privateGroups = [];
+  const publicGroups = [];
 
-const Groups = ({ activitySlug }: GroupsProps) => {
-  const store = useStore();
-  const [groups, setGroups] = useState<Group[]>([]);
+  for (const group of groups) {
+    if (activitySlug && group.activitySlug !== activitySlug) {
+      continue;
+    }
 
-  useEffect(() => {
-    const groups = store.groups.filter(({ activitySlug: slug }) =>
-      slug === activitySlug
-    );
-    setGroups(groups);
-  }, [store.groups]);
+    if (group.private) {
+      privateGroups.push(group);
+      continue;
+    }
+
+    publicGroups.push(group);
+  }
+  return {
+    privateGroups,
+    publicGroups,
+  };
+}
+
+function Group(
+  { group, index, session }: {
+    group: Group;
+    index: number;
+    session: SessionContextValue;
+  },
+) {
+  const name = group.title.includes("-")
+    ? group.title.split("-")[0]! + "#" + index
+    : group.title;
+
+  const isMember = session.data &&
+    group.membersIds.includes(session.data.user.id);
+
+  const isAuthor = session.data &&
+    group.createdBy === session.data.user.id;
 
   return (
-    <section>
+    <li
+      key={group.slug}
+      className="relative flex items-center max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-2.5 pr-2.5 text-white"
+    >
+      <div className="flex items-center justify-between gap-4">
+        {(group.private && isMember) || !group.private
+          ? (
+            <Link
+              className={`text-2xl hover:underline ${
+                isMember ? "text-primary" : "text-white"
+              }`}
+              href={`/activities/${group.activitySlug}/${group.slug}`}
+            >
+              {name}
+            </Link>
+          )
+          : (
+            <span className="text-2xl text-white">
+              {name}
+            </span>
+          )}
+
+        {
+          /* {!group.private && (
+          <span className="text-2xl text-white">
+            {name}
+          </span>
+        )} */
+        }
+
+        <span className="text-sm mt-1">
+          {group.membersIds.length}/{group.maxParticipants}
+        </span>
+
+        {!isMember && !isAuthor &&
+          (
+            <JoinGroupButton
+              group={group}
+              session={session}
+            />
+          )}
+      </div>
+    </li>
+  );
+}
+
+function GroupList(
+  { groups, session }: { groups: Group[]; session: SessionContextValue },
+) {
+  return (
+    <ul className="flex flex-wrap justify-center gap-2 mx-2">
+      {groups.map(
+        (group, index) => (
+          <Group key={index} group={group} index={index} session={session} />
+        ),
+      )}
+    </ul>
+  );
+}
+
+const Groups = (props: GroupsProps) => {
+  const _groups = useStore((state) => state.groups);
+  const session = useSession();
+
+  const { privateGroups, publicGroups } = getGroups(
+    props.groups || _groups,
+    props.activitySlug,
+  );
+
+  // const [_groups, setGroups] = useState(getGroups(store.groups, activitySlug));
+  // useEffect(() => {
+  //   setGroups((store.groups, activitySlug));
+  // }, [store.groups]);
+
+  return (
+    <section className="flex flex-col gap-6">
       {
         /* <div className="flex flex-col items-center pb-10">
         <h2 className="p-4 text-white text-2xl font-bold">Groups</h2>
         <hr className="w-40 h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
       </div> */
       }
-      <ul className="grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
-        {groups.map(
-          ({ slug, activitySlug, title, isMember }, index) => {
-            const name = title.includes("-")
-              ? title.split("-")[0]! + "#" + index
-              : title;
 
-            return (
-              <li
-                key={slug}
-                className="max-w-xs min-w-xs rounded-xl bg-white/10 p-4 text-white relative"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <Link
-                    className={`text-2xl hover:underline ${
-                      isMember ? "text-[#cc66ff]" : "text-white"
-                    }`}
-                    href={`/activities/${activitySlug}/${slug}`}
-                  >
-                    {name}
-                  </Link>
-
-                  {
-                    /* <div className="flex items-center">
-                    <FavoriteButton
-                      activityId={id}
-                      className="mt-1"
-                    />
-                    <RegisterButton
-                      activityId={id}
-                      className="mt-1"
-                      onPusherMessage={onFoundUserForRegisteredActivity}
-                    />
-                  </div>
-
-                  <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
-                    {isRegistered && (
-                      <DotsLoader className="fill-[#33BBFF] max-h-3" />
-                    )}
-                  </footer> */
-                  }
-                </div>
-              </li>
-            );
-          },
+      {privateGroups.length > 0 &&
+        (
+          <>
+            <span className="w-full flex justify-center text-primary text-xl">
+              Private Groups
+            </span>
+            <GroupList session={session} groups={privateGroups} />
+          </>
         )}
-      </ul>
+
+      {publicGroups.length > 0 && (
+        <>
+          <span className="w-full flex justify-center text-primary text-xl mt-3">
+            Public Groups
+          </span>
+          <GroupList session={session} groups={publicGroups} />
+        </>
+      )}
     </section>
   );
 };
 
 export default Groups;
+
+export type GroupsProps =
+  & {
+    activitySlug?: string;
+    groups?: Group[];
+  }
+  & (
+    | { activitySlug: string }
+    | { groups: Group[] }
+  );

@@ -1,36 +1,34 @@
 import React, { useEffect, useRef } from "react";
-import { Channel } from "~/types";
-import { useSession } from "next-auth/react";
+import { SessionContextValue } from "next-auth/react";
 import Spinner from "../Spinner";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 import { useStore } from "~/utils/store";
-import { getUserNameById } from "~/utils";
+import { ChannelMessage } from "~/types";
+import { getTime } from "~/utils";
 
 export type ChatProps = {
   isLoading: boolean;
   channelId: string;
+  groupId?: string;
+  session: SessionContextValue;
 };
 
-function Chat({ isLoading, channelId }: ChatProps) {
-  const { data: session } = useSession();
+function Chat({ isLoading, channelId, groupId, session }: ChatProps) {
   const messagesListRef = useRef<HTMLDivElement>(null);
   const store = useStore();
   const channel = store.channels.find(({ id }) => id === channelId);
 
-  // console.log(channelId, store.channels, channel);
-
   function scrollToBottom() {
-    if (messagesListRef.current) {
-      const lastMessage = messagesListRef.current.lastElementChild;
-      if (lastMessage) {
-        lastMessage.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "start",
-        });
-      }
+    if (!messagesListRef.current?.lastElementChild) {
+      return;
     }
+
+    messagesListRef.current.lastElementChild.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
   }
 
   useEffect(() => {
@@ -39,48 +37,88 @@ function Chat({ isLoading, channelId }: ChatProps) {
     }
   }, [channel?.messages]);
 
-  if (!session || !session.user?.id) {
-    return <span className="text-white text-2xl">Sign in to see the chat</span>;
-  }
+  const username = session?.data?.user.name || "you";
 
-  const username = session.user.name || "you";
-  console.log({ username });
+  const messages = channel ? groupMessages(channel.messages) : [];
 
   return (
     <section
       aria-label="chat"
-      className="w-full md:w-3/6 lg:w-2/3  "
+      className="w-full lg:w-2/3 max-w-5xl "
     >
-      <div className="flex justify-center w-full">
-        <h2 className="text-2xl text-white/50">Chat</h2>
-      </div>
-
-      <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
+      {/* <hr className="h-px ml-2 mr-2 border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" /> */}
 
       <div
-        id="message-scroll-container"
-        className="h-2/6 w-full md:w-[50vw] max-h-[50vh] overflow-y-auto	overflow-x-hidden rounded-t-xl scrollbar-thin scrollbar-thumb-[#cc66ff] scrollbar-track-gray-100"
+        ref={messagesListRef}
+        aria-label="messages"
+        className="min-h-screen bg-black/20 p-1 pl-2 mb-20"
       >
-        <div
-          ref={messagesListRef}
-          aria-label="messages"
-          className="w-full min-h-[20vh] bg-black/20 p-2 mx-auto "
-        >
-          {isLoading && <Spinner />}
+        {isLoading && <Spinner />}
 
-          {channel?.messages.map((message, index) => (
-            <ChatMessage
-              key={index}
-              message={message}
-              currentUsername={username}
-            />
-          ))}
-        </div>
+        {messages.map((wrapper, index) => (
+          <ChatMessage
+            key={index}
+            currentUsername={username}
+            session={session}
+            groupId={groupId}
+            {...wrapper}
+          />
+        ))}
       </div>
-      <hr className="h-px border-0 bg-gradient-to-r from-#0000000 via-[#cc66ff] to-#0000000" />
-
-      {channel && <ChatInput channel={channel} />}
+      {channel &&
+        (
+          <div className="fixed bottom-0 w-full lg:w-2/3 max-w-5xl">
+            <ChatInput channel={channel} isLoggedIn={!!session.data} />
+          </div>
+        )}
     </section>
   );
 }
 export default Chat;
+
+function groupMessages(messages: ChannelMessage[]) {
+  let prevMessage: ChannelMessage | undefined;
+  let nextMessage: ChannelMessage | undefined;
+  let currMessage: ChannelMessage;
+  let timeNotAsBefore: boolean = false;
+  let timeNotAsNext: boolean = false;
+  let currTime: string;
+  const groupedMessages: ChatGroupedMessage[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    currMessage = messages[i] as ChannelMessage;
+    prevMessage = messages[i - 1];
+    nextMessage = messages[i + 1];
+    currTime = getTime(currMessage.sentAt);
+
+    timeNotAsBefore = !(prevMessage &&
+        prevMessage.sentBy === currMessage.sentBy &&
+        getTime(prevMessage.sentAt) === currTime || false);
+
+    timeNotAsNext = !(nextMessage &&
+        nextMessage.sentBy === currMessage.sentBy &&
+        getTime(nextMessage.sentAt) === currTime || false);
+
+    groupedMessages.push({
+      message: currMessage,
+      firstItem: timeNotAsBefore || prevMessage?.content === ":like:",
+      lastItem: timeNotAsNext || nextMessage?.content === ":like:",
+      showName: currMessage.sentBy !== prevMessage?.sentBy,
+      showImage: !nextMessage || currMessage.sentBy !== nextMessage.sentBy,
+      showTime: timeNotAsNext,
+      showDate: !prevMessage ||
+        currMessage.sentAt.toDateString() !== prevMessage.sentAt.toDateString(),
+    });
+  }
+  return groupedMessages;
+}
+
+type ChatGroupedMessage = {
+  message: ChannelMessage;
+  firstItem?: boolean;
+  lastItem?: boolean;
+  showDate?: boolean;
+  showName?: boolean;
+  showImage?: boolean;
+  showTime?: boolean;
+};

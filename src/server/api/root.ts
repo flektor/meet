@@ -3,9 +3,9 @@ import { favoritesRouter } from "~/server/api/routers/favorites";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { registrationsRouter } from "~/server/api/routers/registrations";
 import { chatRouter } from "./routers/chat";
-import { activityViewerRouter } from "./routers/activityViewer";
-import { groupViewerRouter } from "./routers/groupViewer";
+import { membershipsRouter } from "./routers/memberships";
 import { groupsRouter } from "./routers/groups";
+import { locationRouter } from "./routers/location";
 
 /**
  * This is the primary router for your server.
@@ -16,10 +16,10 @@ export const appRouter = createTRPCRouter({
   activities: activitiesRouter,
   favorites: favoritesRouter,
   registrations: registrationsRouter,
+  memberships: membershipsRouter,
   chat: chatRouter,
-  activityViewer: activityViewerRouter,
-  groupViewer: groupViewerRouter,
   groups: groupsRouter,
+  location: locationRouter,
 });
 
 // export type definition of API

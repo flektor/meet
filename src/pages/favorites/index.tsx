@@ -1,22 +1,40 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Spinner from "~/components/Spinner";
-import Nav from "~/components/Nav";
-import LeaveIcon from "~/components/icons/Leave";
-import useActivities from "~/hooks/useActivities";
+import FavoritesPageNav from "../../components/Nav/FavoritesPageNav";
 import RegisterButton from "~/components/RegisterButton";
 import FavoriteButton from "~/components/FavoriteButton";
 import Link from "next/link";
-import DotsLoader from "~/components/DotsLoader";
-import { useRouter } from "next/router";
 import Toasts from "~/components/Toasts";
 import { useStore } from "~/utils/store";
+import { api } from "~/utils/api";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Favorites: NextPage = () => {
-  const { activities, isLoading, error } = useActivities();
-  const favorites = activities.filter((activity) => activity.isFavorite);
+  const store = useStore();
+  const favorites = store.activities.filter((activity) => activity.isFavorite);
+  const session = useSession();
   const router = useRouter();
+
+  const { data, error, isLoading } = api.activities.getActivities
+    .useQuery(undefined, {
+      enabled: !!session.data && store.fetchedActivitiesTimestamp === false,
+    });
+
+  useEffect(() => {
+    if (data && store.fetchedActivitiesTimestamp === false) {
+      store.setActivities(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/");
+    }
+  }, [session]);
+
   return (
     <>
       <Head>
@@ -24,23 +42,9 @@ const Favorites: NextPage = () => {
         <meta name="description" content="Spiced Chicory Final Project" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <FavoritesPageNav session={session} />
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Nav />
         <Toasts />
-
-        <header className="w-full flex items-center justify-center mb-6 p-1">
-          <div className="mt-32 flex items-center">
-            <button
-              className=" inline-block"
-              onClick={() => router.back()}
-            >
-              <LeaveIcon />
-            </button>
-            <span className=" mr-2 ml-2 text-white text-3xl">
-              Favorites
-            </span>
-          </div>
-        </header>
 
         <div className="flex flex-col items-center justify-center">
           {isLoading
@@ -56,15 +60,16 @@ const Favorites: NextPage = () => {
                 Your favorites are empty..
               </div>
             )}
-          <ul className="mt-32 grid grid-stretch grid-cols-1 gap-4 lg:grid-cols-3 sm:grid-cols-2 md:gap-8">
+
+          <ul className="mt-32 grid grid-stretch grid-cols-1 gap-3 lg:grid-cols-3 sm:grid-cols-2 md:gap-4">
             {favorites.map(
               ({ id, slug, title, isRegistered }) => {
                 return (
                   <li
                     key={slug}
-                    className="max-w-xs min-w-xs rounded-xl bg-white/10 p-4 text-white relative"
+                    className="relative flex items center w-full max-w-xs w-fit h-12 pb-1 rounded-xl bg-white/10 pl-3 pr-1.5 text-white"
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="w-full flex items-center justify-between ">
                       <Link
                         className={`text-2xl hover:underline ${
                           isRegistered ? "text-[#33BBFF]" : "text-white"
@@ -74,7 +79,7 @@ const Favorites: NextPage = () => {
                         {title}
                       </Link>
 
-                      <div className="flex items-center">
+                      <div className="flex justify-end  items-center">
                         <FavoriteButton
                           activityId={id}
                           className="mt-1"
@@ -85,12 +90,6 @@ const Favorites: NextPage = () => {
                           activitySlug={slug}
                         />
                       </div>
-
-                      <footer className="absolute bottom-2.5 right-4 pr-0.5 z-0">
-                        {isRegistered && (
-                          <DotsLoader className="fill-[#33BBFF] max-h-3" />
-                        )}
-                      </footer>
                     </div>
                   </li>
                 );

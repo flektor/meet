@@ -1,6 +1,7 @@
 import { type inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 import { type AppRouter } from "./server/api/root";
+import { LngLat } from "./components/Map";
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -13,23 +14,8 @@ export type addActivityOutput = NonNullable<
 export type getActivityOutput = NonNullable<
   RouterOutput["activities"]["getActivity"]
 >;
-type getActivityViewersOutput = NonNullable<
-  RouterOutput["activityViewer"]["getActivityViewers"]
->;
 
-export type getUserGroupsOutput = NonNullable<
-  RouterOutput["groups"]["getUserGroups"]
->;
 export type addGroupOutput = NonNullable<RouterOutput["groups"]["addGroup"]>;
-export type addDynamicGroupOutput = NonNullable<
-  RouterOutput["groups"]["addDynamicGroup"]
->;
-
-type getGroupViewersOutput = NonNullable<
-  RouterOutput["groupViewer"]["getGroupViewers"]
->;
-
-export type Viewers = getActivityViewersOutput | getGroupViewersOutput;
 
 type BaseChannel =
   (Pick<getActivityOutput | getGroupOutput, "channel">)["channel"];
@@ -38,6 +24,11 @@ export type ChannelMessage = Omit<
   Pick<BaseChannel, "messages">["messages"][number],
   "channelId"
 >;
+
+export type User = Pick<
+  getGroupOutput | getActivityOutput,
+  "users"
+>["users"][number];
 
 export type Channel =
   & Omit<BaseChannel, "messages">
@@ -49,16 +40,22 @@ export type ActivityOutput =
 
 export type Activity = Omit<
   NonNullable<ActivityOutput>,
-  "channel" | "groups"
+  "channel" | "groups" | "users"
 >;
 
-type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
+export type getGroupOutput = NonNullable<RouterOutput["groups"]["getGroup"]>;
+export type getUserGroupsOutput = NonNullable<
+  RouterOutput["groups"]["getUserGroups"]
+>;
+export type addDynamicGroupOutput = NonNullable<
+  RouterOutput["groups"]["addDynamicGroup"]
+>;
 
 export type GroupOutput =
-  & Omit<getGroupOutput, "channel">
-  & { channel: Channel };
+  & Omit<getGroupOutput, "channel" | "users">
+  & { channel: Channel; users: User[] };
 
-export type Group = Omit<GroupOutput, "channel">;
+export type Group = Omit<GroupOutput, "channel" | "users">;
 
 export const addActivityInput = z.object({
   title: z.string().trim(),
@@ -69,26 +66,67 @@ export const addGroupInput = z.object({
   title: z.string().trim(),
   description: z.string(),
   activityId: z.string(),
+  locationTitle: z.string(),
+  locationPin: z.string().optional(),
+  startsAt: z.date(),
+  endsAt: z.date().optional(),
+  minParticipants: z.number(),
+  maxParticipants: z.number().optional(),
+  private: z.boolean(),
 });
 
-export const addDynamicGroupInput = z.object({
-  title: z.string().trim(),
-  description: z.string(),
-  activityId: z.string(),
+export const lngLatInput = z.tuple([z.number(), z.number()]);
+
+export const updateGroupLocationInput = z.object({
+  lngLat: lngLatInput,
+  groupId: z.string(),
+});
+export type UpdateGroupLocationInput = z.infer<typeof updateGroupLocationInput>;
+
+export const addDynamicGroupInput = addGroupInput.extend({
   otherUserId: z.string(),
 });
 
-export type AddActivityValidator = z.infer<typeof addActivityInput>;
+export const acceptJoinRequestInput = z.object({
+  activitySlug: z.string(),
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type AcceptJoinRequestInput = z.infer<typeof acceptJoinRequestInput>;
+
+export const acceptInviteRequestInput = z.object({
+  groupId: z.string(),
+  userId: z.string(),
+});
+export type AcceptInviteRequestInput = z.infer<typeof acceptInviteRequestInput>;
+
+export const declineJoinRequestInput = z.object({
+  userId: z.string(),
+  groupId: z.string(),
+});
+export type DeclineJoinRequestInput = z.infer<typeof declineJoinRequestInput>;
+
+export const inviteRequestInput = z.object({
+  channelId: z.string(),
+  groupId: z.string(),
+  activitySlug: z.string(),
+  userId: z.string(),
+});
+export type InviteRequestInput = z.infer<typeof inviteRequestInput>;
+
+export const addToMembershipsInput = z.object({
+  groupId: z.string(),
+  activitySlug: z.string(),
+});
+export type AddToMembershipsInput = z.infer<typeof addToMembershipsInput>;
+
+export type AddGroupInput = z.infer<typeof addGroupInput>;
+export type AddDynamicGroupInput = z.infer<typeof addDynamicGroupInput>;
+export type AddActivityInput = z.infer<typeof addActivityInput>;
 
 export type addToFavoritesOutput = RouterOutput["favorites"]["addToFavorites"];
 export type removeFromFavoritesOutput =
   RouterOutput["favorites"]["removeFromFavorites"];
-
-export type addToActivityViewerOutput = RouterOutput["activityViewer"]["add"];
-export type removeFromActivityViewerOutput =
-  RouterOutput["activityViewer"]["remove"];
-export type getAllActivityViewersOutput =
-  RouterOutput["activityViewer"]["getActivityViewers"];
 
 export type addToRegistrationsOutput = RouterOutput["registrations"]["add"];
 export type removeFromRegistratiosOutput =
@@ -112,7 +150,7 @@ export const receiversInput = z.union([
 export const sendMessageInput = z.object({
   content: z.string(),
   channelId: z.string(),
-  receivers: receiversInput,
+  // receivers: receiversInput,
 });
 
 export type MessageInput = z.infer<typeof sendMessageInput>;
@@ -126,19 +164,36 @@ type PusherViewerMessage = {
   sentBy: string;
 };
 
-type PusherInviteMessage = {
+export type PusherInviteMessage = {
   action:
     | "invite_request"
-    | "invite_accepted"
-    | "invite_declined";
+    | "quick_invite_accepted"
+    | "invite_declined"
+    | "join_request"
+    | "join_accepted";
   groupId: string;
-  activityId: string;
+  groupSlug: string;
+  activitySlug: string;
+  sentBy: string;
+} | PusherInviteAcceptMessage;
+
+export type PusherInviteAcceptMessage = {
+  action: "invite_accepted";
+  groupId: string;
   sentBy: string;
 };
 
-type PusherQuickSearchMessage = {
-  action: "quick_search_found";
-  activityId: string;
+export type PusherQuickInviteMessage = {
+  action: "quick_invite_request";
+  activitySlug: string;
+  sentBy: string;
+};
+
+export type PusherLocationMessage = {
+  action: "location_update";
+  lngLat: LngLat;
+  locationName: string;
+  groupId: string;
   sentBy: string;
 };
 
@@ -146,7 +201,8 @@ export type PusherMessage =
   | PusherViewerMessage
   | PusherChatMessage
   | PusherInviteMessage
-  | PusherQuickSearchMessage;
+  | PusherQuickInviteMessage
+  | PusherLocationMessage;
 
 export type PusherSendProps = {
   receivers: string | string[];
@@ -154,9 +210,13 @@ export type PusherSendProps = {
   body: PusherMessage;
 };
 
-export type Toast = {
+export type ToastProps = {
+  duration?: number;
   displayMessage: string;
-  pusherMessage: PusherMessage;
+  pusherMessage: PusherInviteMessage | PusherQuickInviteMessage;
   id: string;
   icon?: string;
+  onDie?: (...args: any) => void;
+  onAccept?: (...args: any) => void;
+  onDecline?: (...args: any) => void;
 };
