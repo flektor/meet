@@ -27,7 +27,7 @@ const Home: NextPage = () => {
     <>
       <Head>
         <title>Meet</title>
-        <meta name="description" content="Spiced Chicory Final Project" />
+        <meta name="description" content="A social activity app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
