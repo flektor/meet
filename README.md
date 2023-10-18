@@ -1,13 +1,6 @@
-<svg width="400" height="60" xmlns="http://www.w3.org/2000/svg">
-<a xlink:href="https://meet-demo.vercel.app/">
- <text x="0" y="50" font-size="5rem" fill="#cc66ff" style="font-weight: 800; letter-spacing: -0.05em">
-      meet
-</text>
-</a>
-<text x="190" y="50" font-size="24" fill="#fff">A social activity app</text>
-</svg>
+# [![Click me](./public/logo.png)](https://meet-demo.vercel.app/)&nbsp;&nbsp; A social activity app
 
-#
+<!-- [![Click me](https://raw.githubusercontent.com/yourusername/yourrepository/main/yourfile.svg)](https://meet-demo.vercel.app/) -->
 
 Meet is a social app designed for connecting with others and participating in activities together. This project originated as my final project during an intense full-stack coding bootcamp at [SPICED academy](https://www.spiced-academy.com/en) , and has since undergone significant refactoring for educational purposes.
 
